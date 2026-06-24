@@ -18,7 +18,8 @@ export default class RecognitionUserSelect extends Component<RecognitionUserSele
     const { users, selectedUserIds, onToggleUser } = this.props;
 
     return (
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="max-h-[588px] overflow-y-auto pr-2 sm:max-h-[288px]">
+        <div className="grid gap-3 sm:grid-cols-2">
         {users.map((user) => {
           const selected = selectedUserIds.includes(user.user_id);
           return (
@@ -26,7 +27,7 @@ export default class RecognitionUserSelect extends Component<RecognitionUserSele
               key={user.user_id}
               type="button"
               onClick={() => onToggleUser(user.user_id)}
-              className={`relative flex items-start gap-4 rounded-3xl border p-4 text-left transition ${selected
+              className={`relative flex h-[88px] items-start gap-4 rounded-3xl border p-4 text-left transition ${selected
                 ? "border-slate-900 bg-white shadow-sm ring-2 ring-slate-200"
                 : "border-slate-200 bg-white text-slate-900 hover:border-slate-300"
                 }`}
@@ -35,9 +36,9 @@ export default class RecognitionUserSelect extends Component<RecognitionUserSele
                 {getInitials(user)}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-slate-900">{user.firstName} {user.lastName}</p>
-                <p className="mt-1 text-xs text-slate-500">{user.role ? `${user.role}` : user.email}</p>
-                {user.team && <p className="text-xs text-slate-500">{user.team}</p>}
+                <p className="truncate text-sm font-semibold text-slate-900">{user.firstName} {user.lastName}</p>
+                <p className="mt-1 truncate text-xs text-slate-500">{user.role ? `${user.role}` : user.email}</p>
+                {user.team && <p className="truncate text-xs text-slate-500">{user.team}</p>}
               </div>
               <div className={`grid h-6 w-6 shrink-0 place-items-center rounded-full border ${selected ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300 bg-white text-slate-300"}`}>
                 ✓
@@ -45,6 +46,7 @@ export default class RecognitionUserSelect extends Component<RecognitionUserSele
             </button>
           );
         })}
+        </div>
       </div>
     );
   }
