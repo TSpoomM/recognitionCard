@@ -3,12 +3,12 @@
 import { Component } from "react";
 import Alert from "../../ui/Alert";
 
-type RecognitionFormMessagesProps = {
+type FormMessagesProps = {
   error: string;
   success: string;
 };
 
-export default class RecognitionFormMessages extends Component<RecognitionFormMessagesProps> {
+export default class FormMessages extends Component<FormMessagesProps> {
   render() {
     const { error, success } = this.props;
 

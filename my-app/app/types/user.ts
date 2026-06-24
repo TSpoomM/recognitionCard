@@ -3,7 +3,7 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  photoUrl: string;
+  photoUrl?: string;
   role?: string; // e.g. "Product Designer"
   team?: string; // e.g. "Design"
 };

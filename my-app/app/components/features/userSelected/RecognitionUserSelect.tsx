@@ -9,6 +9,10 @@ type RecognitionUserSelectProps = {
   onToggleUser: (userId: string) => void;
 };
 
+function getInitials(user: User) {
+  return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.trim().toUpperCase() || "?";
+}
+
 export default class RecognitionUserSelect extends Component<RecognitionUserSelectProps> {
   render() {
     const { users, selectedUserIds, onToggleUser } = this.props;
@@ -27,14 +31,8 @@ export default class RecognitionUserSelect extends Component<RecognitionUserSele
                 : "border-slate-200 bg-white text-slate-900 hover:border-slate-300"
                 }`}
             >
-              <div className="relative h-12 w-12 flex-shrink-0 rounded-2xl overflow-hidden">
-                <img
-                  src={user.photoUrl}
-                  alt={`${user.firstName} ${user.lastName}`}
-                  width={48}
-                  height={48}
-                  className="h-full w-full object-cover"
-                />
+              <div className="relative grid h-12 w-12 flex-shrink-0 place-items-center overflow-hidden rounded-2xl bg-slate-100 text-sm font-bold text-slate-600">
+                {getInitials(user)}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-slate-900">{user.firstName} {user.lastName}</p>

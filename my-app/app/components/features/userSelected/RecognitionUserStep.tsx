@@ -23,7 +23,7 @@ export default class RecognitionUserStep extends Component<RecognitionUserStepPr
 
     return (
       <>
-        <h2 className="mb-4 text-xl font-semibold text-slate-900">1. Choose people</h2>
+        <h2 className="mb-4 text-xl font-semibold text-slate-900">Choose Recipients</h2>
         <p className="mb-6 text-sm text-slate-600">
           Pick one or more teammates to recognize.
         </p>

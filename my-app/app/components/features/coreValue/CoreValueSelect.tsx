@@ -3,12 +3,12 @@
 import { Component } from "react";
 import { CommentType, COMMENT_TYPES, COMMENT_TYPE_META } from "../../../types/commentType";
 
-type RecognitionCommentTypeSelectProps = {
+type CoreValueSelectProps = {
   selectedTypes: CommentType[];
   onToggleType: (type: CommentType) => void;
 };
 
-export default class RecognitionCommentTypeSelect extends Component<RecognitionCommentTypeSelectProps> {
+export default class CoreValueSelect extends Component<CoreValueSelectProps> {
   render() {
     const { selectedTypes, onToggleType } = this.props;
 

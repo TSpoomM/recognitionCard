@@ -4,26 +4,30 @@ import { Component, FormEvent } from "react";
 import { CommentType } from "./types/commentType";
 import { PendingSubmission } from "./types/pendingSubmission";
 import { HomeState } from "./types/homeState";
-import { MOCK_USERS } from "./data/mockUsers";
+import { User } from "./types/user";
 import { RECOGNITION_STEPS } from "./constants/recognitionFlow";
-import RecognitionStepper from "./components/features/recognition/RecognitionStepper";
+import RecognitionStepper from "./components/features/recognition/Stepper";
 import RecognitionHeader from "./components/features/recognition/RecognitionHeader";
 import RecognitionUserStep from "./components/features/userSelected/RecognitionUserStep";
-import RecognitionCommentStep from "./components/features/coreValue/RecognitionCommentStep";
-import RecognitionReviewStep from "./components/features/pendingConfirm/RecognitionReviewStep";
-import RecognitionFormMessages from "./components/features/recognition/RecognitionFormMessages";
-import RecognitionFormActions from "./components/features/recognition/RecognitionFormActions";
+import RecognitionCommentStep from "./components/features/starComment/RecognitionCommentStep";
+import CoreValueSelect from "./components/features/coreValue/CoreValueSelect";
+import FormMessages from "./components/features/recognition/FormMessages";
+import FormActions from "./components/features/recognition/FormActions";
+import RecognitionQueueButton from "./components/features/recognition/QueueButton";
 import Card from "./components/ui/Card";
 import { RecognitionEngine } from "./lib/RecognitionEngine";
 
 export default class Home extends Component<Record<string, never>, HomeState> {
   private intervalId: number | null = null;
+  private sendingSubmissionIds = new Set<string>();
 
   constructor(props: Record<string, never>) {
     super(props);
 
     this.state = {
       currentStep: 1,
+      users: [],
+      isLoadingUsers: true,
       selectedUserIds: [],
       selectedTypes: [],
       comment: "",
@@ -36,13 +40,13 @@ export default class Home extends Component<Record<string, never>, HomeState> {
   }
 
   private get selectedUsers() {
-    return MOCK_USERS.filter((user) => this.state.selectedUserIds.includes(user.user_id));
+    return this.state.users.filter((user) => this.state.selectedUserIds.includes(user.user_id));
   }
 
   private get filteredUsers() {
     const query = this.state.searchQuery.toLowerCase();
 
-    return MOCK_USERS.filter((user) =>
+    return this.state.users.filter((user) =>
       user.firstName.toLowerCase().includes(query) ||
       user.lastName.toLowerCase().includes(query) ||
       user.team?.toLowerCase().includes(query) ||
@@ -51,20 +55,15 @@ export default class Home extends Component<Record<string, never>, HomeState> {
     );
   }
 
-  private get alphabetCount() {
-    return RecognitionEngine.countAlphabetLetters(this.state.comment);
+  private get commentLength() {
+    return this.state.comment.trim().length;
   }
 
   componentDidMount() {
+    this.loadUsers();
+
     this.intervalId = window.setInterval(() => {
-      this.setState((currentState) => {
-        const next = RecognitionEngine.updatePendingStatuses(currentState.pendingSubmissions);
-        if (JSON.stringify(next) !== JSON.stringify(currentState.pendingSubmissions)) {
-          RecognitionEngine.saveSubmissions(next);
-          return { pendingSubmissions: next };
-        }
-        return null;
-      });
+      this.confirmExpiredSubmissions();
     }, 1000);
   }
 
@@ -77,6 +76,76 @@ export default class Home extends Component<Record<string, never>, HomeState> {
   private persistSubmissions(submissions: PendingSubmission[]) {
     this.setState({ pendingSubmissions: submissions });
     RecognitionEngine.saveSubmissions(submissions);
+  }
+
+  private async loadUsers() {
+    try {
+      const response = await fetch("/api/employees");
+      const result = await response.json();
+
+      if (!response.ok || !result.success || !Array.isArray(result.data)) {
+        throw new Error(result.error || "Could not load employee data.");
+      }
+
+      this.setState({ users: result.data as User[], isLoadingUsers: false, formError: "" });
+    } catch (error) {
+      this.setState({
+        users: [],
+        isLoadingUsers: false,
+        formError: `Unable to load employee data: ${error instanceof Error ? error.message : String(error)}`,
+      });
+    }
+  }
+
+  private async sendSubmission(submission: PendingSubmission) {
+    if (this.sendingSubmissionIds.has(submission.id)) return;
+    this.sendingSubmissionIds.add(submission.id);
+
+    try {
+      await Promise.all(
+        submission.users.map(async (user) => {
+          const response = await fetch("/api/diary", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              diary_emp_id: user.user_id,
+              diary_comment: submission.comment,
+              diary_corevalue: submission.types.join(", "),
+            }),
+          });
+
+          const result = await response.json().catch(() => null);
+          if (!response.ok || result?.success === false) {
+            throw new Error(result?.error || "Could not save recognition card.");
+          }
+        })
+      );
+
+      const next = this.state.pendingSubmissions.map((item) =>
+        item.id === submission.id ? { ...item, status: "sent" as const } : item
+      );
+      this.persistSubmissions(next);
+      this.setState({ formError: "", formSuccess: "Recognition card saved to database." });
+    } catch (error) {
+      this.setState({
+        formError: `Unable to save recognition card: ${error instanceof Error ? error.message : String(error)}`,
+        formSuccess: "",
+      });
+    } finally {
+      this.sendingSubmissionIds.delete(submission.id);
+    }
+  }
+
+  private confirmExpiredSubmissions() {
+    const next = RecognitionEngine.updatePendingStatuses(this.state.pendingSubmissions);
+    const expired = next.filter((submission, index) =>
+      submission.status === "sent" &&
+      this.state.pendingSubmissions[index]?.status === "pending"
+    );
+
+    expired.forEach((submission) => {
+      this.sendSubmission(submission);
+    });
   }
 
   private handleToggleUser = (userId: string) => {
@@ -124,9 +193,9 @@ export default class Home extends Component<Record<string, never>, HomeState> {
       return false;
     }
 
-    if (step === 2 && (this.state.selectedTypes.length === 0 || this.alphabetCount < 70)) {
+    if (step === 2 && this.state.selectedTypes.length === 0) {
       this.setState({
-        formError: "Please choose at least one core value and ensure your comment contains at least 70 alphabetic letters.",
+        formError: "Please choose at least one core value.",
         formSuccess: "",
       });
       return false;
@@ -141,16 +210,19 @@ export default class Home extends Component<Record<string, never>, HomeState> {
     if (currentStep === 1 && !this.validateStep(1)) return;
     if (currentStep === 2 && !this.validateStep(2)) return;
 
-    this.setState((state) => ({ currentStep: Math.min(3, state.currentStep + 1) }));
+    this.setState((state) => ({
+      currentStep: Math.min(3, state.currentStep + 1),
+    }));
   };
 
   private handlePrevStep = () => {
-    this.setState({ formError: "", currentStep: Math.max(1, this.state.currentStep - 1) });
+    this.setState({
+      formError: "",
+      currentStep: Math.max(1, this.state.currentStep - 1),
+    });
   };
 
-  private handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  private submitRecognition = () => {
     const { selectedUserIds, selectedTypes, comment, editingId, pendingSubmissions } = this.state;
 
     if (selectedUserIds.length === 0) {
@@ -171,10 +243,10 @@ export default class Home extends Component<Record<string, never>, HomeState> {
       return;
     }
 
-    if (this.alphabetCount < 70) {
+    if (this.commentLength < 5) {
       this.setState({
-        currentStep: 2,
-        formError: `Please write at least 70 letters (currently ${this.alphabetCount}).`,
+        currentStep: 3,
+        formError: `Please write at least 5 characters (currently ${this.commentLength}).`,
         formSuccess: "",
       });
       return;
@@ -188,7 +260,7 @@ export default class Home extends Component<Record<string, never>, HomeState> {
       );
       this.persistSubmissions(updated);
       this.setState({
-        // currentStep: 1,
+        currentStep: 1,
         selectedUserIds: [],
         selectedTypes: [],
         comment: "",
@@ -203,7 +275,7 @@ export default class Home extends Component<Record<string, never>, HomeState> {
     const newSubmission = RecognitionEngine.createPendingSubmission(this.selectedUsers, selectedTypes, comment);
     this.persistSubmissions([newSubmission, ...pendingSubmissions]);
     this.setState({
-      // currentStep: 1,
+      currentStep: 1,
       selectedUserIds: [],
       selectedTypes: [],
       comment: "",
@@ -212,6 +284,10 @@ export default class Home extends Component<Record<string, never>, HomeState> {
       formError: "",
       formSuccess: "Recognition card queued successfully.",
     });
+  };
+
+  private handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
   };
 
   private handleEditPending = (submission: PendingSubmission) => {
@@ -235,10 +311,33 @@ export default class Home extends Component<Record<string, never>, HomeState> {
     }
   };
 
+  private handleConfirmPending = (submissionId: string) => {
+    const submission = this.state.pendingSubmissions.find((item) => item.id === submissionId);
+    if (submission) {
+      this.sendSubmission(submission);
+    }
+  };
+
   private renderCurrentStep() {
-    const { currentStep, selectedUserIds, selectedTypes, searchQuery, comment, pendingSubmissions } = this.state;
+    const {
+      currentStep,
+      selectedUserIds,
+      selectedTypes,
+      searchQuery,
+      comment,
+      isLoadingUsers,
+    } = this.state;
 
     if (currentStep === 1) {
+      if (isLoadingUsers) {
+        return (
+          <>
+            <h2 className="mb-4 text-xl font-semibold text-slate-900">Choose Recipients</h2>
+            <p className="text-sm text-slate-600">Loading employee data...</p>
+          </>
+        );
+      }
+
       return (
         <RecognitionUserStep
           filteredUsers={this.filteredUsers}
@@ -253,21 +352,24 @@ export default class Home extends Component<Record<string, never>, HomeState> {
 
     if (currentStep === 2) {
       return (
-        <RecognitionCommentStep
-          selectedTypes={selectedTypes}
-          comment={comment}
-          alphabetCount={this.alphabetCount}
-          onToggleType={this.handleToggleType}
-          onCommentChange={this.handleCommentChange}
-        />
+        <>
+          <h2 className="mb-4 text-xl font-semibold text-slate-900">Choose types</h2>
+          <p className="mb-4 text-sm text-slate-600">Select one or more core values that fit.</p>
+          <CoreValueSelect
+            selectedTypes={selectedTypes}
+            onToggleType={this.handleToggleType}
+          />
+        </>
       );
     }
 
     return (
-      <RecognitionReviewStep
-        submissions={pendingSubmissions}
-        onEditPending={this.handleEditPending}
-        onDeletePending={this.handleDeletePending}
+      <RecognitionCommentStep
+        users={this.selectedUsers}
+        selectedTypes={selectedTypes}
+        comment={comment}
+        commentLength={this.commentLength}
+        onCommentChange={this.handleCommentChange}
       />
     );
   }
@@ -288,15 +390,25 @@ export default class Home extends Component<Record<string, never>, HomeState> {
                 {this.renderCurrentStep()}
               </Card>
 
-              <RecognitionFormMessages error={formError} success={formSuccess} />
-              <RecognitionFormActions
+              <FormMessages error={formError} success={formSuccess} />
+              <FormActions
                 currentStep={currentStep}
                 onPrevStep={this.handlePrevStep}
                 onNextStep={this.handleNextStep}
+                onSubmitRecognition={() => {
+                  this.submitRecognition();
+                  console.log("Submit recognition clicked");
+                }}
               />
             </form>
           </Card>
         </div>
+        <RecognitionQueueButton
+          submissions={this.state.pendingSubmissions}
+          onEditPending={this.handleEditPending}
+          onDeletePending={this.handleDeletePending}
+          onConfirmPending={this.handleConfirmPending}
+        />
       </div>
     );
   }

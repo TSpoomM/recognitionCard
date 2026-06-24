@@ -3,15 +3,16 @@
 import { Component } from "react";
 import Button from "../../ui/Button";
 
-type RecognitionFormActionsProps = {
+type FormActionsProps = {
   currentStep: number;
   onPrevStep: () => void;
   onNextStep: () => void;
+  onSubmitRecognition: () => void;
 };
 
-export default class RecognitionFormActions extends Component<RecognitionFormActionsProps> {
+export default class FormActions extends Component<FormActionsProps> {
   render() {
-    const { currentStep, onPrevStep, onNextStep } = this.props;
+    const { currentStep, onPrevStep, onNextStep, onSubmitRecognition } = this.props;
 
     return (
       <div className="flex items-center justify-end gap-4">
@@ -32,7 +33,8 @@ export default class RecognitionFormActions extends Component<RecognitionFormAct
           </Button>
         ) : (
           <Button
-            type="submit"
+            type="button"
+            onClick={onSubmitRecognition}
           >
             Submit recognition
           </Button>
