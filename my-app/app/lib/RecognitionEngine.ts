@@ -35,17 +35,25 @@ export class RecognitionEngine {
     const createdAt = typeof submission.createdAt === "number" ? submission.createdAt : Date.now();
     const status = submission.status === "sent" ? "sent" : "pending";
 
-    const types = Array.isArray(submission.types)
-      ? (submission.types as CommentType[])
+    const validTypes = ["RESPECT", "LEADERSHIP", "COMMUNICATION", "PROFESSIONALISM", "INTEGRITY"];
+    const rawTypes = Array.isArray(submission.types)
+      ? submission.types
       : typeof submission.type === "string"
-      ? [submission.type as CommentType]
+      ? [submission.type]
       : [];
+
+    const types = rawTypes
+      .map((t) => (typeof t === "string" ? (t.toUpperCase() as CommentType) : null))
+      .filter((t): t is CommentType => t !== null && validTypes.includes(t));
+
+    const typeVal = typeof submission.type === "string" ? submission.type.toUpperCase() : undefined;
+    const type = typeVal && validTypes.includes(typeVal) ? (typeVal as CommentType) : undefined;
 
     return {
       id: typeof submission.id === "string" ? submission.id : `${createdAt}`,
       users,
       types,
-      type: typeof submission.type === "string" ? (submission.type as CommentType) : undefined,
+      type,
       comment,
       createdAt,
       status,

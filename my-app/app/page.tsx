@@ -32,7 +32,7 @@ export default class Home extends Component<Record<string, never>, HomeState> {
       selectedTypes: [],
       comment: "",
       searchQuery: "",
-      pendingSubmissions: RecognitionEngine.loadSubmissions(),
+      pendingSubmissions: [],
       editingId: null,
       formError: "",
       formSuccess: "",
@@ -61,6 +61,10 @@ export default class Home extends Component<Record<string, never>, HomeState> {
 
   componentDidMount() {
     this.loadUsers();
+
+    this.setState({
+      pendingSubmissions: RecognitionEngine.loadSubmissions(),
+    });
 
     this.intervalId = window.setInterval(() => {
       this.confirmExpiredSubmissions();
