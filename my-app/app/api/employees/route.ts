@@ -1,4 +1,5 @@
 import { pool } from "@/app/lib/db";
+import { TEST_CURRENT_USER } from "@/app/lib/currentUser";
 import { NextResponse } from "next/server";
 import { RowDataPacket } from "mysql2";
 
@@ -46,6 +47,13 @@ export async function GET() {
         team: undefined,
       };
     });
+
+    if (!data.some((user) => user.user_id === TEST_CURRENT_USER.user_id)) {
+      data.unshift({
+        ...TEST_CURRENT_USER,
+        team: undefined,
+      });
+    }
 
     return NextResponse.json({
       success: true,

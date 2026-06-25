@@ -16,6 +16,7 @@ import FormActions from "./components/features/recognition/FormActions";
 import RecognitionQueueButton from "./components/features/recognition/QueueButton";
 import Card from "./components/ui/Card";
 import { RecognitionEngine } from "./lib/RecognitionEngine";
+import { getClientCurrentUserId, isSameUserId } from "./lib/currentUser";
 
 export default class Home extends Component<Record<string, never>, HomeState> {
   private intervalId: number | null = null;
@@ -26,6 +27,7 @@ export default class Home extends Component<Record<string, never>, HomeState> {
 
     this.state = {
       currentStep: 1,
+      currentUserId: "",
       users: [],
       isLoadingUsers: true,
       selectedUserIds: [],
@@ -40,19 +42,26 @@ export default class Home extends Component<Record<string, never>, HomeState> {
   }
 
   private get selectedUsers() {
-    return this.state.users.filter((user) => this.state.selectedUserIds.includes(user.user_id));
+    return this.state.users.filter((user) =>
+      this.state.selectedUserIds.includes(user.user_id) &&
+      !isSameUserId(user.user_id, this.state.currentUserId)
+    );
   }
 
   private get filteredUsers() {
     const query = this.state.searchQuery.toLowerCase();
 
-    return this.state.users.filter((user) =>
-      user.firstName.toLowerCase().includes(query) ||
-      user.lastName.toLowerCase().includes(query) ||
-      user.team?.toLowerCase().includes(query) ||
-      user.role?.toLowerCase().includes(query) ||
-      user.email.toLowerCase().includes(query)
-    );
+    return this.state.users.filter((user) => {
+      if (isSameUserId(user.user_id, this.state.currentUserId)) return false;
+
+      return (
+        user.firstName.toLowerCase().includes(query) ||
+        user.lastName.toLowerCase().includes(query) ||
+        user.team?.toLowerCase().includes(query) ||
+        user.role?.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query)
+      );
+    });
   }
 
   private get commentLength() {
@@ -60,6 +69,9 @@ export default class Home extends Component<Record<string, never>, HomeState> {
   }
 
   componentDidMount() {
+    const currentUserId = getClientCurrentUserId();
+
+    this.setState({ currentUserId });
     this.loadUsers();
 
     this.setState({
@@ -102,6 +114,16 @@ export default class Home extends Component<Record<string, never>, HomeState> {
   }
 
   private async sendSubmission(submission: PendingSubmission) {
+    const { currentUserId } = this.state;
+
+    if (!currentUserId) {
+      this.setState({
+        formError: "Current user id is missing. Please open this page from the login system.",
+        formSuccess: "",
+      });
+      return;
+    }
+
     if (this.sendingSubmissionIds.has(submission.id)) return;
     this.sendingSubmissionIds.add(submission.id);
 
@@ -115,6 +137,7 @@ export default class Home extends Component<Record<string, never>, HomeState> {
               diary_emp_id: user.user_id,
               diary_comment: submission.comment,
               diary_corevalue: submission.types.join(", "),
+              createdBy: currentUserId,
             }),
           });
 
@@ -153,6 +176,11 @@ export default class Home extends Component<Record<string, never>, HomeState> {
   }
 
   private handleToggleUser = (userId: string) => {
+    if (isSameUserId(userId, this.state.currentUserId)) {
+      this.setState({ formError: "You cannot recognize yourself.", formSuccess: "" });
+      return;
+    }
+
     this.setState((currentState) => {
       const selectedUserIds = currentState.selectedUserIds.includes(userId)
         ? currentState.selectedUserIds.filter((id) => id !== userId)
@@ -192,8 +220,21 @@ export default class Home extends Component<Record<string, never>, HomeState> {
   };
 
   private validateStep(step: number) {
+    if (!this.state.currentUserId) {
+      this.setState({
+        formError: "Current user id is missing. Please open this page from the login system.",
+        formSuccess: "",
+      });
+      return false;
+    }
+
     if (step === 1 && this.state.selectedUserIds.length === 0) {
       this.setState({ formError: "Please choose at least one user to comment.", formSuccess: "" });
+      return false;
+    }
+
+    if (step === 1 && this.state.selectedUserIds.some((id) => isSameUserId(id, this.state.currentUserId))) {
+      this.setState({ formError: "You cannot recognize yourself.", formSuccess: "" });
       return false;
     }
 
@@ -227,12 +268,30 @@ export default class Home extends Component<Record<string, never>, HomeState> {
   };
 
   private submitRecognition = () => {
-    const { selectedUserIds, selectedTypes, comment, editingId, pendingSubmissions } = this.state;
+    const { selectedUserIds, selectedTypes, comment, editingId, pendingSubmissions, currentUserId } = this.state;
+
+    if (!currentUserId) {
+      this.setState({
+        currentStep: 1,
+        formError: "Current user id is missing. Please open this page from the login system.",
+        formSuccess: "",
+      });
+      return;
+    }
 
     if (selectedUserIds.length === 0) {
       this.setState({
         currentStep: 1,
         formError: "Please select at least one user.",
+        formSuccess: "",
+      });
+      return;
+    }
+
+    if (selectedUserIds.some((id) => isSameUserId(id, currentUserId))) {
+      this.setState({
+        currentStep: 1,
+        formError: "You cannot recognize yourself.",
         formSuccess: "",
       });
       return;
@@ -379,13 +438,13 @@ export default class Home extends Component<Record<string, never>, HomeState> {
   }
 
   render() {
-    const { currentStep, formError, formSuccess } = this.state;
+    const { currentStep, currentUserId, formError, formSuccess } = this.state;
 
     return (
       <div className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <Card bordered={false} padding="xl" shadow="xl" className="mb-10">
-            <RecognitionHeader />
+            <RecognitionHeader currentUserId={currentUserId} />
 
             <RecognitionStepper currentStep={currentStep} steps={RECOGNITION_STEPS} />
 

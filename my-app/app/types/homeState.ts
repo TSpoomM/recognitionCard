@@ -4,6 +4,7 @@ import { User } from "./user";
 
 export type HomeState = {
   currentStep: number;
+  currentUserId: string;
   users: User[];
   isLoadingUsers: boolean;
   selectedUserIds: string[];

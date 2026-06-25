@@ -1,33 +1,47 @@
 import { pool } from "@/app/lib/db";
-import { ResultSetHeader } from "mysql2";
+import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { NextResponse } from "next/server";
-import { sendComplimentEmail } from "@/app/lib/email";
+import { EmailService } from "@/app/services/email/EmailService";
+import { getRequestCurrentUserId, isSameUserId } from "@/app/lib/currentUser";
+
+type EmployeeEmailRow = RowDataPacket & {
+  emp_name_en: string | null;
+  email: string | null;
+};
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { diary_emp_id, diary_comment, diary_corevalue } = body;
+    const createdBy = await getRequestCurrentUserId(request, body);
 
-    if (!diary_emp_id || !diary_comment) {
+    if (!diary_emp_id || !diary_comment || !createdBy) {
       return NextResponse.json(
-        { success: false, error: "diary_emp_id and diary_comment are required." },
+        { success: false, error: "diary_emp_id, diary_comment, and current user id are required." },
+        { status: 400 }
+      );
+    }
+
+    if (isSameUserId(diary_emp_id, createdBy)) {
+      return NextResponse.json(
+        { success: false, error: "You cannot recognize yourself." },
         { status: 400 }
       );
     }
 
     const [result] = await pool.query<ResultSetHeader>(
       `
-      INSERT INTO tb_diary_list (diary_emp_id, diary_comment, createdDate, diary_corevalue)
-      VALUES (?, ?, CURRENT_TIMESTAMP, ?)
+      INSERT INTO tb_diary_list (diary_emp_id, diary_comment, createdBy, createdDate, diary_corevalue)
+      VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?)
       `,
-      [diary_emp_id, diary_comment, diary_corevalue || null]
+      [diary_emp_id, diary_comment, createdBy, diary_corevalue || null]
     );
 
     // Look up employee info for the email
     let recipientName = `Employee #${diary_emp_id}`;
     let recipientEmail = "";
     try {
-      const [empRows] = await pool.query<any[]>(
+      const [empRows] = await pool.query<EmployeeEmailRow[]>(
         `
         SELECT e.emp_name_en, em.email
         FROM tb_employee_list e
@@ -50,7 +64,7 @@ export async function POST(request: Request) {
         ? diary_corevalue.split(",").map((s: string) => s.trim()).filter(Boolean)
         : [];
 
-      sendComplimentEmail({
+      EmailService.sendComplimentEmail({
         toEmail: recipientEmail,
         recipientName,
         comment: diary_comment,
