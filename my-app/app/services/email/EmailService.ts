@@ -82,7 +82,11 @@ export class EmailService {
       ],
     });
 
-    console.log(`Email sent successfully: ${info.messageId}`);
+    console.log("recipientName: ", recipientName);
+    console.log("targetRecipient: ", targetRecipient);
+
+
+    console.log("Email sent successfully: ${info.messageId}");
     return { success: true, messageId: info.messageId, info };
   }
 

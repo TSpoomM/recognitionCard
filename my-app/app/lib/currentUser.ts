@@ -8,6 +8,7 @@ export const TEST_CURRENT_USER = {
   lastName: "naja",
   email: "testnaja@teckbeehang.com",
   role: "tester",
+  location: "HQ"
 };
 
 export function normalizeUserId(value: unknown) {

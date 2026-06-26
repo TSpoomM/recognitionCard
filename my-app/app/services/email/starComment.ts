@@ -1,16 +1,15 @@
 export type StarSection = {
   label: "S" | "T" | "A" | "R";
-  title: string;
   text: string;
 };
 
 export class StarCommentParser {
   static parse(comment: string): StarSection[] {
     const sections: StarSection[] = [
-      { label: "S", title: "Situation", text: "" },
-      { label: "T", title: "Task", text: "" },
-      { label: "A", title: "Action", text: "" },
-      { label: "R", title: "Result", text: "" },
+      { label: "S", text: "" },
+      { label: "T", text: "" },
+      { label: "A", text: "" },
+      { label: "R", text: "" },
     ];
     const sectionByLabel = new Map(sections.map((section) => [section.label, section]));
     const matches = Array.from(comment.matchAll(/(^|\s)(S|T|A|R)\s*[:\-]\s*/gi));

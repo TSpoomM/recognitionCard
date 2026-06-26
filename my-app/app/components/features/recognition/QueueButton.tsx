@@ -57,7 +57,6 @@ function CloseIcon({ className = "h-5 w-5" }: { className?: string }) {
 }
 
 function getSubmissionTypes(submission: PendingSubmission) {
-  console.log("submission.types =", submission.types);
   return submission.types?.length ? submission.types : submission.type ? [submission.type] : [];
 }
 
@@ -136,8 +135,6 @@ export default function RecognitionQueueButton({
                           <div className="flex flex-wrap gap-1.5">
                             {getSubmissionTypes(submission).map((type) => {
                               const meta = COMMENT_TYPE_META[type];
-                              console.log("type =", type);
-                              console.log("meta =", meta);
                               if (!meta) return null;
                               return (
                                 <span key={type} className={`rounded-full px-2.5 py-1 text-[13px] font-bold ${meta.tint}`}>

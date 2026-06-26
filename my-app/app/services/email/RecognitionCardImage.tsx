@@ -203,7 +203,7 @@ export class RecognitionCardImageRenderer {
             paddingTop: "2px",
           }}
         >
-          <span
+          {/* <span
             style={{
               fontFamily: "Roboto",
               fontSize: "14px",
@@ -213,7 +213,7 @@ export class RecognitionCardImageRenderer {
             }}
           >
             {section.title}
-          </span>
+          </span> */}
           <div
             style={{
               display: "flex",

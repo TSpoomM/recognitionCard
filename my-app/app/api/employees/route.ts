@@ -6,6 +6,7 @@ import { RowDataPacket } from "mysql2";
 type EmployeeRow = RowDataPacket & {
   fs_id: string | number;
   emp_name_en: string | null;
+  location_emp: string | null;
   position: string | null;
   email: string | null;
 };
@@ -25,6 +26,7 @@ export async function GET() {
       SELECT
         e.fs_id,
         e.emp_name_en,
+        e.location_emp,
         em.position,
         em.email
       FROM tb_employee_list e
@@ -45,6 +47,7 @@ export async function GET() {
         email: row.email || "",
         role: row.position || undefined,
         team: undefined,
+        location: row.location_emp || undefined,        
       };
     });
 

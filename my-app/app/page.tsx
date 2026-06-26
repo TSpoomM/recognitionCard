@@ -460,7 +460,6 @@ export default class Home extends Component<Record<string, never>, HomeState> {
                 onNextStep={this.handleNextStep}
                 onSubmitRecognition={() => {
                   this.submitRecognition();
-                  console.log("Submit recognition clicked");
                 }}
               />
             </form>

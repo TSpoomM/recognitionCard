@@ -4,6 +4,7 @@ export const EMAIL_CONFIG = {
   smtpUser: process.env.SMTP_USER || "",
   smtpPass: process.env.SMTP_PASS || "",
   smtpSecure: process.env.SMTP_SECURE === "true",
-  emailFrom: process.env.EMAIL_FROM || "tanapoom@teckbeehang.com",
+  // emailFrom: process.env.EMAIL_FROM || "tanapoom@teckbeehang.com",
+  emailFrom: process.env.EMAIL_FROM,
   testEmailTo: process.env.TEST_EMAIL_TO || "",
 };
