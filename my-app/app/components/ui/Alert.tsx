@@ -19,7 +19,7 @@ export default class Alert extends Component<AlertProps> {
 
   render() {
     return (
-      <Card padding="none" shadow="none" className={`px-4 py-3 text-sm ${this.toneClassName}`}>
+      <Card padding="none" shadow="none" className={`px-4 py-3 text-base font-medium ${this.toneClassName}`}>
         {this.props.children}
       </Card>
     );

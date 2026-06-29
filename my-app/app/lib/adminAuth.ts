@@ -1,53 +1,70 @@
 import { pool } from "@/app/lib/db";
-import { getRequestCurrentUserId, normalizeUserId } from "@/app/lib/currentUser";
+import { currentUserService } from "@/app/lib/currentUser";
 import { RowDataPacket } from "mysql2";
 
 type EmployeeRoleRow = RowDataPacket & {
   position: string | null;
 };
 
-function getAdminUserIds(): Set<string> {
-  const raw = process.env.ADMIN_USER_IDS || "";
-  return new Set(
-    raw
-      .split(",")
-      .map((id) => normalizeUserId(id))
-      .filter(Boolean)
-  );
-}
+export type AdminAccess = {
+  userId: string;
+  isAdmin: boolean;
+};
 
-function isAdminPosition(position: string | null | undefined) {
-  if (!position) return false;
-  return /\badmin\b/i.test(position.trim());
-}
-
-export async function isUserAdmin(userId: string): Promise<boolean> {
-  const normalizedId = normalizeUserId(userId);
-  if (!normalizedId) return false;
-
-  if (getAdminUserIds().has(normalizedId)) return true;
-
-  try {
-    const [rows] = await pool.query<EmployeeRoleRow[]>(
-      `
-      SELECT em.position
-      FROM tb_employee_list e
-      LEFT JOIN tb_emp_email em ON e.fs_id = em.Code
-      WHERE e.fs_id = ?
-      LIMIT 1
-      `,
-      [normalizedId]
+export class AdminAuthService {
+  private getAdminUserIds(): Set<string> {
+    const raw = process.env.ADMIN_USER_IDS || "";
+    return new Set(
+      raw
+        .split(",")
+        .map((id) => currentUserService.normalizeUserId(id))
+        .filter(Boolean)
     );
+  }
 
-    return isAdminPosition(rows[0]?.position);
-  } catch {
-    return false;
+  private isAdminPosition(position: string | null | undefined) {
+    if (!position) return false;
+    return /\badmin\b/i.test(position.trim());
+  }
+
+  async isUserAdmin(userId: string): Promise<boolean> {
+    const normalizedId = currentUserService.normalizeUserId(userId);
+    if (!normalizedId) return false;
+
+    if (this.getAdminUserIds().has(normalizedId)) return true;
+
+    try {
+      const [rows] = await pool.query<EmployeeRoleRow[]>(
+        `
+        SELECT em.position
+        FROM tb_employee_list e
+        LEFT JOIN tb_emp_email em ON e.fs_id = em.Code
+        WHERE e.fs_id = ?
+        LIMIT 1
+        `,
+        [normalizedId]
+      );
+
+      return this.isAdminPosition(rows[0]?.position);
+    } catch {
+      return false;
+    }
+  }
+
+  async getAccess(request: Request, body?: Record<string, unknown>): Promise<AdminAccess> {
+    const userId = await currentUserService.getRequestCurrentUserId(request, body);
+    const isAdmin = await this.isUserAdmin(userId);
+
+    return { userId, isAdmin };
+  }
+
+  async requireAdmin(request: Request, body?: Record<string, unknown>): Promise<AdminAccess> {
+    return this.getAccess(request, body);
   }
 }
 
-export async function requireAdmin(request: Request, body?: Record<string, unknown>) {
-  const userId = await getRequestCurrentUserId(request, body);
-  const isAdmin = await isUserAdmin(userId);
+export const adminAuthService = new AdminAuthService();
 
-  return { userId, isAdmin };
-}
+export const isUserAdmin = (userId: string) => adminAuthService.isUserAdmin(userId);
+export const requireAdmin = (request: Request, body?: Record<string, unknown>) =>
+  adminAuthService.requireAdmin(request, body);

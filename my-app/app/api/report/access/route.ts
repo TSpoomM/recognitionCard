@@ -1,11 +1,9 @@
-import { isUserAdmin } from "@/app/lib/adminAuth";
-import { getRequestCurrentUserId } from "@/app/lib/currentUser";
+import { adminAuthService } from "@/app/lib/adminAuth";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   try {
-    const userId = await getRequestCurrentUserId(request);
-    const isAdmin = await isUserAdmin(userId);
+    const { userId, isAdmin } = await adminAuthService.getAccess(request);
 
     return NextResponse.json({
       success: true,

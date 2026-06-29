@@ -10,4 +10,5 @@ export type HistoryItem = {
   comment: string;
   coreValues: string[];
   createdDate: string | null;
+  year: number | null;
 };

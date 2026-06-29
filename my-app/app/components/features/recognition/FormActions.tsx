@@ -21,6 +21,7 @@ export default class FormActions extends Component<FormActionsProps> {
           onClick={onPrevStep}
           disabled={currentStep === 1}
           variant="secondary"
+          className="text-base"
         >
           Back
         </Button>
@@ -28,6 +29,7 @@ export default class FormActions extends Component<FormActionsProps> {
           <Button
             type="button"
             onClick={onNextStep}
+            className="text-base"
           >
             Continue
           </Button>
@@ -35,6 +37,7 @@ export default class FormActions extends Component<FormActionsProps> {
           <Button
             type="button"
             onClick={onSubmitRecognition}
+            className="text-base"
           >
             Submit recognition
           </Button>

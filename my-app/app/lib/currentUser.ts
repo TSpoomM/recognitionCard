@@ -11,54 +11,68 @@ export const TEST_CURRENT_USER = {
   location: "HQ"
 };
 
-export function normalizeUserId(value: unknown) {
-  if (typeof value !== "string" && typeof value !== "number") return "";
-  return String(value).trim();
-}
-
-export function isSameUserId(a: unknown, b: unknown) {
-  const left = normalizeUserId(a);
-  const right = normalizeUserId(b);
-  return Boolean(left && right && left === right);
-}
-
-export function getClientCurrentUserId() {
-  if (typeof window === "undefined") return TEST_CURRENT_USER.user_id;
-
-  const params = new URLSearchParams(window.location.search);
-  const fromUrl = USER_ID_KEYS.map((key) => normalizeUserId(params.get(key))).find(Boolean) || "";
-
-  if (fromUrl) {
-    window.localStorage.setItem(CURRENT_USER_STORAGE_KEY, fromUrl);
-    return fromUrl;
+export class CurrentUserService {
+  normalizeUserId(value: unknown) {
+    if (typeof value !== "string" && typeof value !== "number") return "";
+    return String(value).trim();
   }
 
-  return TEST_CURRENT_USER.user_id;
+  isSameUserId(a: unknown, b: unknown) {
+    const left = this.normalizeUserId(a);
+    const right = this.normalizeUserId(b);
+    return Boolean(left && right && left === right);
+  }
+
+  getClientCurrentUserId() {
+    if (typeof window === "undefined") return TEST_CURRENT_USER.user_id;
+
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl =
+      USER_ID_KEYS.map((key) => this.normalizeUserId(params.get(key))).find(Boolean) || "";
+
+    if (fromUrl) {
+      window.localStorage.setItem(CURRENT_USER_STORAGE_KEY, fromUrl);
+      return fromUrl;
+    }
+
+    const fromStorage = this.normalizeUserId(window.localStorage.getItem(CURRENT_USER_STORAGE_KEY));
+    return fromStorage || TEST_CURRENT_USER.user_id;
+  }
+
+  buildCurrentUserHref(pathname: string, currentUserId: string) {
+    if (!currentUserId) return pathname;
+    return `${pathname}?currentUserId=${encodeURIComponent(currentUserId)}`;
+  }
+
+  async getRequestCurrentUserId(request: Request, body?: Record<string, unknown>) {
+    const headerUserId = USER_ID_HEADERS
+      .map((header) => this.normalizeUserId(request.headers.get(header)))
+      .find(Boolean);
+
+    if (headerUserId) return headerUserId;
+
+    const params = new URL(request.url).searchParams;
+    const queryUserId = USER_ID_KEYS.map((key) => this.normalizeUserId(params.get(key))).find(Boolean);
+
+    if (queryUserId) return queryUserId;
+
+    if (!body) return TEST_CURRENT_USER.user_id;
+
+    return (
+      USER_ID_KEYS.map((key) => this.normalizeUserId(body[key])).find(Boolean) ||
+      this.normalizeUserId(body.current_user_id) ||
+      this.normalizeUserId(body.created_by) ||
+      TEST_CURRENT_USER.user_id
+    );
+  }
 }
 
-export function buildCurrentUserHref(pathname: string, currentUserId: string) {
-  if (!currentUserId) return pathname;
-  return `${pathname}?currentUserId=${encodeURIComponent(currentUserId)}`;
-}
+export const currentUserService = new CurrentUserService();
 
-export async function getRequestCurrentUserId(request: Request, body?: Record<string, unknown>) {
-  const headerUserId = USER_ID_HEADERS
-    .map((header) => normalizeUserId(request.headers.get(header)))
-    .find(Boolean);
-
-  if (headerUserId) return headerUserId;
-
-  const params = new URL(request.url).searchParams;
-  const queryUserId = USER_ID_KEYS.map((key) => normalizeUserId(params.get(key))).find(Boolean);
-
-  if (queryUserId) return queryUserId;
-
-  if (!body) return TEST_CURRENT_USER.user_id;
-
-  return (
-    USER_ID_KEYS.map((key) => normalizeUserId(body[key])).find(Boolean) ||
-    normalizeUserId(body.current_user_id) ||
-    normalizeUserId(body.created_by) ||
-    TEST_CURRENT_USER.user_id
-  );
-}
+export const normalizeUserId = (value: unknown) => currentUserService.normalizeUserId(value);
+export const isSameUserId = (a: unknown, b: unknown) => currentUserService.isSameUserId(a, b);
+export const getClientCurrentUserId = () => currentUserService.getClientCurrentUserId();
+export const buildCurrentUserHref = (pathname: string, currentUserId: string) =>
+  currentUserService.buildCurrentUserHref(pathname, currentUserId);
+export const getRequestCurrentUserId = (request: Request, body?: Record<string, unknown>) =>
+  currentUserService.getRequestCurrentUserId(request, body);

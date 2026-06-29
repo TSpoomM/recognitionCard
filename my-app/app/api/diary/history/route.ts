@@ -59,6 +59,7 @@ export async function GET(request: Request) {
       const fallbackName = row.diary_emp_id ? `Employee #${row.diary_emp_id}` : "Unknown employee";
       const fullName = row.recipient_name?.trim() || fallbackName;
       const { firstName, lastName } = splitName(fullName);
+      const createdDate = row.createdDate ? new Date(row.createdDate) : null;
 
       return {
         id: String(row.diary_list),
@@ -73,7 +74,8 @@ export async function GET(request: Request) {
         coreValues: row.diary_corevalue
           ? row.diary_corevalue.split(",").map((value) => value.trim()).filter(Boolean)
           : [],
-        createdDate: row.createdDate ? new Date(row.createdDate).toISOString() : null,
+        createdDate: createdDate ? createdDate.toISOString() : null,
+        year: createdDate ? createdDate.getFullYear() : null,
       };
     });
 

@@ -16,8 +16,8 @@ export default class RecognitionStepper extends Component<RecognitionStepperProp
       <Card surface="muted" padding="lg" className="mb-10">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900">Step {currentStep} of {steps.length}</h2>
-            <p className="text-sm text-slate-600">Complete each step to submit your recognition card.</p>
+            <h2 className="text-2xl font-semibold text-slate-900">Step {currentStep} of {steps.length}</h2>
+            <p className="mt-1 text-base text-slate-600">Complete each step to submit your recognition card.</p>
           </div>
           <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3 lg:w-auto">
             {steps.map((label, index) => {
@@ -29,10 +29,10 @@ export default class RecognitionStepper extends Component<RecognitionStepperProp
                 <Card
                   key={label}
                   padding="sm"
-                  className="flex items-center gap-3 text-sm min-w-0"
+                  className="flex min-w-0 items-center gap-3 text-base"
                 >
                   <div
-                    className={`flex h-9 w-9 items-center justify-center rounded-full border font-semibold ${completed
+                    className={`flex h-10 w-10 items-center justify-center rounded-full border font-semibold ${completed
                       ? "border-emerald-500 bg-emerald-500 text-white"
                       : active
                         ? "border-slate-900 bg-slate-900 text-white"

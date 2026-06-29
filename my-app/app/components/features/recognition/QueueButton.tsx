@@ -74,13 +74,13 @@ export default function RecognitionQueueButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed bottom-5 right-5 z-50 inline-flex min-h-12 items-center gap-2 rounded-full bg-slate-950 px-4 py-3 text-sm font-semibold text-white shadow-xl shadow-slate-900/20 transition hover:bg-slate-800"
+        className="fixed bottom-5 right-5 z-50 inline-flex min-h-12 items-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-base font-semibold text-white shadow-xl shadow-slate-900/20 transition hover:bg-slate-800"
         aria-label="Open recognition queue"
       >
         <QueueIcon />
         <span>Queue</span>
         {pendingCount > 0 ? (
-          <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-400 px-1.5 text-[11px] font-bold text-slate-950">
+          <span className="ml-1 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-amber-400 px-1.5 text-xs font-bold text-slate-950">
             {pendingCount}
           </span>
         ) : null}
@@ -101,7 +101,7 @@ export default function RecognitionQueueButton({
                       <QueueIcon className="h-6 w-6" />
                       Recognition queue
                     </h2>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                    <p className="mt-2 text-base leading-7 text-slate-600">
                       Pending cards auto-confirm after 2 minutes. You can edit, delete, or confirm during that window.
                     </p>
                   </div>
@@ -137,29 +137,29 @@ export default function RecognitionQueueButton({
                               const meta = COMMENT_TYPE_META[type];
                               if (!meta) return null;
                               return (
-                                <span key={type} className={`rounded-full px-2.5 py-1 text-[13px] font-bold ${meta.tint}`}>
+                                <span key={type} className={`rounded-full px-3 py-1.5 text-sm font-bold ${meta.tint}`}>
                                   {meta.emoji} {meta.en}
                                 </span>
                               );
                             })}
                           </div>
                           {pending ? (
-                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-[13px] font-bold text-amber-800">
+                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-100 px-3 py-1.5 text-sm font-bold text-amber-800">
                               <ClockIcon /> {RecognitionEngine.formatRemaining(submission.createdAt)}
                             </span>
                           ) : (
-                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[13px] font-bold text-emerald-800">
+                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-100 px-3 py-1.5 text-sm font-bold text-emerald-800">
                               <CheckIcon /> Confirmed
                             </span>
                           )}
                         </div>
 
-                        <div className="mt-3 text-sm leading-6 text-slate-700">
+                        <div className="mt-3 text-base leading-7 text-slate-700">
                           <span className="font-bold text-slate-800">To:</span>{" "}
                           {submission.users.map((user) => `${user.firstName} ${user.lastName}`).join(", ") || "None"}
                         </div>
 
-                        <p className="mt-3 whitespace-pre-wrap text-base sm:text-[17px] leading-relaxed font-medium text-slate-900">{submission.comment}</p>
+                        <p className="mt-3 whitespace-pre-wrap text-lg leading-relaxed font-medium text-slate-900">{submission.comment}</p>
 
                         {pending ? (
                           <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-amber-200/70 pt-4">
@@ -169,21 +169,21 @@ export default function RecognitionQueueButton({
                                 onEditPending(submission);
                                 setOpen(false);
                               }}
-                              className="inline-flex min-h-10 items-center gap-1 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950"
+                              className="inline-flex min-h-10 items-center gap-1 rounded-xl border border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950"
                             >
                               <PencilIcon /> Edit
                             </button>
                             <button
                               type="button"
                               onClick={() => onDeletePending(submission.id)}
-                              className="inline-flex min-h-10 items-center gap-1 rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-600 transition hover:border-rose-300 hover:text-rose-700"
+                              className="inline-flex min-h-10 items-center gap-1 rounded-xl border border-rose-200 bg-white px-4 py-2 text-base font-semibold text-rose-600 transition hover:border-rose-300 hover:text-rose-700"
                             >
                               <TrashIcon /> Delete
                             </button>
                             <button
                               type="button"
                               onClick={() => onConfirmPending(submission.id)}
-                              className="ml-auto inline-flex min-h-10 items-center gap-1 rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                              className="ml-auto inline-flex min-h-10 items-center gap-1 rounded-xl bg-slate-950 px-4 py-2 text-base font-semibold text-white transition hover:bg-slate-800"
                             >
                               <SendIcon /> Confirm now
                             </button>

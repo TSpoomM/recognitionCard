@@ -13,6 +13,7 @@ export type ReportRow = {
   coreValue: string;
   coreValueLabel: string;
   createdAt: string | null;
+  year: number | null;
   createdBy: string;
   senderName: string;
 };
@@ -21,4 +22,5 @@ export type ReportData = {
   rows: ReportRow[];
   branches: string[];
   employees: ReportEmployee[];
+  years: number[];
 };

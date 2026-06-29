@@ -391,8 +391,8 @@ export default class Home extends Component<Record<string, never>, HomeState> {
       if (isLoadingUsers) {
         return (
           <>
-            <h2 className="mb-4 text-xl font-semibold text-slate-900">Choose Recipients</h2>
-            <p className="text-sm text-slate-600">Loading employee data...</p>
+            <h2 className="mb-4 text-2xl font-semibold text-slate-900">Choose Recipients</h2>
+            <p className="text-base text-slate-600">Loading employee data...</p>
           </>
         );
       }
@@ -412,8 +412,8 @@ export default class Home extends Component<Record<string, never>, HomeState> {
     if (currentStep === 2) {
       return (
         <>
-          <h2 className="mb-4 text-xl font-semibold text-slate-900">Choose types</h2>
-          <p className="mb-4 text-sm text-slate-600">Select one or more core values that fit.</p>
+          <h2 className="mb-4 text-2xl font-semibold text-slate-900">Choose types</h2>
+          <p className="mb-4 text-base text-slate-600">Select one or more core values that fit.</p>
           <CoreValueSelect
             selectedTypes={selectedTypes}
             onToggleType={this.handleToggleType}

@@ -101,34 +101,34 @@ export default class RecognitionCommentStep extends Component<RecognitionComment
     return (
       <div className="mx-auto max-w-5xl">
         <div className="mb-6 flex items-start gap-3">
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-950 text-white">
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-slate-950 text-white">
+            <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M5 5h14v12H8l-3 3V5Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
               <path d="m9 11 2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-slate-950">Write your message</h2>
-            <p className="mt-1 text-sm text-slate-600">Use the four STAR boxes to structure the note.</p>
+            <h2 className="text-2xl font-semibold text-slate-950">Write your message</h2>
+            <p className="mt-1 text-base text-slate-600">Use the four STAR boxes to structure the note.</p>
           </div>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600">
+          <div className="flex flex-wrap items-center gap-2 text-base text-slate-600">
             <span className="font-medium">To</span>
             {users.map((user) => (
-              <span key={user.user_id} className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
+              <span key={user.user_id} className="rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 ring-1 ring-slate-200">
                 {user.firstName} {user.lastName}
               </span>
             ))}
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+          <div className="mt-4 flex flex-wrap items-center gap-2 text-base text-slate-600">
             <span className="font-medium">For</span>
             {selectedTypes.map((type) => {
               const meta = COMMENT_TYPE_META[type];
               return (
-                <span key={type} className={`rounded-full px-3 py-1 text-xs font-semibold ${meta.tint}`}>
+                <span key={type} className={`rounded-full px-3 py-1.5 text-sm font-semibold ${meta.tint}`}>
                   {meta.emoji} {meta.en}
                 </span>
               );
@@ -140,12 +140,12 @@ export default class RecognitionCommentStep extends Component<RecognitionComment
           {starSections.map((section) => (
             <div key={section.key} className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
               <div className="mb-2 flex items-center gap-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-950 text-base font-semibold text-white">
                   {section.label}
                 </span>
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">{section.title}</p>
-                  <p className="text-xs text-slate-500">{section.placeholder}</p>
+                  <p className="text-base font-semibold text-slate-900">{section.title}</p>
+                  <p className="text-sm text-slate-500">{section.placeholder}</p>
                 </div>
               </div>
               <textarea
@@ -153,13 +153,13 @@ export default class RecognitionCommentStep extends Component<RecognitionComment
                 onChange={this.handleChange(section.key)}
                 rows={5}
                 placeholder={section.placeholder}
-                className="min-h-[120px] w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+                className="min-h-[150px] w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 text-lg text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
               />
             </div>
           ))}
         </div>
 
-        <div className="mt-3 flex items-center justify-end gap-3 text-xs text-slate-500">
+        <div className="mt-3 flex items-center justify-end gap-3 text-sm text-slate-500">
           <span>{commentLength}/500</span>
         </div>
       </div>

@@ -71,6 +71,7 @@ export async function GET(request: Request) {
       const personName = row.recipient_name?.trim() || `Employee #${personId}`;
       const branch = row.location_emp?.trim() || "Unknown";
       const senderName = row.sender_name?.trim() || String(row.createdBy);
+      const createdAt = row.createdDate ? new Date(row.createdDate) : null;
       const coreValues = parseCoreValues(row.diary_corevalue);
       const values = coreValues.length > 0 ? coreValues : [""];
 
@@ -83,7 +84,8 @@ export async function GET(request: Request) {
           comment: row.diary_comment || "",
           coreValue,
           coreValueLabel: coreValue ? getCoreValueLabel(coreValue) : "",
-          createdAt: row.createdDate ? new Date(row.createdDate).toISOString() : null,
+          createdAt: createdAt ? createdAt.toISOString() : null,
+          year: createdAt ? createdAt.getFullYear() : null,
           createdBy: String(row.createdBy),
           senderName,
         });
@@ -93,6 +95,8 @@ export async function GET(request: Request) {
     const branches = [...new Set(rows.map((row) => row.branch).filter(Boolean))].sort((a, b) =>
       a.localeCompare(b)
     );
+    const years = [...new Set(rows.map((row) => row.year).filter((year): year is number => year !== null))]
+      .sort((a, b) => b - a);
 
     const employees: ReportEmployee[] = employeeRows.map((row) => {
       const fullName = row.emp_name_en?.trim() || String(row.fs_id);
@@ -105,7 +109,7 @@ export async function GET(request: Request) {
       };
     });
 
-    const data: ReportData = { rows, branches, employees };
+    const data: ReportData = { rows, branches, employees, years };
 
     return NextResponse.json({ success: true, data });
   } catch (error) {

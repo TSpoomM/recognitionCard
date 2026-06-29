@@ -5,6 +5,7 @@ import Link from "next/link";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import { buildCurrentUserHref, getClientCurrentUserId } from "../lib/currentUser";
+import { reportAccessClient } from "../lib/reportAccessClient";
 import { downloadReportCsv, downloadReportPdf } from "../lib/reportExport";
 import { ReportData, ReportEmployee, ReportRow } from "../types/report";
 
@@ -17,6 +18,7 @@ type ReportPageState = {
   data: ReportData | null;
   selectedPeople: string[];
   selectedBranches: string[];
+  selectedYear: string;
   query: string;
   expandedRowIds: string[];
 };
@@ -36,6 +38,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
       data: null,
       selectedPeople: [],
       selectedBranches: [],
+      selectedYear: "",
       query: "",
       expandedRowIds: [],
     };
@@ -70,12 +73,13 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
   }
 
   private get filteredRows(): ReportRow[] {
-    const { data, selectedBranches, selectedPeople } = this.state;
+    const { data, selectedBranches, selectedPeople, selectedYear } = this.state;
     if (!data) return [];
 
     return data.rows.filter((row) => {
       if (selectedPeople.length > 0 && !selectedPeople.includes(row.personId)) return false;
       if (selectedBranches.length > 0 && !selectedBranches.includes(row.branch)) return false;
+      if (selectedYear && row.year !== Number(selectedYear)) return false;
       return true;
     });
   }
@@ -95,18 +99,12 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
     this.setState({ currentUserId });
 
     try {
-      const response = await fetch(
-        `/api/report/access?currentUserId=${encodeURIComponent(currentUserId)}`
-      );
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || "Could not verify report access.");
-      }
-
       if (this.cancelled) return;
 
-      const isAdmin = Boolean(result.data?.isAdmin);
+      const access = await reportAccessClient.getAccess(currentUserId);
+      if (this.cancelled) return;
+
+      const isAdmin = access.isAdmin;
 
       this.setState({
         isAdmin,
@@ -181,6 +179,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
       selectedPeople: [],
       selectedBranches: [],
       query: "",
+      selectedYear: "",
     });
   };
 
@@ -214,6 +213,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
       query,
       selectedBranches,
       selectedPeople,
+      selectedYear,
       expandedRowIds,
     } = this.state;
 
@@ -256,7 +256,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                   Recognition Card
                 </p>
                 <h1 className="mt-2 text-2xl font-bold text-slate-900">Recognition Report</h1>
-                <p className="mt-1 text-sm text-slate-500">Filter by people or branch, then export PDF or CSV.</p>
+                <p className="mt-1 text-base text-slate-500">Filter by people, branch, or year, then export PDF or CSV.</p>
               </div>
               <Link
                 href={homeHref}
@@ -303,16 +303,16 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                     <button
                       type="button"
                       onClick={this.clearFilters}
-                      className="text-xs text-slate-500 hover:text-slate-900"
+                      className="text-sm font-semibold text-slate-500 hover:text-slate-900"
                     >
                       Clear
                     </button>
                   </div>
 
-                  <div className="grid gap-6 lg:grid-cols-2">
+                  <div className="grid gap-6 xl:grid-cols-[1fr_1fr_220px]">
                     {/* Branch */}
                     <div>
-                      <p className="mb-3 text-[13px] font-semibold uppercase tracking-wide text-slate-500">
+                      <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
                         Branches
                       </p>
 
@@ -344,7 +344,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
 
                     {/* People */}
                     <div>
-                      <p className="mb-3 text-[13px] font-semibold uppercase tracking-wide text-slate-500">
+                      <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
                         People
                       </p>
 
@@ -384,6 +384,25 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                         })}
                       </div>
                     </div>
+
+                    {/* Year */}
+                    <div>
+                      <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+                        Year
+                      </p>
+                      <select
+                        value={selectedYear}
+                        onChange={(e) => this.setState({ selectedYear: e.target.value })}
+                        className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-lg font-medium text-slate-900"
+                      >
+                        <option value="">All years</option>
+                        {(data?.years || []).map((year) => (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 </aside>
 
@@ -418,6 +437,11 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                       {selectedPeople.length > 3 && (
                         <span className="rounded-full border border-slate-200 px-2 py-0.5 text-xs text-slate-600">
                           +{selectedPeople.length - 3} more
+                        </span>
+                      )}
+                      {selectedYear && (
+                        <span className="rounded-full border border-slate-200 px-2 py-0.5 text-xs text-slate-600">
+                          {selectedYear}
                         </span>
                       )}
                     </div>
