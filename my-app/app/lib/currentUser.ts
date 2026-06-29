@@ -3,11 +3,11 @@ const USER_ID_KEYS = ["currentUserId", "user_id", "emp_id", "fs_id", "createdBy"
 const USER_ID_HEADERS = ["x-current-user-id", "x-user-id", "x-employee-id", "x-fs-id"];
 
 export const TEST_CURRENT_USER = {
-  user_id: "9999",
-  firstName: "test",
-  lastName: "naja",
-  email: "testnaja@teckbeehang.com",
-  role: "tester",
+  user_id: "10180",
+  firstName: "Pumin",
+  lastName: "Intarasri",
+  email: "pumin@teckbeehang.com",
+  role: "I.T. Specialist",
   location: "HQ"
 };
 

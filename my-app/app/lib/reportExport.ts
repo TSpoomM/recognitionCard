@@ -29,7 +29,9 @@ const COLORS = {
 const FONT = "Sarabun";
 
 export function downloadReportPdf(rows: ReportRow[]) {
-  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  // A4 portrait: 210mm wide. Narrower than landscape, so column
+  // proportions below are tuned specifically for this width.
+  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
   // Embed the Thai-capable font and make it the default for the whole document.
   registerThaiFont(doc);
@@ -37,7 +39,7 @@ export function downloadReportPdf(rows: ReportRow[]) {
 
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const marginX = 14;
+  const marginX = 12;
 
   const generatedAt = new Date().toLocaleString("th-TH", {
     year: "numeric",
@@ -49,34 +51,35 @@ export function downloadReportPdf(rows: ReportRow[]) {
 
   const drawHeader = () => {
     doc.setFont(FONT, "bold");
-    doc.setFontSize(20);
+    doc.setFontSize(17);
     doc.setTextColor(...COLORS.ink);
-    doc.text("Recognition Report", marginX, 16);
+    doc.text("Recognition Report", marginX, 15);
 
-    doc.setFont(FONT, "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(...COLORS.subtle);
-    doc.text("Employee recognition records", marginX, 22);
-
-    doc.setDrawColor(...COLORS.accent);
-    doc.setLineWidth(0.8);
-    doc.line(marginX, 25.5, marginX + 26, 25.5);
-
-    const metaRight = pageWidth - marginX;
     doc.setFont(FONT, "normal");
     doc.setFontSize(9);
     doc.setTextColor(...COLORS.subtle);
-    doc.text(`Generated: ${generatedAt}`, metaRight, 14, { align: "right" });
+    doc.text("Employee recognition records", marginX, 20.5);
+
+    doc.setDrawColor(...COLORS.accent);
+    doc.setLineWidth(0.8);
+    doc.line(marginX, 23.5, marginX + 22, 23.5);
+
+    const metaRight = pageWidth - marginX;
+    doc.setFont(FONT, "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...COLORS.subtle);
+    doc.text(`Generated: ${generatedAt}`, metaRight, 13, { align: "right" });
 
     doc.setFont(FONT, "bold");
+    doc.setFontSize(9);
     doc.setTextColor(...COLORS.ink);
-    doc.text(`${rows.length} record${rows.length === 1 ? "" : "s"}`, metaRight, 19.5, {
+    doc.text(`${rows.length} record${rows.length === 1 ? "" : "s"}`, metaRight, 18, {
       align: "right",
     });
 
     doc.setDrawColor(...COLORS.line);
     doc.setLineWidth(0.3);
-    doc.line(marginX, 29, pageWidth - marginX, 29);
+    doc.line(marginX, 27, pageWidth - marginX, 27);
   };
 
   const drawFooter = (pageNumber: number, pageCount: number) => {
@@ -85,7 +88,7 @@ export function downloadReportPdf(rows: ReportRow[]) {
     doc.line(marginX, pageHeight - 12, pageWidth - marginX, pageHeight - 12);
 
     doc.setFont(FONT, "normal");
-    doc.setFontSize(8);
+    doc.setFontSize(7.5);
     doc.setTextColor(...COLORS.subtle);
     doc.text("Recognition Report \u2022 Confidential", marginX, pageHeight - 7);
     doc.text(`Page ${pageNumber} of ${pageCount}`, pageWidth - marginX, pageHeight - 7, {
@@ -100,10 +103,10 @@ export function downloadReportPdf(rows: ReportRow[]) {
   // Columns are sized so they always sum to (roughly) this value, so
   // autoTable's word-wrap has an accurate box to wrap inside instead of
   // letting long Thai/English content spill past the cell border.
-  const usableWidth = pageWidth - marginX * 2; // ~269mm on A4 landscape
+  const usableWidth = pageWidth - marginX * 2; // ~186mm on A4 portrait
 
   autoTable(doc, {
-    startY: 34,
+    startY: 31,
     head: [["Employee", "Branch", "Core Value", "Comment", "Sent By", "Date"]],
     body: rows.map((row) => [
       row.personName,
@@ -119,36 +122,39 @@ export function downloadReportPdf(rows: ReportRow[]) {
       font: FONT,
       fontStyle: "normal",
       fontSize: 9,
-      cellPadding: { top: 3, bottom: 3, left: 3, right: 3 },
+      cellPadding: { top: 2.5, bottom: 2.5, left: 2, right: 2 },
       overflow: "linebreak",
       lineColor: COLORS.line,
       lineWidth: 0.2,
       textColor: COLORS.ink,
       valign: "middle",
-      minCellHeight: 8,
+      minCellHeight: 7,
     },
     headStyles: {
       font: FONT,
       fillColor: COLORS.headerBg,
       textColor: COLORS.headerText,
       fontStyle: "bold",
-      fontSize: 9.5,
+      fontSize: 12,
       halign: "left",
-      cellPadding: { top: 4, bottom: 4, left: 3, right: 3 },
+      cellPadding: { top: 3, bottom: 3, left: 2, right: 2 },
     },
     alternateRowStyles: {
       fillColor: COLORS.stripe,
     },
-    // Widths are proportions of usableWidth (≈269mm): 13/10/14/40/13/10 = 100%
+    // Portrait usable width is ≈186mm — narrower than landscape, so
+    // Comment gets a smaller absolute share and Branch/Date/Sent By
+    // are trimmed to the minimum that still reads comfortably.
+    // Proportions: 14/11/14/38/13/10 = 100%
     columnStyles: {
-      0: { cellWidth: usableWidth * 0.13, fontStyle: "bold" },          // Employee
-      1: { cellWidth: usableWidth * 0.1 },                              // Branch
+      0: { cellWidth: usableWidth * 0.14, fontStyle: "bold" },          // Employee
+      1: { cellWidth: usableWidth * 0.11 },                             // Branch
       2: { cellWidth: usableWidth * 0.14 },                             // Core Value
-      3: { cellWidth: usableWidth * 0.4 },                              // Comment
+      3: { cellWidth: usableWidth * 0.38 },                             // Comment
       4: { cellWidth: usableWidth * 0.13 },                             // Sent By
       5: { cellWidth: usableWidth * 0.1, textColor: COLORS.subtle },    // Date
     },
-    margin: { left: marginX, right: marginX, top: 34, bottom: 16 },
+    margin: { left: marginX, right: marginX, top: 31, bottom: 16 },
     didParseCell: (data) => {
       // Belt-and-suspenders: guarantee every cell uses the Thai-capable
       // font even if a plugin default tries to reset it per-cell.

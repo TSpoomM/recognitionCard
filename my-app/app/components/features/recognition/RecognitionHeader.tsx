@@ -33,12 +33,15 @@ export default class RecognitionHeader extends Component<RecognitionHeaderProps,
   private async loadAdminAccess() {
     const { currentUserId } = this.props;
     if (!currentUserId) return;
+    console.log("currentUserId", currentUserId);
 
     try {
       const response = await fetch(
         `/api/report/access?currentUserId=${encodeURIComponent(currentUserId)}`
       );
       const result = await response.json();
+      console.log("result", result);
+
 
       if (this.cancelled || !response.ok || !result.success) return;
 
@@ -56,6 +59,8 @@ export default class RecognitionHeader extends Component<RecognitionHeaderProps,
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="mb-2 text-sm uppercase tracking-[0.2em] text-slate-500">Recognition Card</p>
+          {JSON.stringify("Admin")}
+          {JSON.stringify(isAdmin)}
         </div>
         <div className="flex flex-wrap gap-2">
           {isAdmin && (

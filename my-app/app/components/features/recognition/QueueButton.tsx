@@ -196,8 +196,9 @@ export default function RecognitionQueueButton({
               </div>
             </Card>
           </aside>
-        </div>
-      ) : null}
+        </div >
+      ) : null
+      }
     </>
   );
 }

@@ -27,7 +27,7 @@ export default class Home extends Component<Record<string, never>, HomeState> {
 
     this.state = {
       currentStep: 1,
-      currentUserId: "",
+      currentUserId: getClientCurrentUserId(),
       users: [],
       isLoadingUsers: true,
       selectedUserIds: [],
@@ -69,11 +69,7 @@ export default class Home extends Component<Record<string, never>, HomeState> {
   }
 
   componentDidMount() {
-    const currentUserId = getClientCurrentUserId();
-
-    this.setState({ currentUserId });
     this.loadUsers();
-
     this.setState({
       pendingSubmissions: RecognitionEngine.loadSubmissions(),
     });
