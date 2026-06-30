@@ -4,8 +4,20 @@ import React from "react";
 import { ImageResponse } from "next/og";
 import { StarCommentParser, StarSection } from "./starComment";
 
-const CARD_WIDTH = 600;
-const CARD_HEIGHT = 600;
+const CARD_WIDTH = 900;
+const CARD_HEIGHT = 1200;
+
+const THEME = {
+  primary: "#166534",
+  primaryLight: "#DCFCE7",
+  background: "#F8FAF8",
+  surface: "#FFFFFF",
+  border: "#E5E7EB",
+  title: "#0F172A",
+  text: "#334155",
+  subtitle: "#64748B",
+  divider: "#E2E8F0",
+};
 
 const CORE_VALUE_STYLE: Record<
   string,
@@ -75,160 +87,254 @@ export class RecognitionCardImageRenderer {
     maxLineChars: number,
     maxLines: number
   ): FittedText {
-    const truncated = this.truncateText(text, maxChars);
-    const words = truncated.split(" ");
+    const normalized = this.truncateText(text, maxChars);
+
+    const words = normalized.split(/\s+/);
+
     const lines: string[] = [];
-    let currentLine = "";
 
-    words.forEach((word) => {
-      if (word.length > maxLineChars) {
-        if (currentLine) {
-          lines.push(currentLine);
-          currentLine = "";
-        }
+    let current = "";
 
-        for (let index = 0; index < word.length; index += maxLineChars) {
-          lines.push(word.slice(index, index + maxLineChars));
-        }
-        return;
+    for (const word of words) {
+      const candidate = current ? `${current} ${word}` : word;
+
+      if (candidate.length <= maxLineChars) {
+        current = candidate;
+        continue;
       }
 
-      const nextLine = currentLine ? `${currentLine} ${word}` : word;
-      if (nextLine.length > maxLineChars) {
-        lines.push(currentLine);
-        currentLine = word;
-        return;
-      }
+      if (current) lines.push(current);
 
-      currentLine = nextLine;
-    });
-
-    if (currentLine) lines.push(currentLine);
-
-    const limitedLines = lines.slice(0, maxLines);
-    if (lines.length > maxLines && limitedLines.length > 0) {
-      const lastIndex = limitedLines.length - 1;
-      limitedLines[lastIndex] = `${limitedLines[lastIndex].slice(0, Math.max(0, maxLineChars - 3)).trim()}...`;
+      current = word;
     }
 
-    return { lines: limitedLines.length > 0 ? limitedLines : [""] };
+    if (current) lines.push(current);
+
+    if (lines.length > maxLines) {
+      const limited = lines.slice(0, maxLines);
+
+      limited[maxLines - 1] =
+        limited[maxLines - 1]
+          .replace(/[.,;:]?$/, "")
+          .trim() + "...";
+
+      return { lines: limited };
+    }
+
+    return { lines };
+  }
+
+  private static getCommentFontSize(section: StarSection) {
+    const len = section.text.length;
+
+    if (len < 90) return 22;
+
+    if (len < 150) return 20;
+
+    if (len < 220) return 18;
+
+    return 17;
   }
 
   private static renderCoreValues(coreValues: string[]) {
-    const dense = coreValues.length > 4;
-
     return (
       <div
         style={{
           display: "flex",
-          flexWrap: "wrap",
-          gap: dense ? "6px" : "8px",
-          justifyContent: "center",
-          marginTop: "10px",
-          marginBottom: dense ? "4px" : "10px",
-          maxHeight: "96px",
-          overflow: "hidden",
+          flexDirection: "column",
+          width: "100%",
+          background: THEME.surface,
+          border: `1px solid ${THEME.border}`,
+          borderRadius: "18px",
+          padding: "22px",
         }}
       >
-        {coreValues.map((val) => {
-          const cleanVal = val.trim().toUpperCase();
-          const meta = CORE_VALUE_STYLE[cleanVal] || {
-            emoji: "\u2728",
-            name: val,
-            bgColor: "#f1f5f9",
-            textColor: "#475569",
-          };
+        <span
+          style={{
+            fontSize: "20px",
+            fontWeight: 600,
+            color: THEME.primary,
+            fontFamily: "Roboto",
+            marginBottom: "18px",
+            letterSpacing: "1px",
+          }}
+        >
+          CORE VALUES
+        </span>
 
-          return (
-            <span
-              key={val}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: meta.bgColor,
-                color: meta.textColor,
-                padding: dense ? "4px 10px" : "5px 12px",
-                borderRadius: "20px",
-                fontSize: dense ? "16px" : "18px",
-                fontFamily: "Roboto",
-                fontWeight: 500,
-              }}
-            >
-              <span style={{ marginRight: "4px" }}>{meta.emoji}</span>
-              {meta.name}
-            </span>
-          );
-        })}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "12px",
+          }}
+        >
+          {coreValues.map((val) => {
+            const meta = CORE_VALUE_STYLE[val.trim().toUpperCase()];
+
+            return (
+              <div
+                key={val}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  background: meta?.bgColor || "#F1F5F9",
+                  color: meta?.textColor || "#475569",
+                  borderRadius: "999px",
+                  padding: "10px 18px",
+                  fontSize: "18px",
+                  fontWeight: 500,
+                  fontFamily: "Roboto",
+                }}
+              >
+                <span style={{ marginRight: 8 }}>
+                  {meta?.emoji || "✨"}
+                </span>
+
+                {meta?.name || val}
+              </div>
+            );
+          })}
+        </div>
       </div>
     );
   }
 
-  private static renderStarSection(section: StarSection, maxLines: number) {
-    const fittedText = this.fitText(section.text, maxLines * 34, 34, maxLines);
+  private static renderStarSection(section: StarSection) {
+    const fitted = this.fitText(section.text, 320, 64, 4);
+    const fontSize = this.getCommentFontSize(section);
+
+    const SECTION_META: Record<
+      string,
+      {
+        title: string;
+        color: string;
+        bg: string;
+      }
+    > = {
+      S: {
+        title: "Situation",
+        color: "#0F766E",
+        bg: "#ECFDF5",
+      },
+      T: {
+        title: "Task",
+        color: "#2563EB",
+        bg: "#EFF6FF",
+      },
+      A: {
+        title: "Action",
+        color: "#9333EA",
+        bg: "#FAF5FF",
+      },
+      R: {
+        title: "Result",
+        color: "#EA580C",
+        bg: "#FFF7ED",
+      },
+    };
+
+    const meta =
+      SECTION_META[section.label] ?? {
+        title: section.label,
+        color: "#475569",
+        bg: "#F8FAFC",
+      };
 
     return (
       <div
         key={section.label}
         style={{
           display: "flex",
-          alignItems: "flex-start",
+          flexDirection: "column",
           width: "100%",
-          gap: "12px",
+          border: `1px solid ${THEME.border}`,
+          borderRadius: "18px",
+          background: THEME.surface,
+          overflow: "hidden",
         }}
       >
+        {/* Header */}
+
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            width: "34px",
-            height: "34px",
-            borderRadius: "17px",
-            backgroundColor: "#0f172a",
-            color: "#ffffff",
-            fontFamily: "Roboto",
-            fontSize: "18px",
-            fontWeight: 500,
-            flexShrink: 0,
+            padding: "16px 22px",
+            background: meta.bg,
+            borderBottom: `1px solid ${THEME.border}`,
           }}
         >
-          {section.label}
-        </div>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            flex: 1,
-            paddingTop: "2px",
-          }}
-        >
-          {/* <span
+          <div
             style={{
+              width: "42px",
+              height: "42px",
+              borderRadius: "21px",
+              background: meta.color,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              color: "#fff",
+              fontWeight: 700,
+              fontSize: `${fontSize}px`,
               fontFamily: "Roboto",
-              fontSize: "14px",
-              fontWeight: 500,
-              color: "#64748b",
-              marginBottom: "2px",
+              marginRight: "14px",
             }}
           >
-            {section.title}
-          </span> */}
+            {section.label}
+          </div>
+
           <div
             style={{
               display: "flex",
               flexDirection: "column",
-              fontFamily: "Roboto",
-              fontSize: maxLines > 2 ? "16px" : "15px",
-              color: "#1e293b",
-              lineHeight: 1.32,
-              fontStyle: "italic",
             }}
           >
-            {fittedText.lines.map((line, lineIndex) => (
-              <span key={`${section.label}-${lineIndex}`}>{line}</span>
-            ))}
+            <span
+              style={{
+                fontFamily: "Roboto",
+                fontWeight: 700,
+                fontSize: "23px",
+                color: meta.color,
+              }}
+            >
+              {meta.title}
+            </span>
+
+            <span
+              style={{
+                fontFamily: "Roboto",
+                fontSize: "14px",
+                color: THEME.subtitle,
+              }}
+            >
+              STAR Framework
+            </span>
           </div>
+        </div>
+
+        {/* Body */}
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            padding: "22px",
+          }}
+        >
+          {fitted.lines.map((line, i) => (
+            <span
+              key={i}
+              style={{
+                fontFamily: "Roboto",
+                fontSize: "21px",
+                lineHeight: 1.7,
+                color: THEME.text,
+              }}
+            >
+              {line}
+            </span>
+          ))}
         </div>
       </div>
     );
@@ -246,11 +352,16 @@ export class RecognitionCardImageRenderer {
             display: "flex",
             flexDirection: "column",
             fontFamily: "Roboto",
-            fontSize: fittedText.lines.length > 3 ? "17px" : "20px",
+            // fontSize: fittedText.lines.length > 3 ? "17px" : "20px",
+            fontSize: "24px",
             color: "#1e293b",
-            lineHeight: 1.55,
-            textAlign: "center",
+            lineHeight: 1.8,
+            textAlign: "left",
             fontStyle: "italic",
+            background: "#fff",
+            border: `1px solid ${THEME.border}`,
+            borderRadius: "18px",
+            padding: "28px",
           }}
         >
           {fittedText.lines.map((line, index) => (
@@ -260,124 +371,177 @@ export class RecognitionCardImageRenderer {
       );
     }
 
-    const maxLinesPerSection = starSections.length >= 4 ? 2 : 3;
+    // const maxLinesPerSection = starSections.length >= 4 ? 2 : 3;
 
     return (
       <div
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: starSections.length >= 4 ? "7px" : "8px",
-          width: "360px",
-          maxWidth: "100%",
+          width: "100%",
+          gap: "18px",
         }}
       >
-        {starSections.map((section) => this.renderStarSection(section, maxLinesPerSection))}
+        {starSections.map((section) => this.renderStarSection(section))}
       </div>
     );
   }
 
-  private static renderImage({ comment, coreValues, dateString, recipientName }: RecognitionCardImageProps) {
+  private static renderImage({
+    comment,
+    coreValues,
+    dateString,
+    recipientName,
+  }: RecognitionCardImageProps) {
     return (
       <div
         style={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "space-between",
           width: "100%",
           height: "100%",
-          backgroundColor: "#FAF9F6",
-          border: "18px solid #FFFFFF",
-          padding: "40px",
+          background: THEME.background,
+          padding: "48px",
           boxSizing: "border-box",
-          overflow: "hidden",
+          fontFamily: "Roboto",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            width: "100%",
-            flexShrink: 0,
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "Roboto",
-              fontWeight: 500,
-              fontSize: "13px",
-              color: "#94a3b8",
-              letterSpacing: "3px",
-              marginBottom: "12px",
-            }}
-          >
-            RECOGNITION CARD
-          </span>
-          <span
-            style={{
-              fontFamily: "Roboto",
-              fontWeight: 500,
-              fontSize: recipientName.length > 24 ? "27px" : "32px",
-              color: "#334155",
-              textAlign: "center",
-              lineHeight: 1.15,
-            }}
-          >
-            For: {this.truncateText(recipientName, 34)}
-          </span>
-        </div>
-
-        {this.renderCoreValues(coreValues)}
+        {/* Card */}
 
         <div
           style={{
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            flexGrow: 1,
-            flexShrink: 1,
-            minHeight: 0,
-            gap: "8px",
-            padding: "0 8px",
-            margin: "8px 0",
-            width: "100%",
-            overflow: "hidden",
+            flex: 1,
+            background: "#fff",
+            borderRadius: "28px",
+            border: `1px solid ${THEME.border}`,
+            padding: "42px",
           }}
         >
-          {this.renderComment(comment)}
-        </div>
+          {/* HEADER */}
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            width: "100%",
-            flexShrink: 0,
-          }}
-        >
-          <span
+          <div
             style={{
-              fontFamily: "GreatVibes",
-              fontSize: "52px",
-              color: "#0f172a",
-              marginBottom: "6px",
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "40px",
             }}
           >
-            Thank You
-          </span>
-          <svg viewBox="0 0 24 24" style={{ width: "24px", height: "24px", marginBottom: "8px" }}>
-            <path
-              fill="#ef4444"
-              d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+            <div
+              style={{
+                width: "8px",
+                height: "90px",
+                borderRadius: "8px",
+                background: THEME.primary,
+                marginRight: "24px",
+              }}
             />
-          </svg>
-          <span style={{ fontFamily: "Roboto", fontSize: "12px", color: "#94a3b8" }}>
-            Sent on {dateString}
-          </span>
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "18px",
+                  letterSpacing: "4px",
+                  color: THEME.subtitle,
+                  fontWeight: 500,
+                }}
+              >
+                RECOGNITION CARD
+              </span>
+
+              <span
+                style={{
+                  marginTop: "12px",
+                  fontSize:
+                    recipientName.length > 30
+                      ? "38px"
+                      : "46px",
+                  color: THEME.title,
+                  fontWeight: 700,
+                  lineHeight: 1.15,
+                }}
+              >
+                {this.truncateText(recipientName, 42)}
+              </span>
+
+              <span
+                style={{
+                  marginTop: "10px",
+                  fontSize: "22px",
+                  color: THEME.subtitle,
+                }}
+              >
+                Thank you for your outstanding contribution.
+              </span>
+            </div>
+          </div>
+
+          {/* CORE VALUES */}
+
+          {this.renderCoreValues(coreValues)}
+
+          {/* COMMENT */}
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              flex: 1,
+              marginTop: "36px",
+              marginBottom: "36px",
+            }}
+          >
+            {this.renderComment(comment)}
+          </div>
+
+          {/* FOOTER */}
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              borderTop: `1px solid ${THEME.border}`,
+              paddingTop: "28px",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "GreatVibes",
+                fontSize: "74px",
+                color: THEME.primary,
+              }}
+            >
+              Thank You
+            </span>
+
+            <span
+              style={{
+                marginTop: "12px",
+                fontSize: "18px",
+                color: THEME.subtitle,
+              }}
+            >
+              Recognized on
+            </span>
+
+            <span
+              style={{
+                marginTop: "6px",
+                fontSize: "22px",
+                color: THEME.title,
+                fontWeight: 500,
+              }}
+            >
+              {dateString}
+            </span>
+          </div>
         </div>
       </div>
     );

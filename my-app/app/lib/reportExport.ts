@@ -107,7 +107,7 @@ export function downloadReportPdf(rows: ReportRow[]) {
 
   autoTable(doc, {
     startY: 31,
-    head: [["Employee", "Branch", "Core Value", "Comment", "Sent By", "Date"]],
+    head: [["Recipients", "Branch", "Core Value", "Comment", "Sent By", "Date"]],
     body: rows.map((row) => [
       row.personName,
       row.branch,
@@ -135,7 +135,7 @@ export function downloadReportPdf(rows: ReportRow[]) {
       fillColor: COLORS.headerBg,
       textColor: COLORS.headerText,
       fontStyle: "bold",
-      fontSize: 12,
+      fontSize: 13,
       halign: "left",
       cellPadding: { top: 3, bottom: 3, left: 2, right: 2 },
     },
