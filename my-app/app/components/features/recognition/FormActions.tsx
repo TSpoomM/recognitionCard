@@ -2,6 +2,7 @@
 
 import { Component } from "react";
 import Button from "../../ui/Button";
+import { LanguageContext } from "../../../context/LanguageContext";
 
 type FormActionsProps = {
   currentStep: number;
@@ -11,8 +12,12 @@ type FormActionsProps = {
 };
 
 export default class FormActions extends Component<FormActionsProps> {
+  static contextType = LanguageContext;
+  declare context: React.ContextType<typeof LanguageContext>;
+
   render() {
     const { currentStep, onPrevStep, onNextStep, onSubmitRecognition } = this.props;
+    const { t } = this.context;
 
     return (
       <div className="flex items-center justify-end gap-4">
@@ -23,7 +28,7 @@ export default class FormActions extends Component<FormActionsProps> {
           variant="secondary"
           className="text-base"
         >
-          Back
+          {t.back}
         </Button>
         {currentStep < 3 ? (
           <Button
@@ -31,7 +36,7 @@ export default class FormActions extends Component<FormActionsProps> {
             onClick={onNextStep}
             className="text-base"
           >
-            Continue
+            {t.continue}
           </Button>
         ) : (
           <Button
@@ -39,7 +44,7 @@ export default class FormActions extends Component<FormActionsProps> {
             onClick={onSubmitRecognition}
             className="text-base"
           >
-            Submit recognition
+            {t.submitRecognition}
           </Button>
         )}
       </div>

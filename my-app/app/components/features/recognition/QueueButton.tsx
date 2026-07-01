@@ -6,6 +6,7 @@ import { COMMENT_TYPE_META } from "../../../types/commentType";
 import { RecognitionEngine } from "../../../lib/RecognitionEngine";
 import Card from "../../ui/Card";
 import { Logs, Clock, Check, Pencil, Trash, Send, X } from 'lucide-react';
+import { useLanguage } from "../../../context/LanguageContext";
 
 type RecognitionQueueButtonProps = {
   submissions: PendingSubmission[];
@@ -67,6 +68,7 @@ export default function RecognitionQueueButton({
   onConfirmPending,
 }: RecognitionQueueButtonProps) {
   const [open, setOpen] = useState(false);
+  const { t } = useLanguage();
   const pendingCount = useMemo(() => submissions.filter((item) => item.status === "pending").length, [submissions]);
 
   return (
@@ -78,7 +80,7 @@ export default function RecognitionQueueButton({
         aria-label="Open recognition queue"
       >
         <QueueIcon />
-        <span>Queue</span>
+        <span>{t.queue}</span>
         {pendingCount > 0 ? (
           <span className="ml-1 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-amber-400 px-1.5 text-xs font-bold text-slate-950">
             {pendingCount}
@@ -99,10 +101,10 @@ export default function RecognitionQueueButton({
                   <div>
                     <h2 className="flex items-center gap-2 text-2xl font-bold text-slate-950">
                       <QueueIcon className="h-6 w-6" />
-                      Recognition queue
+                      {t.queueTitle}
                     </h2>
                     <p className="mt-2 text-base leading-7 text-slate-600">
-                      Pending cards auto-confirm after 2 minutes. You can edit, delete, or confirm during that window.
+                      {t.queueDescription}
                     </p>
                   </div>
                   <button
@@ -119,7 +121,7 @@ export default function RecognitionQueueButton({
               <div className="min-h-0 flex-1 overflow-y-auto p-6 overscroll-contain space-y-4">
                 {submissions.length === 0 ? (
                   <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-10 text-center text-base text-slate-500">
-                    Your queue is empty.
+                    {t.queueEmpty}
                   </div>
                 ) : (
                   submissions.map((submission) => {
@@ -149,13 +151,13 @@ export default function RecognitionQueueButton({
                             </span>
                           ) : (
                             <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-100 px-3 py-1.5 text-sm font-bold text-emerald-800">
-                              <CheckIcon /> Confirmed
+                              <CheckIcon /> {t.queueConfirmed}
                             </span>
                           )}
                         </div>
 
                         <div className="mt-3 text-base leading-7 text-slate-700">
-                          <span className="font-bold text-slate-800">To:</span>{" "}
+                          <span className="font-bold text-slate-800">{t.queueTo}</span>{" "}
                           {submission.users.map((user) => `${user.firstName} ${user.lastName}`).join(", ") || "None"}
                         </div>
 
@@ -171,21 +173,21 @@ export default function RecognitionQueueButton({
                               }}
                               className="inline-flex min-h-10 items-center gap-1 rounded-xl border border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950"
                             >
-                              <PencilIcon /> Edit
+                              <PencilIcon /> {t.edit}
                             </button>
                             <button
                               type="button"
                               onClick={() => onDeletePending(submission.id)}
                               className="inline-flex min-h-10 items-center gap-1 rounded-xl border border-rose-200 bg-white px-4 py-2 text-base font-semibold text-rose-600 transition hover:border-rose-300 hover:text-rose-700"
                             >
-                              <TrashIcon /> Delete
+                              <TrashIcon /> {t.delete}
                             </button>
                             <button
                               type="button"
                               onClick={() => onConfirmPending(submission.id)}
                               className="ml-auto inline-flex min-h-10 items-center gap-1 rounded-xl bg-slate-950 px-4 py-2 text-base font-semibold text-white transition hover:bg-slate-800"
                             >
-                              <SendIcon /> Confirm now
+                              <SendIcon /> {t.confirmNow}
                             </button>
                           </div>
                         ) : null}

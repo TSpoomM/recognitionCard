@@ -3,6 +3,7 @@
 import { ChangeEvent, Component } from "react";
 import { User } from "../../../types/user";
 import RecognitionUserSelect from "../userSelected/RecognitionUserSelect";
+import { LanguageContext } from "../../../context/LanguageContext";
 
 type RecognitionUserStepProps = {
   filteredUsers: User[];
@@ -14,25 +15,29 @@ type RecognitionUserStepProps = {
 };
 
 export default class RecognitionUserStep extends Component<RecognitionUserStepProps> {
+  static contextType = LanguageContext;
+  declare context: React.ContextType<typeof LanguageContext>;
+
   private handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     this.props.onSearchChange(event.target.value);
   };
 
   render() {
     const { filteredUsers, selectedUsers, selectedUserIds, searchQuery, onToggleUser } = this.props;
+    const { t } = this.context;
 
     return (
       <>
-        <h2 className="mb-4 text-2xl font-semibold text-slate-900">Choose Recipients</h2>
+        <h2 className="mb-4 text-2xl font-semibold text-slate-900">{t.step1Title}</h2>
         <p className="mb-6 text-base text-slate-600">
-          Pick one or more teammates to recognize.
+          {t.step1Description}
         </p>
         <div className="mb-4 relative">
           <input
             type="text"
             value={searchQuery}
             onChange={this.handleSearchChange}
-            placeholder="Search by name, team, role..."
+            placeholder={t.step1SearchPlaceholder}
             className="w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-lg text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
           />
         </div>

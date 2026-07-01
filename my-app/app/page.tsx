@@ -5,7 +5,8 @@ import { CommentType } from "./types/commentType";
 import { PendingSubmission } from "./types/pendingSubmission";
 import { HomeState } from "./types/homeState";
 import { User } from "./types/user";
-import { RECOGNITION_STEPS } from "./constants/recognitionFlow";
+import { Language, TRANSLATIONS } from "./constants/translations";
+import { LanguageContext } from "./context/LanguageContext";
 import RecognitionStepper from "./components/features/recognition/Stepper";
 import RecognitionHeader from "./components/features/recognition/RecognitionHeader";
 import RecognitionUserStep from "./components/features/userSelected/RecognitionUserStep";
@@ -18,7 +19,9 @@ import Card from "./components/ui/Card";
 import { RecognitionEngine } from "./lib/RecognitionEngine";
 import { getClientCurrentUserId, isSameUserId } from "./lib/currentUser";
 
-export default class Home extends Component<Record<string, never>, HomeState> {
+type PageState = HomeState & { lang: Language };
+
+export default class Home extends Component<Record<string, never>, PageState> {
   private intervalId: number | null = null;
   private sendingSubmissionIds = new Set<string>();
 
@@ -26,6 +29,7 @@ export default class Home extends Component<Record<string, never>, HomeState> {
     super(props);
 
     this.state = {
+      lang: 'en',
       currentStep: 1,
       currentUserId: getClientCurrentUserId(),
       users: [],
@@ -39,6 +43,10 @@ export default class Home extends Component<Record<string, never>, HomeState> {
       formError: "",
       formSuccess: "",
     };
+  }
+
+  private get t() {
+    return TRANSLATIONS[this.state.lang];
   }
 
   private get selectedUsers() {
@@ -104,7 +112,7 @@ export default class Home extends Component<Record<string, never>, HomeState> {
       this.setState({
         users: [],
         isLoadingUsers: false,
-        formError: `Unable to load employee data: ${error instanceof Error ? error.message : String(error)}`,
+        formError: this.t.errorLoadUsers(error instanceof Error ? error.message : String(error)),
       });
     }
   }
@@ -114,7 +122,7 @@ export default class Home extends Component<Record<string, never>, HomeState> {
 
     if (!currentUserId) {
       this.setState({
-        formError: "Current user id is missing. Please open this page from the login system.",
+        formError: this.t.errorNoUserId,
         formSuccess: "",
       });
       return;
@@ -148,10 +156,10 @@ export default class Home extends Component<Record<string, never>, HomeState> {
         item.id === submission.id ? { ...item, status: "sent" as const } : item
       );
       this.persistSubmissions(next);
-      this.setState({ formError: "", formSuccess: "Recognition card saved to database." });
+      this.setState({ formError: "", formSuccess: this.t.successSaved });
     } catch (error) {
       this.setState({
-        formError: `Unable to save recognition card: ${error instanceof Error ? error.message : String(error)}`,
+        formError: this.t.errorSaveCard(error instanceof Error ? error.message : String(error)),
         formSuccess: "",
       });
     } finally {
@@ -173,7 +181,7 @@ export default class Home extends Component<Record<string, never>, HomeState> {
 
   private handleToggleUser = (userId: string) => {
     if (isSameUserId(userId, this.state.currentUserId)) {
-      this.setState({ formError: "You cannot recognize yourself.", formSuccess: "" });
+      this.setState({ formError: this.t.errorSelfRecognize, formSuccess: "" });
       return;
     }
 
@@ -216,29 +224,25 @@ export default class Home extends Component<Record<string, never>, HomeState> {
   };
 
   private validateStep(step: number) {
+    const { t } = this;
+
     if (!this.state.currentUserId) {
-      this.setState({
-        formError: "Current user id is missing. Please open this page from the login system.",
-        formSuccess: "",
-      });
+      this.setState({ formError: t.errorNoUserId, formSuccess: "" });
       return false;
     }
 
     if (step === 1 && this.state.selectedUserIds.length === 0) {
-      this.setState({ formError: "Please choose at least one user to comment.", formSuccess: "" });
+      this.setState({ formError: t.errorSelectUser, formSuccess: "" });
       return false;
     }
 
     if (step === 1 && this.state.selectedUserIds.some((id) => isSameUserId(id, this.state.currentUserId))) {
-      this.setState({ formError: "You cannot recognize yourself.", formSuccess: "" });
+      this.setState({ formError: t.errorSelfRecognize, formSuccess: "" });
       return false;
     }
 
     if (step === 2 && this.state.selectedTypes.length === 0) {
-      this.setState({
-        formError: "Please choose at least one core value.",
-        formSuccess: "",
-      });
+      this.setState({ formError: t.errorSelectCoreValue, formSuccess: "" });
       return false;
     }
 
@@ -265,49 +269,30 @@ export default class Home extends Component<Record<string, never>, HomeState> {
 
   private submitRecognition = () => {
     const { selectedUserIds, selectedTypes, comment, editingId, pendingSubmissions, currentUserId } = this.state;
+    const { t } = this;
 
     if (!currentUserId) {
-      this.setState({
-        currentStep: 1,
-        formError: "Current user id is missing. Please open this page from the login system.",
-        formSuccess: "",
-      });
+      this.setState({ currentStep: 1, formError: t.errorNoUserId, formSuccess: "" });
       return;
     }
 
     if (selectedUserIds.length === 0) {
-      this.setState({
-        currentStep: 1,
-        formError: "Please select at least one user.",
-        formSuccess: "",
-      });
+      this.setState({ currentStep: 1, formError: t.errorNoUser, formSuccess: "" });
       return;
     }
 
     if (selectedUserIds.some((id) => isSameUserId(id, currentUserId))) {
-      this.setState({
-        currentStep: 1,
-        formError: "You cannot recognize yourself.",
-        formSuccess: "",
-      });
+      this.setState({ currentStep: 1, formError: t.errorSelfRecognize, formSuccess: "" });
       return;
     }
 
     if (selectedTypes.length === 0) {
-      this.setState({
-        currentStep: 2,
-        formError: "Please select at least one core value.",
-        formSuccess: "",
-      });
+      this.setState({ currentStep: 2, formError: t.errorSelectCoreValue, formSuccess: "" });
       return;
     }
 
     if (this.commentLength < 5) {
-      this.setState({
-        currentStep: 3,
-        formError: `Please write at least 5 characters (currently ${this.commentLength}).`,
-        formSuccess: "",
-      });
+      this.setState({ currentStep: 3, formError: t.errorCommentTooShort(this.commentLength), formSuccess: "" });
       return;
     }
 
@@ -326,7 +311,7 @@ export default class Home extends Component<Record<string, never>, HomeState> {
         searchQuery: "",
         editingId: null,
         formError: "",
-        formSuccess: "Recognition card updated successfully.",
+        formSuccess: t.successUpdated,
       });
       return;
     }
@@ -341,7 +326,7 @@ export default class Home extends Component<Record<string, never>, HomeState> {
       searchQuery: "",
       editingId: null,
       formError: "",
-      formSuccess: "Recognition card queued successfully.",
+      formSuccess: t.successQueued,
     });
   };
 
@@ -377,6 +362,10 @@ export default class Home extends Component<Record<string, never>, HomeState> {
     }
   };
 
+  private handleSetLang = (lang: Language) => {
+    this.setState({ lang });
+  };
+
   private renderCurrentStep() {
     const {
       currentStep,
@@ -386,13 +375,14 @@ export default class Home extends Component<Record<string, never>, HomeState> {
       comment,
       isLoadingUsers,
     } = this.state;
+    const { t } = this;
 
     if (currentStep === 1) {
       if (isLoadingUsers) {
         return (
           <>
-            <h2 className="mb-4 text-2xl font-semibold text-slate-900">Choose Recipients</h2>
-            <p className="text-base text-slate-600">Loading employee data...</p>
+            <h2 className="mb-4 text-2xl font-semibold text-slate-900">{t.step1Title}</h2>
+            <p className="text-base text-slate-600">{t.step1Loading}</p>
           </>
         );
       }
@@ -412,8 +402,8 @@ export default class Home extends Component<Record<string, never>, HomeState> {
     if (currentStep === 2) {
       return (
         <>
-          <h2 className="mb-4 text-2xl font-semibold text-slate-900">Choose types</h2>
-          <p className="mb-4 text-base text-slate-600">Select one or more core values that fit.</p>
+          <h2 className="mb-4 text-2xl font-semibold text-slate-900">{t.step2Title}</h2>
+          <p className="mb-4 text-base text-slate-600">{t.step2Description}</p>
           <CoreValueSelect
             selectedTypes={selectedTypes}
             onToggleType={this.handleToggleType}
@@ -434,40 +424,49 @@ export default class Home extends Component<Record<string, never>, HomeState> {
   }
 
   render() {
-    const { currentStep, currentUserId, formError, formSuccess } = this.state;
+    const { currentStep, currentUserId, formError, formSuccess, lang } = this.state;
+    const { t } = this;
 
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
-          <Card bordered={false} padding="xl" shadow="xl" className="mb-10">
-            <RecognitionHeader currentUserId={currentUserId} />
+      <LanguageContext.Provider
+        value={{
+          lang,
+          t: TRANSLATIONS[lang],
+          setLang: this.handleSetLang,
+        }}
+      >
+        <div className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-6xl">
+            <Card bordered={false} padding="xl" shadow="xl" className="mb-10">
+              <RecognitionHeader currentUserId={currentUserId} />
 
-            <RecognitionStepper currentStep={currentStep} steps={RECOGNITION_STEPS} />
+              <RecognitionStepper currentStep={currentStep} steps={t.stepLabels as unknown as string[]} />
 
-            <form onSubmit={this.handleSubmit} className="space-y-8">
-              <Card padding="lg">
-                {this.renderCurrentStep()}
-              </Card>
+              <form onSubmit={this.handleSubmit} className="space-y-8">
+                <Card padding="lg">
+                  {this.renderCurrentStep()}
+                </Card>
 
-              <FormMessages error={formError} success={formSuccess} />
-              <FormActions
-                currentStep={currentStep}
-                onPrevStep={this.handlePrevStep}
-                onNextStep={this.handleNextStep}
-                onSubmitRecognition={() => {
-                  this.submitRecognition();
-                }}
-              />
-            </form>
-          </Card>
+                <FormMessages error={formError} success={formSuccess} />
+                <FormActions
+                  currentStep={currentStep}
+                  onPrevStep={this.handlePrevStep}
+                  onNextStep={this.handleNextStep}
+                  onSubmitRecognition={() => {
+                    this.submitRecognition();
+                  }}
+                />
+              </form>
+            </Card>
+          </div>
+          <RecognitionQueueButton
+            submissions={this.state.pendingSubmissions}
+            onEditPending={this.handleEditPending}
+            onDeletePending={this.handleDeletePending}
+            onConfirmPending={this.handleConfirmPending}
+          />
         </div>
-        <RecognitionQueueButton
-          submissions={this.state.pendingSubmissions}
-          onEditPending={this.handleEditPending}
-          onDeletePending={this.handleDeletePending}
-          onConfirmPending={this.handleConfirmPending}
-        />
-      </div>
+      </LanguageContext.Provider>
     );
   }
 }

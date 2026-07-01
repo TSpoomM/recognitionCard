@@ -3,6 +3,8 @@
 import { Component } from "react";
 import { buildCurrentUserHref } from "../../../lib/currentUser";
 import { reportAccessClient } from "../../../lib/reportAccessClient";
+import { LanguageContext } from "../../../context/LanguageContext";
+import LanguageSwitcher from "../../ui/LanguageSwitcher";
 
 type RecognitionHeaderProps = {
   currentUserId: string;
@@ -13,6 +15,9 @@ type RecognitionHeaderState = {
 };
 
 export default class RecognitionHeader extends Component<RecognitionHeaderProps, RecognitionHeaderState> {
+  static contextType = LanguageContext;
+  declare context: React.ContextType<typeof LanguageContext>;
+
   private cancelled = false;
 
   constructor(props: RecognitionHeaderProps) {
@@ -47,27 +52,29 @@ export default class RecognitionHeader extends Component<RecognitionHeaderProps,
   render() {
     const { currentUserId } = this.props;
     const { isAdmin } = this.state;
+    const { t } = this.context;
 
     return (
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="mb-2 text-base uppercase tracking-[0.2em] text-slate-500">Recognition Card</p>
-          <h1 className="text-4xl font-bold text-slate-950">Send Recognition</h1>
+          <p className="mb-2 text-base uppercase tracking-[0.2em] text-slate-500">{t.headerLabel}</p>
+          <h1 className="text-4xl font-bold text-slate-950">{t.headerTitle}</h1>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <LanguageSwitcher />
           {isAdmin && (
             <a
               href={buildCurrentUserHref("/report", currentUserId)}
               className="inline-flex h-12 items-center justify-center rounded-3xl border border-violet-300 bg-violet-50 px-5 text-base font-semibold text-violet-800 transition hover:border-violet-400"
             >
-              Report
+              {t.headerReport}
             </a>
           )}
           <a
             href={buildCurrentUserHref("/history", currentUserId)}
             className="inline-flex h-12 items-center justify-center rounded-3xl border border-slate-300 bg-white px-5 text-base font-semibold text-slate-900 transition hover:border-slate-400"
           >
-            History
+            {t.headerHistory}
           </a>
         </div>
       </div>

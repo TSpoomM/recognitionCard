@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recognition Card – TBH</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,700&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── BODY ── */
+body {
+  background: #e8ede9;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: clamp(16px, 4vw, 40px) clamp(12px, 3vw, 24px);
+  font-family: 'IBM Plex Sans Thai', 'IBM Plex Sans', sans-serif;
+}
+
+/* ── CARD ── */
+.card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 660px;
+  border-radius: clamp(8px, 2vw, 14px);
+  overflow: hidden;
+  box-shadow: 0 4px 28px rgba(0,0,0,0.11);
+}
+
+/* ══════════════════════════════
+   HEADER
+══════════════════════════════ */
+.card-header {
+  position: relative;
+  padding: clamp(20px, 4vw, 32px) clamp(20px, 5vw, 36px) clamp(18px, 3.5vw, 28px) clamp(24px, 5.5vw, 40px);
+}
+.card-header::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: #2d6a4f;
+  border-radius: 0 2px 2px 0;
+}
+
+.label-recognition {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: clamp(9px, 1.6vw, 11px);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  color: #6b8c7a;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.card-name {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: clamp(24px, 6vw, 38px);
+  font-weight: 700;
+  font-style: italic;
+  color: #1a3828;
+  line-height: 1.15;
+  margin-bottom: 10px;
+  word-break: break-word;
+}
+
+.card-subtitle {
+  font-size: clamp(12px, 2.5vw, 14px);
+  color: #5a6e63;
+  line-height: 1.65;
+}
+
+/* ══════════════════════════════
+   CORE VALUES
+══════════════════════════════ */
+.core-values {
+  margin: 12px clamp(14px, 4vw, 28px);
+  background: #f5faf7;
+  border: 1px solid #d0e8da;
+  border-radius: 10px;
+  padding: clamp(12px, 2.5vw, 16px) clamp(14px, 3vw, 20px);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.cv-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.cv-icon-wrap {
+  width: clamp(34px, 6vw, 40px);
+  height: clamp(34px, 6vw, 40px);
+  background: #2d6a4f;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.cv-icon-wrap svg { width: 18px; height: 18px; fill: #fff; }
+
+.cv-title {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: clamp(9px, 1.8vw, 11px);
+  font-weight: 700;
+  color: #1a3828;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+}
+
+.cv-sep {
+  width: 1px;
+  height: 34px;
+  background: #c0dac9;
+  flex-shrink: 0;
+}
+
+.cv-values {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: clamp(10px, 3vw, 20px);
+  flex: 1;
+  min-width: 0;
+}
+
+.cv-value {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: clamp(11px, 2.2vw, 13.5px);
+  color: #2d5040;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.cv-value-icon {
+  width: clamp(26px, 5vw, 32px);
+  height: clamp(26px, 5vw, 32px);
+  background: #e4f3eb;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.cv-value-icon svg { width: 15px; height: 15px; }
+
+/* ══════════════════════════════
+   STAR SECTIONS
+══════════════════════════════ */
+.star-sections {
+  padding: 4px clamp(14px, 4vw, 28px) 0;
+}
+
+.star-row {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(12px, 3vw, 18px);
+  padding: clamp(14px, 3vw, 20px) 0;
+  border-bottom: 1.5px dashed #ccddd5;
+}
+.star-row:last-child { border-bottom: none; }
+
+.star-icon-wrap {
+  width: clamp(38px, 8vw, 48px);
+  height: clamp(38px, 8vw, 48px);
+  background: #e4f3eb;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.star-icon-wrap svg {
+  width: clamp(20px, 4.5vw, 26px);
+  height: clamp(20px, 4.5vw, 26px);
+}
+
+.star-content { flex: 1; min-width: 0; }
+
+.star-label {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: clamp(10px, 2vw, 12px);
+  font-weight: 700;
+  color: #1a3828;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 5px;
+}
+
+.star-text {
+  font-size: clamp(12.5px, 2.4vw, 14px);
+  color: #3d5247;
+  line-height: 1.75;
+  word-break: break-word;
+}
+
+/* ══════════════════════════════
+   FOOTER
+══════════════════════════════ */
+.card-footer {
+  margin: 8px clamp(14px, 4vw, 28px) clamp(18px, 4vw, 28px);
+  border-top: 1.5px solid #ccddd5;
+  padding-top: clamp(14px, 3vw, 20px);
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr 1px auto;
+  align-items: center;
+  gap: 0;
+}
+
+.footer-col {
+  padding: 0 clamp(10px, 2.5vw, 16px);
+  min-width: 0;
+}
+.footer-col:first-child { padding-left: 0; }
+
+.footer-vdiv {
+  width: 1px;
+  height: 52px;
+  background: #c0dac9;
+  flex-shrink: 0;
+}
+
+/* Thank you */
+.ft-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.heart-wrap {
+  width: clamp(28px, 6vw, 36px);
+  height: clamp(28px, 6vw, 36px);
+  background: #2d6a4f;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.heart-wrap svg { width: 15px; height: 15px; fill: #fff; }
+
+.ft-ty-title {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: clamp(12px, 2.5vw, 15px);
+  font-weight: 700;
+  color: #1a3828;
+}
+.ft-ty-sub {
+  font-size: clamp(10.5px, 2vw, 12.5px);
+  color: #6b8c7a;
+  padding-left: clamp(36px, 7vw, 44px);
+  line-height: 1.5;
+}
+
+/* Meta cols */
+.ft-meta-label {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: clamp(8px, 1.6vw, 10px);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8aab96;
+  margin-bottom: 4px;
+}
+.ft-meta-name {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: clamp(12px, 2.5vw, 15px);
+  font-weight: 700;
+  color: #1a3828;
+  word-break: break-word;
+}
+.ft-meta-role {
+  font-size: clamp(10px, 2vw, 12.5px);
+  color: #6b8c7a;
+}
+.ft-meta-date {
+  font-size: clamp(11px, 2.2vw, 13.5px);
+  color: #2d5040;
+  font-weight: 500;
+}
+
+/* TBH Logo */
+.tbh-logo-wrap {
+  padding-left: clamp(8px, 2vw, 14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tbh-logo {
+  width: clamp(50px, 10vw, 68px);
+  height: clamp(50px, 10vw, 68px);
+}
+
+/* ══════════════════════════════
+   RESPONSIVE — MOBILE ≤ 480px
+══════════════════════════════ */
+@media (max-width: 480px) {
+  body { padding: 12px 10px; }
+
+  /* Core values: stack vertically */
+  .core-values { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .cv-sep { display: none; }
+  .cv-values { gap: 10px; }
+
+  /* Footer: stack 2 columns top + logo row bottom */
+  .card-footer {
+    grid-template-columns: 1fr 1px 1fr;
+    grid-template-rows: auto 1px auto;
+    row-gap: 12px;
+  }
+
+  /* Hide vertical dividers between date col and logo on mobile, keep one */
+  .footer-vdiv:last-of-type { display: none; }
+
+  /* TBH logo goes to full-width bottom row */
+  .tbh-logo-wrap {
+    grid-column: 1 / -1;
+    border-top: 1px solid #ccddd5;
+    padding-top: 12px;
+    padding-left: 0;
+    justify-content: flex-end;
+  }
+  .footer-col:first-child { padding-left: clamp(0px, 2vw, 8px); }
+}
+
+/* ══════════════════════════════
+   RESPONSIVE — TABLET ≤ 600px
+   (smooth mid-range adjustments)
+══════════════════════════════ */
+@media (max-width: 600px) and (min-width: 481px) {
+  .cv-sep { display: none; }
+  .cv-values { gap: 12px; }
+}
+
+/* ══════════════════════════════
+   PRINT
+══════════════════════════════ */
+@media print {
+  body { background: none; padding: 0; }
+  .card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- ── HEADER ── -->
+  <div class="card-header">
+    <div class="label-recognition">Recognition Card</div>
+    <div class="card-name">Adisak Kaewptasert</div>
+    <div class="card-subtitle">
+      Thank you for your dedication and outstanding contribution
+      to our team and organization.
+    </div>
+  </div>
+
+  <!-- ── CORE VALUES ── -->
+  <div class="core-values">
+    <div class="cv-label">
+      <div class="cv-icon-wrap">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+      </div>
+      <div class="cv-title">Core Values<br>Demonstrated</div>
+    </div>
+
+    <div class="cv-sep"></div>
+
+    <div class="cv-values">
+      <div class="cv-value">
+        <div class="cv-value-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 12l2 2 4-4"/>
+            <path d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622C17.175 19.29 21 14.591 21 9a12.02 12.02 0 00-.382-3.016z"/>
+          </svg>
+        </div>
+        Respect
+      </div>
+
+      <div class="cv-value">
+        <div class="cv-value-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+          </svg>
+        </div>
+        Communication
+      </div>
+
+      <div class="cv-value">
+        <div class="cv-value-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+          </svg>
+        </div>
+        Leadership
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STAR SECTIONS ── -->
+  <div class="star-sections">
+
+    <!-- SITUATION -->
+    <div class="star-row">
+      <div class="star-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+      </div>
+      <div class="star-content">
+        <div class="star-label">Situation</div>
+        <div class="star-text">
+          บริษัทต้องเตรียมความพร้อมในการตรวจสอบข้อมูลลับของวัตถุดิบขายธรรมชาติ
+          เพื่อให้สอดคล้องกับข้อกำหนด EUDR ซึ่งกระบวนการเดิมใช้การเดินเอกสารและ
+          การนับข้อมูลด้วยมือ ทำให้ใช้เวลานานและมีความเสี่ยงต่อความผิดพลาด
+        </div>
+      </div>
+    </div>
+
+    <!-- TASK -->
+    <div class="star-row">
+      <div class="star-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
+      <div class="star-content">
+        <div class="star-label">Task</div>
+        <div class="star-text">
+          ออกแบบและพัฒนาระบบการเก็บข้อมูลดิจิทัล เพื่อเพิ่มความถูกต้อง รวดเร็ว
+          และสามารถตรวจสอบข้อมูลลับได้ตลอดห่วงโซ่อุปทาน
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTION -->
+    <div class="star-row">
+      <div class="star-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.07 4.93l-1.41 1.41M6.34 17.66l-1.41 1.41M20 12h2M2 12h2M19.07 19.07l-1.41-1.41M6.34 6.34L4.93 4.93M12 20v2M12 2v2"/>
+        </svg>
+      </div>
+      <div class="star-content">
+        <div class="star-label">Action</div>
+        <div class="star-text">
+          พัฒนาแอปพลิเคชันสำหรับเก็บข้อมูลแปลงสวนยางและข้อมูลการซื้อขาย
+          พร้อมเชื่อมต่อกับระบบฐานข้อมูลกลาง จัดทำคู่มือและอบรมทีมงานให้งานได้จริง
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="star-row">
+      <div class="star-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+          <polyline points="17 6 23 6 23 12"/>
+        </svg>
+      </div>
+      <div class="star-content">
+        <div class="star-label">Result</div>
+        <div class="star-text">
+          ลดเวลาในการเก็บข้อมูลจาก 5 วัน เหลือ 1 วัน ลดข้อผิดพลาดได้มากกว่า 90%
+          และสามารถส่งข้อมูลให้ลูกค้าได้ตรงตามข้อกำหนด EUDR สำเร็จ 100%
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /star-sections -->
+
+  <!-- ── FOOTER ── -->
+  <div class="card-footer">
+
+    <!-- Thank you -->
+    <div class="footer-col">
+      <div class="ft-head">
+        <div class="heart-wrap">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+          </svg>
+        </div>
+        <div class="ft-ty-title">Thank you</div>
+      </div>
+      <div class="ft-ty-sub">Your commitment<br>strengthens our team</div>
+    </div>
+
+    <div class="footer-vdiv"></div>
+
+    <!-- Recognized By -->
+    <div class="footer-col">
+      <div class="ft-meta-label">Recognized By</div>
+      <div class="ft-meta-name">John Smith</div>
+      <div class="ft-meta-role">Supply Chain Manager</div>
+    </div>
+
+    <div class="footer-vdiv"></div>
+
+    <!-- Date -->
+    <div class="footer-col">
+      <div class="ft-meta-label">Date</div>
+      <div class="ft-meta-date">June 30, 2026</div>
+    </div>
+
+  
+
+  </div><!-- /card-footer -->
+
+</div><!-- /card -->
+</body>
+</html>

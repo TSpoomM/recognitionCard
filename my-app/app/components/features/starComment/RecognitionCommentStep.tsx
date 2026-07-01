@@ -3,6 +3,7 @@
 import { ChangeEvent, Component } from "react";
 import { CommentType, COMMENT_TYPE_META } from "../../../types/commentType";
 import { User } from "../../../types/user";
+import { LanguageContext } from "../../../context/LanguageContext";
 
 type RecognitionCommentStepProps = {
   users: User[];
@@ -20,6 +21,9 @@ type StarSections = {
 };
 
 export default class RecognitionCommentStep extends Component<RecognitionCommentStepProps, StarSections> {
+  static contextType = LanguageContext;
+  declare context: React.ContextType<typeof LanguageContext>;
+
   constructor(props: RecognitionCommentStepProps) {
     super(props);
     this.state = this.parseComment(props.comment);
@@ -91,11 +95,13 @@ export default class RecognitionCommentStep extends Component<RecognitionComment
 
   render() {
     const { users, selectedTypes, commentLength } = this.props;
+    const { t, lang } = this.context;
+
     const starSections = [
-      { key: "s" as const, label: "S", title: "Situation", placeholder: "Describe the situation..." },
-      { key: "t" as const, label: "T", title: "Task", placeholder: "What was the task?" },
-      { key: "a" as const, label: "A", title: "Action", placeholder: "What action did you take?" },
-      { key: "r" as const, label: "R", title: "Result", placeholder: "What was the outcome?" },
+      { key: "s" as const, label: "S", title: t.step3Situation, placeholder: t.step3SituationPlaceholder },
+      { key: "t" as const, label: "T", title: t.step3Task, placeholder: t.step3TaskPlaceholder },
+      { key: "a" as const, label: "A", title: t.step3Action, placeholder: t.step3ActionPlaceholder },
+      { key: "r" as const, label: "R", title: t.step3Result, placeholder: t.step3ResultPlaceholder },
     ];
 
     return (
@@ -108,14 +114,14 @@ export default class RecognitionCommentStep extends Component<RecognitionComment
             </svg>
           </div>
           <div>
-            <h2 className="text-2xl font-semibold text-slate-950">Write your message</h2>
-            <p className="mt-1 text-base text-slate-600">Use the four STAR boxes to structure the note.</p>
+            <h2 className="text-2xl font-semibold text-slate-950">{t.step3Title}</h2>
+            <p className="mt-1 text-base text-slate-600">{t.step3Description}</p>
           </div>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
           <div className="flex flex-wrap items-center gap-2 text-base text-slate-600">
-            <span className="font-medium">To</span>
+            <span className="font-medium">{t.step3To}</span>
             {users.map((user) => (
               <span key={user.user_id} className="rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 ring-1 ring-slate-200">
                 {user.firstName} {user.lastName}
@@ -124,12 +130,12 @@ export default class RecognitionCommentStep extends Component<RecognitionComment
           </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-2 text-base text-slate-600">
-            <span className="font-medium">For</span>
+            <span className="font-medium">{t.step3For}</span>
             {selectedTypes.map((type) => {
               const meta = COMMENT_TYPE_META[type];
               return (
                 <span key={type} className={`rounded-full px-3 py-1.5 text-sm font-semibold ${meta.tint}`}>
-                  {meta.emoji} {meta.en}
+                  {meta.emoji} {meta[lang]}
                 </span>
               );
             })}

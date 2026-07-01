@@ -2,6 +2,7 @@
 
 import { Component } from "react";
 import Card from "../../ui/Card";
+import { LanguageContext } from "../../../context/LanguageContext";
 
 type RecognitionStepperProps = {
   currentStep: number;
@@ -9,15 +10,19 @@ type RecognitionStepperProps = {
 };
 
 export default class RecognitionStepper extends Component<RecognitionStepperProps> {
+  static contextType = LanguageContext;
+  declare context: React.ContextType<typeof LanguageContext>;
+
   render() {
     const { currentStep, steps } = this.props;
+    const { t } = this.context;
 
     return (
       <Card surface="muted" padding="lg" className="mb-10">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900">Step {currentStep} of {steps.length}</h2>
-            <p className="mt-1 text-base text-slate-600">Complete each step to submit your recognition card.</p>
+            <h2 className="text-2xl font-semibold text-slate-900">{t.stepperTitle(currentStep, steps.length)}</h2>
+            <p className="mt-1 text-base text-slate-600">{t.stepperDescription}</p>
           </div>
           <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3 lg:w-auto">
             {steps.map((label, index) => {
