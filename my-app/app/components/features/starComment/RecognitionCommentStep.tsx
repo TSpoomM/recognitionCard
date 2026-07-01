@@ -10,6 +10,8 @@ type RecognitionCommentStepProps = {
   selectedTypes: CommentType[];
   comment: string;
   commentLength: number;
+  minLength: number;
+  maxLength: number;
   onCommentChange: (comment: string) => void;
 };
 
@@ -23,14 +25,17 @@ type StarSections = {
 export default class RecognitionCommentStep extends Component<RecognitionCommentStepProps, StarSections> {
   static contextType = LanguageContext;
   declare context: React.ContextType<typeof LanguageContext>;
+  private lastEmittedComment = "";
 
   constructor(props: RecognitionCommentStepProps) {
     super(props);
+    this.lastEmittedComment = props.comment;
     this.state = this.parseComment(props.comment);
   }
 
   componentDidUpdate(prevProps: RecognitionCommentStepProps) {
-    if (prevProps.comment !== this.props.comment) {
+    if (prevProps.comment !== this.props.comment && this.props.comment !== this.lastEmittedComment) {
+      this.lastEmittedComment = this.props.comment;
       this.setState(this.parseComment(this.props.comment));
     }
   }
@@ -42,7 +47,7 @@ export default class RecognitionCommentStep extends Component<RecognitionComment
       return sections;
     }
 
-    const lines = comment.split(/\n/).map((line) => line.trim());
+    const lines = comment.split(/\n/);
     const sectionMap: Record<string, keyof StarSections> = {
       S: "s",
       T: "t",
@@ -58,14 +63,14 @@ export default class RecognitionCommentStep extends Component<RecognitionComment
       if (match) {
         const key = sectionMap[match[1].toUpperCase()];
         if (key) {
-          sections[key] = match[2].trim();
+          sections[key] = match[2];
           currentSection = key;
           return;
         }
       }
 
       if (currentSection) {
-        sections[currentSection] = `${sections[currentSection]}${sections[currentSection] ? "\n" : ""}${line}`.trim();
+        sections[currentSection] = `${sections[currentSection]}${sections[currentSection] ? "\n" : ""}${line}`;
       }
     });
 
@@ -89,13 +94,20 @@ export default class RecognitionCommentStep extends Component<RecognitionComment
 
   private handleChange = (section: keyof StarSections) => (event: ChangeEvent<HTMLTextAreaElement>) => {
     const nextSections = { ...this.state, [section]: event.target.value };
+    const nextComment = this.buildComment(nextSections);
+
+    if (nextComment.trim().length > this.props.maxLength) return;
+
+    this.lastEmittedComment = nextComment;
     this.setState(nextSections);
-    this.props.onCommentChange(this.buildComment(nextSections));
+    this.props.onCommentChange(nextComment);
   };
 
   render() {
-    const { users, selectedTypes, commentLength } = this.props;
+    const { users, selectedTypes, commentLength, minLength, maxLength } = this.props;
     const { t, lang } = this.context;
+    const isBelowMinimum = commentLength < minLength;
+    const remainingCharacters = maxLength - commentLength;
 
     const starSections = [
       { key: "s" as const, label: "S", title: t.step3Situation, placeholder: t.step3SituationPlaceholder },
@@ -157,6 +169,7 @@ export default class RecognitionCommentStep extends Component<RecognitionComment
               <textarea
                 value={this.state[section.key]}
                 onChange={this.handleChange(section.key)}
+                maxLength={maxLength}
                 rows={5}
                 placeholder={section.placeholder}
                 className="min-h-[150px] w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 text-lg text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
@@ -165,8 +178,13 @@ export default class RecognitionCommentStep extends Component<RecognitionComment
           ))}
         </div>
 
-        <div className="mt-3 flex items-center justify-end gap-3 text-sm text-slate-500">
-          <span>{commentLength}/500</span>
+        <div className="mt-3 flex items-center justify-between gap-3 text-sm">
+          <span className={isBelowMinimum ? "text-amber-600" : "text-emerald-700"}>
+            {t.step3LengthRequirement(minLength)}
+          </span>
+          <span className={remainingCharacters <= 30 ? "font-semibold text-amber-600" : "text-slate-500"}>
+            {commentLength}/{maxLength}
+          </span>
         </div>
       </div>
     );

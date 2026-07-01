@@ -40,6 +40,7 @@ export async function POST(request: Request) {
     // Look up employee info for the email
     let recipientName = `Employee #${diary_emp_id}`;
     let recipientEmail = "";
+    let recognizedByName = String(createdBy);
     try {
       const [empRows] = await pool.query<EmployeeEmailRow[]>(
         `
@@ -58,6 +59,23 @@ export async function POST(request: Request) {
       console.error("Failed to query employee info for email: ", err);
     }
 
+    try {
+      const [senderRows] = await pool.query<EmployeeEmailRow[]>(
+        `
+        SELECT e.emp_name_en, em.email
+        FROM tb_employee_list e
+        LEFT JOIN tb_emp_email em ON e.fs_id = em.Code
+        WHERE e.fs_id = ?
+        `,
+        [createdBy]
+      );
+      if (senderRows && senderRows.length > 0) {
+        recognizedByName = senderRows[0].emp_name_en || recognizedByName;
+      }
+    } catch (err) {
+      console.error("Failed to query sender info for email: ", err);
+    }
+
     // Trigger email in the background so it does not block the API response
     if (recipientEmail || process.env.TEST_EMAIL_TO) {
       const coreValues = diary_corevalue
@@ -67,6 +85,7 @@ export async function POST(request: Request) {
       EmailService.sendComplimentEmail({
         toEmail: recipientEmail,
         recipientName,
+        recognizedByName,
         comment: diary_comment,
         coreValues,
       }).catch((emailErr) => {

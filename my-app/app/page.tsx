@@ -18,6 +18,7 @@ import RecognitionQueueButton from "./components/features/recognition/QueueButto
 import Card from "./components/ui/Card";
 import { RecognitionEngine } from "./lib/RecognitionEngine";
 import { getClientCurrentUserId, isSameUserId } from "./lib/currentUser";
+import { STAR_COMMENT_MAX_LENGTH, STAR_COMMENT_MIN_LENGTH } from "./constants/recognitionFlow";
 
 type PageState = HomeState & { lang: Language };
 
@@ -207,6 +208,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
   };
 
   private handleCommentChange = (comment: string) => {
+    if (comment.trim().length > STAR_COMMENT_MAX_LENGTH) return;
     this.setState({ comment, formError: "", formSuccess: "" });
   };
 
@@ -291,8 +293,13 @@ export default class Home extends Component<Record<string, never>, PageState> {
       return;
     }
 
-    if (this.commentLength < 5) {
+    if (this.commentLength < STAR_COMMENT_MIN_LENGTH) {
       this.setState({ currentStep: 3, formError: t.errorCommentTooShort(this.commentLength), formSuccess: "" });
+      return;
+    }
+
+    if (this.commentLength > STAR_COMMENT_MAX_LENGTH) {
+      this.setState({ currentStep: 3, formError: t.errorCommentTooLong(this.commentLength), formSuccess: "" });
       return;
     }
 
@@ -418,6 +425,8 @@ export default class Home extends Component<Record<string, never>, PageState> {
         selectedTypes={selectedTypes}
         comment={comment}
         commentLength={this.commentLength}
+        minLength={STAR_COMMENT_MIN_LENGTH}
+        maxLength={STAR_COMMENT_MAX_LENGTH}
         onCommentChange={this.handleCommentChange}
       />
     );

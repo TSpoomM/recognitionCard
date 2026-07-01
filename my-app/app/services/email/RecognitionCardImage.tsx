@@ -6,8 +6,9 @@ import { StarCommentParser, StarSection } from "./starComment";
 
 const CARD_WIDTH = 660;
 const CARD_HEIGHT = 860;
-const CARD_PADDING_X = 40;
-const CARD_PADDING_Y = 36;
+const CARD_PADDING_X = 28;
+const STAR_ICON_SIZE = 48;
+const STAR_ROW_GAP = 18;
 
 /* ══════════════════════════════
    PALETTE — matched to templatePriDew.html
@@ -16,6 +17,7 @@ const COLORS = {
   bg: "#e8ede9",
   card: "#ffffff",
   accent: "#2d6a4f",
+  accentDark: "#1a3828",
   accentSoft: "#e4f3eb",
   accentSofter: "#f5faf7",
   accentBorder: "#d0e8da",
@@ -26,6 +28,7 @@ const COLORS = {
   labelFaint: "#8aab96",
   body: "#3d5247",
   valueText: "#2d5040",
+  surface: "#ffffff",
 };
 
 /* ══════════════════════════════
@@ -183,6 +186,7 @@ function getStarIcon(label: string): IconName {
 
 type RecognitionCardImageProps = {
   recipientName: string;
+  recognizedByName: string;
   comment: string;
   coreValues: string[];
   dateString: string;
@@ -276,6 +280,15 @@ export class RecognitionCardImageRenderer {
     return tiers[tiers.length - 1];
   }
 
+  private static isShortComment(comment: string) {
+    const starSections = StarCommentParser.parse(comment);
+    const textLength = starSections.length > 0
+      ? starSections.reduce((sum, section) => sum + section.text.trim().length, 0)
+      : comment.trim().length;
+
+    return textLength > 0 && textLength <= 220;
+  }
+
   /* ── CORE VALUES BOX (matches .core-values in template) ── */
   private static renderCoreValues(coreValues: string[]) {
     const dense = coreValues.length > 4;
@@ -290,8 +303,8 @@ export class RecognitionCardImageRenderer {
           backgroundColor: COLORS.accentSofter,
           border: `1px solid ${COLORS.accentBorder}`,
           borderRadius: "10px",
-          padding: dense ? "10px 16px" : "12px 18px",
-          gap: "14px",
+          padding: dense ? "12px 16px" : "16px 20px",
+          gap: "12px",
         }}
       >
         <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "10px", flexShrink: 0 }}>
@@ -300,21 +313,21 @@ export class RecognitionCardImageRenderer {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              width: "34px",
-              height: "34px",
-              borderRadius: "17px",
+              width: "40px",
+              height: "40px",
+              borderRadius: "20px",
               backgroundColor: COLORS.accent,
               flexShrink: 0,
             }}
           >
-            <Icon name="star" size={16} color="#ffffff" filled />
+            <Icon name="star" size={18} color="#ffffff" filled />
           </div>
           <div
             style={{
               display: "flex",
               flexDirection: "column",
               fontFamily: "IBM Plex Sans",
-              fontSize: "10px",
+              fontSize: "13px",
               fontWeight: 700,
               color: COLORS.heading,
               textTransform: "uppercase",
@@ -335,7 +348,7 @@ export class RecognitionCardImageRenderer {
             flexDirection: "row",
             flexWrap: "wrap",
             alignItems: "center",
-            gap: dense ? "10px" : "14px",
+            gap: dense ? "12px" : "20px",
             flex: 1,
             minWidth: 0,
           }}
@@ -351,6 +364,7 @@ export class RecognitionCardImageRenderer {
                   display: "flex",
                   alignItems: "center",
                   gap: "7px",
+                  padding: "2px 0",
                 }}
               >
                 <div
@@ -358,21 +372,22 @@ export class RecognitionCardImageRenderer {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    width: dense ? "24px" : "28px",
-                    height: dense ? "24px" : "28px",
+                    width: dense ? "28px" : "32px",
+                    height: dense ? "28px" : "32px",
                     borderRadius: "16px",
                     backgroundColor: COLORS.accentSoft,
                     flexShrink: 0,
                   }}
                 >
-                  <Icon name={meta.icon} size={dense ? 13 : 15} color={COLORS.accent} />
+                  <Icon name={meta.icon} size={15} color={COLORS.accent} />
                 </div>
                 <span
                   style={{
                     fontFamily: "IBM Plex Sans Thai",
-                    fontSize: dense ? "12px" : "13px",
+                    fontSize: dense ? "13.5px" : "14.5px",
                     fontWeight: 500,
                     color: COLORS.valueText,
+                    lineHeight: 1.2,
                   }}
                 >
                   {meta.name}
@@ -390,9 +405,12 @@ export class RecognitionCardImageRenderer {
     section: StarSection,
     lines: string[],
     fontSize: number,
-    isFirst: boolean
+    isLast: boolean,
+    roomy: boolean
   ) {
-    const lineHeight = 1.6;
+    const lineHeight = roomy ? 1.7 : 1.6;
+    const iconSize = roomy ? STAR_ICON_SIZE : 44;
+    const textColumnWidth = CARD_WIDTH - CARD_PADDING_X * 2 - 28 - iconSize - STAR_ROW_GAP;
     const STAR_LABELS: Record<string, string> = {
       S: "Situation",
       T: "Task",
@@ -408,9 +426,9 @@ export class RecognitionCardImageRenderer {
           flexDirection: "row",
           alignItems: "flex-start",
           width: "100%",
-          gap: "16px",
-          padding: "14px 0",
-          borderTop: isFirst ? "none" : `1.5px dashed ${COLORS.line}`,
+          gap: `${STAR_ROW_GAP}px`,
+          padding: roomy ? "18px 14px" : "12px 14px",
+          borderBottom: isLast ? "none" : `1.5px dashed ${COLORS.line}`,
         }}
       >
         <div
@@ -418,25 +436,36 @@ export class RecognitionCardImageRenderer {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            width: "42px",
-            height: "42px",
-            borderRadius: "10px",
+            width: `${iconSize}px`,
+            height: `${iconSize}px`,
+            borderRadius: "9px",
             backgroundColor: COLORS.accentSoft,
             flexShrink: 0,
+            marginTop: "1px",
           }}
         >
-          <Icon name={getStarIcon(section.label)} size={21} color={COLORS.accent} />
+          <Icon name={getStarIcon(section.label)} size={roomy ? 24 : 22} color={COLORS.accent} />
         </div>
-        <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            flex: 1,
+            minWidth: 0,
+            width: `${textColumnWidth}px`,
+            maxWidth: `${textColumnWidth}px`,
+            overflow: "hidden",
+          }}
+        >
           <span
             style={{
               fontFamily: "IBM Plex Sans",
-              fontSize: "11px",
+              fontSize: "12px",
               fontWeight: 700,
               color: COLORS.heading,
               textTransform: "uppercase",
-              letterSpacing: "0.1em",
-              marginBottom: "4px",
+              letterSpacing: "0.12em",
+              marginBottom: "6px",
             }}
           >
             {STAR_LABELS[section.label] ?? section.label}
@@ -449,6 +478,10 @@ export class RecognitionCardImageRenderer {
               fontSize: `${fontSize}px`,
               color: COLORS.body,
               lineHeight,
+              fontWeight: 400,
+              width: "100%",
+              maxWidth: "100%",
+              overflow: "hidden",
             }}
           >
             {lines.map((line, lineIndex) => (
@@ -460,22 +493,21 @@ export class RecognitionCardImageRenderer {
     );
   }
 
-  private static renderComment(comment: string) {
+  private static renderComment(comment: string, roomy = false) {
     const starSections = StarCommentParser.parse(comment);
 
-    // Text-area width available inside a STAR row: card padding, minus
-    // the icon column (42px) and its gap (16px) on the left.
-    const starTextWidth = CARD_WIDTH - CARD_PADDING_X * 2 - 42 - 16;
-    // Text-area width for the no-STAR fallback (full width, centered, no icon).
-    const plainTextWidth = CARD_WIDTH - CARD_PADDING_X * 2;
-    // Rough average glyph width as a fraction of font size for IBM Plex
-    // (mixed Thai/Latin) — used only to estimate chars-per-line, not to
-    // measure pixel-exact text.
-    const GLYPH_RATIO = 0.56;
+    // Text-area width available inside a STAR row: horizontal section padding,
+    // the icon column, and the gap on the left.
+    const starTextWidth = CARD_WIDTH - CARD_PADDING_X * 2 - 28 - (roomy ? STAR_ICON_SIZE : 44) - STAR_ROW_GAP;
+    // Text-area width for the no-STAR fallback, leaving room for its framed box.
+    const plainTextWidth = CARD_WIDTH - CARD_PADDING_X * 2 - 48;
+    // Conservative glyph width estimate so wide Latin text (e.g. repeated
+    // "W") wraps before it can touch the right edge.
+    const GLYPH_RATIO = 0.82;
     const charsPerLine = (width: number, fontSize: number) => Math.max(8, Math.floor(width / (fontSize * GLYPH_RATIO)));
 
     if (starSections.length === 0) {
-      const tiers = [17, 15.5, 14, 12.5, 11].map((fontSize) => ({
+      const tiers = (roomy ? [17, 16, 15, 14, 13] : [15, 14, 13, 12, 11]).map((fontSize) => ({
         fontSize,
         maxLineChars: charsPerLine(plainTextWidth, fontSize),
       }));
@@ -493,7 +525,11 @@ export class RecognitionCardImageRenderer {
             fontSize: `${tier.fontSize}px`,
             color: COLORS.body,
             lineHeight: 1.65,
-            textAlign: "center",
+            textAlign: "left",
+            backgroundColor: COLORS.surface,
+            border: `1px solid ${COLORS.line}`,
+            borderRadius: "14px",
+            padding: "22px 24px",
           }}
         >
           {fittedText.lines.map((line, index) => (
@@ -503,13 +539,13 @@ export class RecognitionCardImageRenderer {
       );
     }
 
-    const tiers = [14.5, 13.5, 12.5, 11.5, 10.5].map((fontSize) => ({
+    const tiers = (roomy ? [16.5, 15.5, 14.5, 13.5, 12.5] : [15, 14, 13, 12, 11]).map((fontSize) => ({
       fontSize,
       maxLineChars: charsPerLine(starTextWidth, fontSize),
     }));
     // Total lines budget shared across all STAR rows so the whole block
     // fits the fixed-height canvas; shrinks font instead of truncating.
-    const lineBudget = 22;
+    const lineBudget = roomy ? 14 : 18;
     const tier = this.pickFontTier(
       starSections.map((s) => s.text),
       tiers,
@@ -529,14 +565,17 @@ export class RecognitionCardImageRenderer {
             section,
             this.wrapText(section.text, tier.maxLineChars).lines,
             tier.fontSize,
-            index === 0
+            index === starSections.length - 1,
+            roomy
           )
         )}
       </div>
     );
   }
 
-  private static renderImage({ comment, coreValues, dateString, recipientName }: RecognitionCardImageProps) {
+  private static renderImage({ comment, coreValues, dateString, recipientName, recognizedByName }: RecognitionCardImageProps) {
+    const shortComment = this.isShortComment(comment);
+
     return (
       <div
         style={{
@@ -547,14 +586,30 @@ export class RecognitionCardImageRenderer {
           backgroundColor: COLORS.card,
           boxSizing: "border-box",
           overflow: "hidden",
-          padding: `${CARD_PADDING_Y}px ${CARD_PADDING_X}px`,
         }}
       >
         {/* ── HEADER (accent bar + label + name, matches .card-header) ── */}
-        <div style={{ display: "flex", flexDirection: "row", alignItems: "stretch", gap: "14px", flexShrink: 0 }}>
-          <div style={{ width: "4px", backgroundColor: COLORS.accent, borderRadius: "0 3px 3px 0" }} />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "stretch",
+            gap: "14px",
+            padding: "24px 36px 18px 28px",
+            flexShrink: 0,
+          }}
+        >
+          <div
+            style={{
+              width: "4px",
+              minHeight: "82px",
+              backgroundColor: COLORS.accent,
+              borderRadius: "0 2px 2px 0",
+              flexShrink: 0,
+            }}
+          />
           <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
-            <span
+            <div
               style={{
                 fontFamily: "IBM Plex Sans",
                 fontSize: "12px",
@@ -562,43 +617,58 @@ export class RecognitionCardImageRenderer {
                 letterSpacing: "0.22em",
                 color: COLORS.labelMuted,
                 textTransform: "uppercase",
-                marginBottom: "9px",
+                lineHeight: 1.2,
+                marginBottom: "7px",
               }}
             >
               Recognition Card
-            </span>
-            <span
+            </div>
+            <div
               style={{
-                fontFamily: "IBM Plex Sans Thai",
+                fontFamily: "IBM Plex Sans",
                 fontWeight: 700,
                 fontStyle: "italic",
-                fontSize: recipientName.length > 24 ? "27px" : "31px",
+                fontSize: recipientName.length > 24 ? "31px" : "38px",
                 color: COLORS.heading,
-                lineHeight: 1.15,
+                lineHeight: 1.05,
+                marginBottom: "9px",
               }}
             >
               {this.truncateText(recipientName, 34)}
-            </span>
+            </div>
+            <div
+              style={{
+                fontFamily: "IBM Plex Sans Thai",
+                fontSize: "14px",
+                color: "#5a6e63",
+                lineHeight: 1.35,
+              }}
+            >
+              Thank you for your dedication and outstanding contribution to our team and organization.
+            </div>
           </div>
         </div>
 
         {/* ── CORE VALUES ── */}
-        <div style={{ display: "flex", width: "100%", margin: "16px 0" }}>{this.renderCoreValues(coreValues)}</div>
+        <div style={{ display: "flex", width: "100%", padding: `0 ${CARD_PADDING_X}px`, margin: "12px 0" }}>
+          {this.renderCoreValues(coreValues)}
+        </div>
 
         {/* ── STAR SECTIONS / COMMENT (fills remaining space) ── */}
         <div
           style={{
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center",
+            justifyContent: shortComment ? "center" : "flex-start",
             flexGrow: 1,
             flexShrink: 1,
             minHeight: 0,
             width: "100%",
             overflow: "hidden",
+            padding: shortComment ? `10px ${CARD_PADDING_X}px 18px` : `4px ${CARD_PADDING_X}px 0`,
           }}
         >
-          {this.renderComment(comment)}
+          {this.renderComment(comment, shortComment)}
         </div>
 
         {/* ── FOOTER (matches .card-footer) ── */}
@@ -607,59 +677,102 @@ export class RecognitionCardImageRenderer {
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
-            justifyContent: "space-between",
-            width: "100%",
+            width: `${CARD_WIDTH - CARD_PADDING_X * 2}px`,
             borderTop: `1.5px solid ${COLORS.line}`,
-            paddingTop: "18px",
-            marginTop: "10px",
+            paddingTop: "15px",
+            margin: `8px ${CARD_PADDING_X}px 24px`,
             flexShrink: 0,
           }}
         >
-          <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "12px" }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "36px",
-                height: "36px",
-                borderRadius: "18px",
-                backgroundColor: COLORS.accent,
-                flexShrink: 0,
-              }}
-            >
-              <Icon name="heart" size={17} color="#ffffff" filled />
+          <div style={{ display: "flex", flexDirection: "column", width: "218px", minWidth: 0 }}>
+            <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "34px",
+                  height: "34px",
+                  borderRadius: "17px",
+                  backgroundColor: COLORS.accent,
+                  flexShrink: 0,
+                }}
+              >
+                <Icon name="heart" size={15} color="#ffffff" filled />
+              </div>
+              <span
+                style={{
+                  fontFamily: "IBM Plex Sans",
+                  fontSize: "17px",
+                  fontWeight: 700,
+                  color: COLORS.heading,
+                }}
+              >
+                Thank you
+              </span>
             </div>
-            <span
+            {/* <span
               style={{
-                fontFamily: "IBM Plex Sans",
-                fontSize: "16px",
-                fontWeight: 700,
-                color: COLORS.heading,
+                fontFamily: "IBM Plex Sans Thai",
+                fontSize: "12.5px",
+                color: COLORS.labelMuted,
+                lineHeight: 1.35,
+                paddingLeft: "42px",
               }}
             >
-              Thank you
-            </span>
+              Your commitment strengthens<br />our team
+            </span> */}
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+          <div style={{ width: "1px", height: "52px", backgroundColor: COLORS.lineSoft, flexShrink: 0 }} />
+
+          <div style={{ display: "flex", flexDirection: "column", width: "216px", minWidth: 0, paddingLeft: "16px", paddingRight: "14px" }}>
             <span
               style={{
                 fontFamily: "IBM Plex Sans",
-                fontSize: "10px",
+                fontSize: "10.5px",
                 fontWeight: 700,
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
                 color: COLORS.labelFaint,
-                marginBottom: "4px",
+                marginBottom: "5px",
               }}
             >
-              Sent On
+              Recognized By
+            </span>
+            <span
+              style={{
+                fontFamily: "IBM Plex Sans Thai",
+                fontSize: recognizedByName.length > 24 ? "12.5px" : "14.5px",
+                fontWeight: 700,
+                color: COLORS.heading,
+                lineHeight: 1.3,
+              }}
+            >
+              {this.truncateText(recognizedByName, 32)}
+            </span>
+          </div>
+
+          <div style={{ width: "1px", height: "52px", backgroundColor: COLORS.lineSoft, flexShrink: 0 }} />
+
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", width: "166px", minWidth: 0, paddingLeft: "14px" }}>
+            <span
+              style={{
+                fontFamily: "IBM Plex Sans",
+                fontSize: "10.5px",
+                fontWeight: 700,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: COLORS.labelFaint,
+                marginBottom: "5px",
+              }}
+            >
+              Date
             </span>
             <span
               style={{
                 fontFamily: "IBM Plex Sans",
-                fontSize: "14px",
+                fontSize: dateString.length > 13 ? "13px" : "15px",
                 fontWeight: 500,
                 color: COLORS.valueText,
               }}

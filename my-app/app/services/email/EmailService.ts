@@ -5,6 +5,7 @@ import { RecognitionCardImageRenderer } from "./RecognitionCardImage";
 type SendComplimentEmailParams = {
   toEmail: string;
   recipientName: string;
+  recognizedByName: string;
   comment: string;
   coreValues: string[];
 };
@@ -19,6 +20,7 @@ export class EmailService {
   static async sendComplimentEmail({
     toEmail,
     recipientName,
+    recognizedByName,
     comment,
     coreValues,
   }: SendComplimentEmailParams): Promise<EmailResult> {
@@ -38,6 +40,7 @@ export class EmailService {
     console.log(`Generating card image for ${recipientName}...`);
     const imageBuffer = await RecognitionCardImageRenderer.renderToBuffer({
       recipientName,
+      recognizedByName,
       comment,
       coreValues,
       dateString,
@@ -50,6 +53,7 @@ export class EmailService {
       console.log("Subject: Compliment");
       console.log("Details:");
       console.log(`- Recipient Name: ${recipientName}`);
+      console.log(`- Recognized By: ${recognizedByName}`);
       console.log(`- Date Sent: ${dateString}`);
       console.log(`- Core Values: ${coreValues.join(", ")}`);
       console.log(`- Comment: ${comment}`);
@@ -101,7 +105,7 @@ export class EmailService {
           Someone has sent you a recognition card to appreciate your hard work and contribution. Please find your recognition card attached below:
         </p>
         <div style="text-align: center; margin: 30px 0;">
-          <img src="cid:recognitionCard" alt="Recognition Card" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);" />
+          <img src="cid:recognitionCard" alt="Recognition Card" width="660" style="width: 660px; max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);" />
         </div>
         <p style="color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 30px; text-align: center;">
           This is an automated email from TeckBeeHang Recognition System.

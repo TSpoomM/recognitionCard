@@ -36,6 +36,7 @@ export const TRANSLATIONS = {
     step3ActionPlaceholder: 'What action did you take?',
     step3Result: 'Result',
     step3ResultPlaceholder: 'What was the outcome?',
+    step3LengthRequirement: (min: number) => `Minimum ${min} characters`,
 
     // Form Actions
     back: 'Back',
@@ -58,7 +59,8 @@ export const TRANSLATIONS = {
     errorSelectUser: 'Please choose at least one user to comment.',
     errorSelfRecognize: 'You cannot recognize yourself.',
     errorSelectCoreValue: 'Please choose at least one core value.',
-    errorCommentTooShort: (length: number) => `Please write at least 5 characters (currently ${length}).`,
+    errorCommentTooShort: (length: number) => `Please write at least 70 characters (currently ${length}).`,
+    errorCommentTooLong: (length: number) => `Please keep the STAR comment within 500 characters (currently ${length}).`,
     successQueued: 'Recognition card queued successfully.',
     successUpdated: 'Recognition card updated successfully.',
     successSaved: 'Recognition card saved to database.',
@@ -102,6 +104,7 @@ export const TRANSLATIONS = {
     step3ActionPlaceholder: 'เขาทำอะไรบ้าง?',
     step3Result: 'ผลลัพธ์',
     step3ResultPlaceholder: 'ผลลัพธ์ที่ได้คืออะไร?',
+    step3LengthRequirement: (min: number) => `ขั้นต่ำ ${min} ตัวอักษร`,
 
     // Form Actions
     back: 'ย้อนกลับ',
@@ -124,7 +127,8 @@ export const TRANSLATIONS = {
     errorSelectUser: 'กรุณาเลือกผู้รับอย่างน้อยหนึ่งคน',
     errorSelfRecognize: 'ไม่สามารถส่ง Recognition ให้ตัวเองได้',
     errorSelectCoreValue: 'กรุณาเลือก Core Value อย่างน้อยหนึ่งข้อ',
-    errorCommentTooShort: (length: number) => `กรุณาเขียนอย่างน้อย 5 ตัวอักษร (ปัจจุบัน ${length} ตัว)`,
+    errorCommentTooShort: (length: number) => `กรุณาเขียนอย่างน้อย 70 ตัวอักษร (ปัจจุบัน ${length} ตัว)`,
+    errorCommentTooLong: (length: number) => `กรุณาเขียน STAR comment ไม่เกิน 500 ตัวอักษร (ปัจจุบัน ${length} ตัว)`,
     successQueued: 'เพิ่ม Recognition Card เข้าคิวเรียบร้อยแล้ว',
     successUpdated: 'อัปเดต Recognition Card เรียบร้อยแล้ว',
     successSaved: 'บันทึก Recognition Card ลงฐานข้อมูลเรียบร้อยแล้ว',
