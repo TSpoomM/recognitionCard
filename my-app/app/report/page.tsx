@@ -157,15 +157,22 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
         : [...state.expandedRowIds, rowId],
     }));
   };
-  private formatDate(value: string | null) {
-    if (!value) return "-";
-    return new Date(value).toLocaleString("th-TH", {
+  private formatDateParts(value: string | null) {
+    if (!value) return null;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+
+    return {
+      date: date.toLocaleDateString("th-TH", {
       year: "numeric",
       month: "short",
       day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+      }),
+      time: date.toLocaleTimeString("th-TH", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
   }
   render() {
     const {
@@ -408,18 +415,18 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                     </div>
                   ) : (
                     <div className="max-h-[640px] overflow-y-auto overflow-x-auto">
-                      <table className="w-full min-w-[1200px] table-fixed border-collapse text-lg">
+                      <table className="w-full min-w-[1320px] table-fixed border-collapse text-lg">
                         <colgroup>
-                          <col className="w-[14%]" />
+                          <col className="w-[13%]" />
                           <col className="w-[9%]" />
                           <col className="w-[14%]" />
-                          <col className="w-[38%]" />
+                          <col className="w-[32%]" />
                           <col className="w-[15%]" />
-                          <col className="w-[10%]" />
+                          <col className="w-[17%]" />
                         </colgroup>
                         <thead className="sticky top-0 z-10 border-b border-slate-200 bg-slate-50/95 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-500 backdrop-blur">
                           <tr>
-                            <th className="whitespace-nowrap px-4 py-3">Recievers</th>
+                            <th className="whitespace-nowrap px-4 py-3">Receivers</th>
                             <th className="whitespace-nowrap px-4 py-3">Branch</th>
                             <th className="whitespace-nowrap px-4 py-3">Core Value</th>
                             <th className="whitespace-nowrap px-4 py-3">Comment</th>
@@ -431,6 +438,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                           {rows.map((row) => {
                             const isExpanded = expandedRowIds.includes(row.id);
                             const isLongComment = row.comment.length > 220;
+                            const createdAt = this.formatDateParts(row.createdAt);
                             return (
                               <tr key={row.id} className="border-b border-slate-100 align-top last:border-b-0">
                                 <td className="truncate px-4 py-4 font-medium text-slate-900">
@@ -467,8 +475,15 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                                   )}
                                 </td>
                                 <td className="truncate px-4 py-4 text-slate-600">{row.senderName}</td>
-                                <td className="whitespace-nowrap px-4 py-4 text-slate-500">
-                                  {this.formatDate(row.createdAt)}
+                                <td className="px-4 py-4 text-slate-500">
+                                  {createdAt ? (
+                                    <time dateTime={row.createdAt || undefined} className="block leading-relaxed">
+                                      <span className="block whitespace-nowrap">{createdAt.date}</span>
+                                      <span className="block whitespace-nowrap text-slate-400">{createdAt.time}</span>
+                                    </time>
+                                  ) : (
+                                    <span className="text-slate-400">-</span>
+                                  )}
                                 </td>
                               </tr>
                             );
