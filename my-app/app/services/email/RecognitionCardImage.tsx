@@ -4,185 +4,43 @@ import React from "react";
 import { ImageResponse } from "next/og";
 import { StarCommentParser, StarSection } from "./starComment";
 
-const CARD_WIDTH = 660;
-const CARD_HEIGHT = 860;
-const CARD_PADDING_X = 28;
-const STAR_ICON_SIZE = 48;
-const STAR_ROW_GAP = 18;
+/**
+ * This renderer reproduces the "TBH Recognition Card" HTML template
+ * (index.html) using next/og's ImageResponse (Satori).
+ *
+ * Satori does not support: CSS Grid, clip-path, ::before/::after pseudo
+ * elements, or @import'ed web fonts. Everywhere the template used one of
+ * those, this file uses the closest Satori-safe equivalent:
+ *   - grid layout        -> flexbox
+ *   - hexagon clip-path   -> rounded-rect badge
+ *   - ::after dashed line -> a real bottom-bordered <div>
+ *   - Poppins             -> Roboto (already loaded as a local font)
+ *   - Dancing Script       -> GreatVibes (already loaded as a local font)
+ * If you'd rather have the exact template fonts, drop Poppins/Dancing
+ * Script .ttf files into public/fonts and swap the family names below.
+ */
 
-/* ══════════════════════════════
-   PALETTE — matched to templatePriDew.html
-══════════════════════════════ */
-const COLORS = {
-  bg: "#e8ede9",
-  card: "#ffffff",
-  accent: "#2d6a4f",
-  accentDark: "#1a3828",
-  accentSoft: "#e4f3eb",
-  accentSofter: "#f5faf7",
-  accentBorder: "#d0e8da",
-  line: "#ccddd5",
-  lineSoft: "#c0dac9",
-  heading: "#1a3828",
-  labelMuted: "#6b8c7a",
-  labelFaint: "#8aab96",
-  body: "#3d5247",
-  valueText: "#2d5040",
-  surface: "#ffffff",
+const CARD_WIDTH = 1100;
+const CARD_HEIGHT = 790;
+
+const PALETTE = {
+  cream: "#f5f6f1",
+  black: "#000000",
+  darkGreen: "#0c3a22",
+  green1: "#165c30",
+  green2: "#1f7040",
+  green3: "#2f8a4a",
+  green4: "#4aab5a",
+  green5: "#82be40",
+  accent: "#a8d840",
+  textDark: "#2c3c28",
+  textMuted: "#556650",
+  textFaint: "#7a8875",
+  lineGray: "#9baa8e",
+  dashGray: "#c8d3be",
+  panelBg: "#edf0e8",
+  white: "#ffffff",
 };
-
-/* ══════════════════════════════
-   ICON DEFINITIONS (inline SVG, passthrough to Satori)
-══════════════════════════════ */
-type IconName =
-  | "star"
-  | "shieldCheck"
-  | "chat"
-  | "people"
-  | "briefcase"
-  | "shield"
-  | "heart"
-  | "mapPin"
-  | "checkCircle"
-  | "gear"
-  | "trendUp";
-
-function Icon({
-  name,
-  size = 16,
-  color = COLORS.accent,
-  filled = false,
-}: {
-  name: IconName;
-  size?: number;
-  color?: string;
-  filled?: boolean;
-}) {
-  const strokeProps = filled
-    ? { fill: color, stroke: "none" }
-    : {
-      fill: "none",
-      stroke: color,
-      strokeWidth: 1.8,
-      strokeLinecap: "round" as const,
-      strokeLinejoin: "round" as const,
-    };
-
-  switch (name) {
-    case "star":
-      return (
-        <svg viewBox="0 0 24 24" width={size} height={size} xmlns="http://www.w3.org/2000/svg">
-          <path
-            fill={color}
-            d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"
-          />
-        </svg>
-      );
-    case "shieldCheck":
-      return (
-        <svg viewBox="0 0 24 24" width={size} height={size} xmlns="http://www.w3.org/2000/svg">
-          <path {...strokeProps} d="M9 12l2 2 4-4" />
-          <path
-            {...strokeProps}
-            d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622C17.175 19.29 21 14.591 21 9a12.02 12.02 0 00-.382-3.016z"
-          />
-        </svg>
-      );
-    case "chat":
-      return (
-        <svg viewBox="0 0 24 24" width={size} height={size} xmlns="http://www.w3.org/2000/svg">
-          <path
-            {...strokeProps}
-            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-          />
-        </svg>
-      );
-    case "people":
-      return (
-        <svg viewBox="0 0 24 24" width={size} height={size} xmlns="http://www.w3.org/2000/svg">
-          <path {...strokeProps} d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-          <circle cx="9" cy="7" r="4" {...strokeProps} />
-          <path {...strokeProps} d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
-        </svg>
-      );
-    case "briefcase":
-      return (
-        <svg viewBox="0 0 24 24" width={size} height={size} xmlns="http://www.w3.org/2000/svg">
-          <path {...strokeProps} d="M3 8a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
-          <path {...strokeProps} d="M8 6V5a2 2 0 012-2h4a2 2 0 012 2v1" />
-          <path {...strokeProps} d="M3 13h18" />
-        </svg>
-      );
-    case "shield":
-      return (
-        <svg viewBox="0 0 24 24" width={size} height={size} xmlns="http://www.w3.org/2000/svg">
-          <path {...strokeProps} d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5l8-3z" />
-        </svg>
-      );
-    case "heart":
-      return (
-        <svg viewBox="0 0 24 24" width={size} height={size} xmlns="http://www.w3.org/2000/svg">
-          <path
-            fill={color}
-            d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"
-          />
-        </svg>
-      );
-    case "mapPin":
-      return (
-        <svg viewBox="0 0 24 24" width={size} height={size} xmlns="http://www.w3.org/2000/svg">
-          <path {...strokeProps} d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-          <circle cx="12" cy="10" r="3" {...strokeProps} />
-        </svg>
-      );
-    case "checkCircle":
-      return (
-        <svg viewBox="0 0 24 24" width={size} height={size} xmlns="http://www.w3.org/2000/svg">
-          <path {...strokeProps} d="M22 11.08V12a10 10 0 11-5.93-9.14" />
-          <path {...strokeProps} d="M22 4L12 14.01L9 11.01" />
-        </svg>
-      );
-    case "gear":
-      return (
-        <svg viewBox="0 0 24 24" width={size} height={size} xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="3" {...strokeProps} />
-          <path
-            {...strokeProps}
-            d="M19.07 4.93l-1.41 1.41M6.34 17.66l-1.41 1.41M20 12h2M2 12h2M19.07 19.07l-1.41-1.41M6.34 6.34L4.93 4.93M12 20v2M12 2v2"
-          />
-        </svg>
-      );
-    case "trendUp":
-      return (
-        <svg viewBox="0 0 24 24" width={size} height={size} xmlns="http://www.w3.org/2000/svg">
-          <path {...strokeProps} d="M23 6L13.5 15.5L8.5 10.5L1 18" />
-          <path {...strokeProps} d="M17 6L23 6L23 12" />
-        </svg>
-      );
-    default:
-      return null;
-  }
-}
-
-/* ══════════════════════════════
-   CORE VALUE → icon + label lookup
-══════════════════════════════ */
-const CORE_VALUE_STYLE: Record<string, { icon: IconName; name: string }> = {
-  RESPECT: { icon: "shieldCheck", name: "Respect" },
-  LEADERSHIP: { icon: "people", name: "Leadership" },
-  COMMUNICATION: { icon: "chat", name: "Communication" },
-  PROFESSIONALISM: { icon: "briefcase", name: "Professionalism" },
-  INTEGRITY: { icon: "shield", name: "Integrity" },
-};
-
-function getStarIcon(label: string): IconName {
-  const key = (label || "").trim().charAt(0).toUpperCase();
-  if (key === "S") return "mapPin";
-  if (key === "T") return "checkCircle";
-  if (key === "A") return "gear";
-  if (key === "R") return "trendUp";
-  return "star";
-}
 
 type RecognitionCardImageProps = {
   recipientName: string;
@@ -190,10 +48,6 @@ type RecognitionCardImageProps = {
   comment: string;
   coreValues: string[];
   dateString: string;
-};
-
-type FittedText = {
-  lines: string[];
 };
 
 function getFontData(fileName: string): Buffer {
@@ -204,16 +58,185 @@ function getFontData(fileName: string): Buffer {
   return fs.readFileSync(filePath);
 }
 
-// Same as getFontData but returns null instead of throwing when the file is
-// missing, so an optional font (e.g. a Thai-supporting weight) can be
-// skipped gracefully instead of breaking the whole render.
-function getFontDataSafe(fileName: string): Buffer | null {
-  try {
-    return getFontData(fileName);
-  } catch {
-    return null;
+function getImageDataUri(fileName: string, mimeType: string): string {
+  const filePath = path.join(process.cwd(), "public", fileName);
+  if (!fs.existsSync(filePath)) {
+    return "";
+  }
+  const buffer = fs.readFileSync(filePath);
+  return `data:${mimeType};base64,${buffer.toString("base64")}`;
+}
+
+type StarKey = "S" | "T" | "A" | "R";
+
+const STAR_ORDER: StarKey[] = ["S", "T", "A", "R"];
+
+const STAR_META: Record<StarKey, { word: string; question: string; bg: string }> = {
+  S: { word: "SITUATION", question: "What was the situation or context?", bg: PALETTE.darkGreen },
+  T: { word: "TASK", question: "What was the task or challenge?", bg: PALETTE.green1 },
+  A: { word: "ACTION", question: "What action did you take?", bg: PALETTE.green3 },
+  R: { word: "RESULT", question: "What was the result or impact?", bg: PALETTE.green5 },
+};
+
+function StarIcon({ letter }: { letter: StarKey }) {
+  const common = { width: 16, height: 16 } as const;
+  switch (letter) {
+    case "S":
+      return (
+        <svg viewBox="0 0 24 24" style={common}>
+          <path
+            fill="#ffffff"
+            d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zM8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
+          />
+        </svg>
+      );
+    case "T":
+      return (
+        <svg viewBox="0 0 24 24" style={common}>
+          <circle cx="12" cy="12" r="10" fill="none" stroke="#ffffff" strokeWidth={2} />
+          <path d="M9 12l2 2 4-4" stroke="#ffffff" strokeWidth={2} fill="none" strokeLinecap="round" />
+        </svg>
+      );
+    case "A":
+      return (
+        <svg viewBox="0 0 24 24" style={common}>
+          <path
+            fill="#ffffff"
+            d="M13.13 22.19L11.5 18.36c1.74-.84 3.31-1.99 4.7-3.46-1.34 2.83-2.84 5.66-3.07 7.29zM5.64 12.5c.93-1.39 2.08-2.96 3.46-4.7l3.63 1.63-7.09 3.07zm12.96-9.7a.996.996 0 00-.82-.3 22.05 22.05 0 00-9.52 4.11L4.63 6.43a1 1 0 00-1.25.15l-1.82 1.82a1 1 0 00.15 1.53l2.38 1.59-1.75 1.75a1 1 0 000 1.41l5.02 5.02a1 1 0 001.41 0l1.75-1.75 1.59 2.38a1 1 0 001.53.15l1.82-1.82a1 1 0 00.15-1.25l-.19-3.65a22 22 0 004.11-9.52 1 1 0 00-.28-.74z"
+          />
+        </svg>
+      );
+    case "R":
+      return (
+        <svg viewBox="0 0 24 24" style={common}>
+          <path fill="#ffffff" d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" />
+        </svg>
+      );
   }
 }
+
+function SparkleIcon({ size = 16, color = "#ffffff" }: { size?: number; color?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" style={{ width: size, height: size, display: "flex" }}>
+      <path
+        fill={color}
+        d="M12 2c.6 3.7 1.9 5.9 5 7-3.1 1.1-4.4 3.3-5 7-.6-3.7-1.9-5.9-5-7 3.1-1.1 4.4-3.3 5-7z"
+      />
+    </svg>
+  );
+}
+
+function StarBadgeIcon({ size = 15, color = "#ffffff" }: { size?: number; color?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" style={{ width: size, height: size, display: "flex" }}>
+      <path
+        fill={color}
+        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+      />
+    </svg>
+  );
+}
+
+function CheckIcon({ size = 15, color = "#ffffff", strokeWidth = 2.6 }: { size?: number; color?: string; strokeWidth?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" style={{ width: size, height: size, display: "flex" }}>
+      <path
+        d="M4 12.5l5 5L20 6"
+        fill="none"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+type CoreValueMeta = {
+  key: string;
+  name: string;
+  description: string;
+  circleColor: string;
+  icon: React.ReactNode;
+};
+
+const CORE_VALUES_META: CoreValueMeta[] = [
+  {
+    key: "RESPECT",
+    name: "RESPECT",
+    // description: "You value every individual and treat everyone with dignity.",
+    description: "(การให้เกียรติ)",
+    circleColor: PALETTE.green4,
+    icon: (
+      <svg viewBox="0 0 24 24" style={{ width: 20, height: 20 }}>
+        <path
+          fill="#ffffff"
+          d="M11 2C6.48 2 2 6.48 2 11s4.48 9 9 9 9-4.48 9-9-4.48-9-9-9zm-1 14H8V8h2v8zm4 0h-2V8h2v8z"
+        />
+      </svg>
+    ),
+  },
+  {
+    key: "LEADERSHIP",
+    name: "LEADERSHIP",
+    // description: "You lead by example and empower others to succeed.",
+    description: "(ความเป็นผู้นำ)",
+    circleColor: PALETTE.darkGreen,
+    icon: (
+      <svg viewBox="0 0 24 24" style={{ width: 20, height: 20 }}>
+        <path
+          fill="#ffffff"
+          d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+        />
+      </svg>
+    ),
+  },
+  {
+    key: "COMMUNICATION",
+    name: "COMMUNICATION",
+    // description: "You listen, share and collaborate openly and honestly.",
+    description: "(การสื่อสารที่ดี)",
+    circleColor: PALETTE.green5,
+    icon: (
+      <svg viewBox="0 0 24 24" style={{ width: 20, height: 20 }}>
+        <path
+          fill="#ffffff"
+          d="M20 2H4a2 2 0 00-2 2v18l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"
+        />
+      </svg>
+    ),
+  },
+  {
+    key: "PROFESSIONALISM",
+    name: "PROFESSIONALISM",
+    // description: "You take pride in your work and deliver excellence.",
+    description: "(ความเป็นมืออาชีพ)",
+    circleColor: PALETTE.green3,
+    icon: (
+      <svg viewBox="0 0 24 24" style={{ width: 20, height: 20 }}>
+        <path
+          fill="#ffffff"
+          d="M12 2a4 4 0 014 4 4 4 0 01-4 4 4 4 0 01-4-4 4 4 0 014-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4z"
+        />
+      </svg>
+    ),
+  },
+  {
+    key: "INTEGRITY",
+    name: "INTEGRITY",
+    // description: "You do the right thing, always and everywhere.",
+    description: "(ความเป็นอันหนึ่งอันเดียวกัน)",
+    circleColor: PALETTE.green1,
+    icon: (
+      <svg viewBox="0 0 24 24" style={{ width: 20, height: 20 }}>
+        <path
+          fill="#ffffff"
+          d="M12 2L4 5v6c0 5.25 3.5 10.1 8 11.5C16.5 21.1 20 16.25 20 11V5l-8-3zm-1.5 12.5l-3-3 1.4-1.4 1.6 1.6 4.1-4.1 1.4 1.4-5.5 5.5z"
+        />
+      </svg>
+    ),
+  },
+];
 
 export class RecognitionCardImageRenderer {
   private static truncateText(text: string, maxChars: number) {
@@ -222,360 +245,629 @@ export class RecognitionCardImageRenderer {
     return `${normalized.slice(0, Math.max(0, maxChars - 3)).trim()}...`;
   }
 
-  // Wraps text to fit `maxLineChars` per line. No truncation, no "..." —
-  // every word in the source text ends up on screen; the caller is
-  // responsible for picking a font size that keeps the total line count
-  // inside the available height (see pickFontTier).
-  private static wrapText(text: string, maxLineChars: number): FittedText {
-    const normalized = text.replace(/\s+/g, " ").trim();
-    if (!normalized) return { lines: [""] };
+  /**
+   * Estimates how many wrapped lines a run of text will need inside a box
+   * of a given pixel width/font-size, WITHOUT cutting any text off. This is
+   * only used to size the canvas tall enough before rendering — the actual
+   * line breaks are left to Satori's real text layout (which measures true
+   * glyph widths and wraps correctly, including unspaced Thai runs).
+   */
+  private static estimateLineCount(
+    text: string,
+    boxWidthPx: number,
+    fontSizePx: number,
+    avgCharWidthFactor = 0.6
+  ): number {
+    const normalized = (text || "").replace(/\s+/g, " ").trim();
+    if (!normalized) return 1;
 
+    const charsPerLine = Math.max(4, Math.floor(boxWidthPx / (fontSizePx * avgCharWidthFactor)));
     const words = normalized.split(" ");
-    const lines: string[] = [];
-    let currentLine = "";
+    let lines = 1;
+    let currentLen = 0;
 
     words.forEach((word) => {
-      if (word.length > maxLineChars) {
-        if (currentLine) {
-          lines.push(currentLine);
-          currentLine = "";
+      let remaining = word;
+      while (remaining.length > 0) {
+        const space = currentLen > 0 ? 1 : 0;
+        const capacity = charsPerLine - currentLen - space;
+        if (capacity <= 0) {
+          lines += 1;
+          currentLen = 0;
+          continue;
         }
-
-        for (let index = 0; index < word.length; index += maxLineChars) {
-          lines.push(word.slice(index, index + maxLineChars));
+        if (remaining.length <= capacity) {
+          currentLen += space + remaining.length;
+          remaining = "";
+        } else {
+          currentLen += space + capacity;
+          remaining = remaining.slice(capacity);
+          lines += 1;
+          currentLen = 0;
         }
-        return;
       }
-
-      const nextLine = currentLine ? `${currentLine} ${word}` : word;
-      if (nextLine.length > maxLineChars) {
-        lines.push(currentLine);
-        currentLine = word;
-        return;
-      }
-
-      currentLine = nextLine;
     });
 
-    if (currentLine) lines.push(currentLine);
-
-    return { lines: lines.length > 0 ? lines : [""] };
+    return lines;
   }
 
-  // Picks the largest font size (and matching chars-per-line) whose total
-  // wrapped line count across all texts stays under the given budget, so
-  // long comments shrink to fit instead of getting cut off with "...".
-  private static pickFontTier<T extends { fontSize: number; maxLineChars: number }>(
-    texts: string[],
-    tiers: T[],
-    lineBudget: number
-  ): T {
-    for (const tier of tiers) {
-      const totalLines = texts.reduce(
-        (sum, text) => sum + this.wrapText(text, tier.maxLineChars).lines.length,
-        0
-      );
-      if (totalLines <= lineBudget) return tier;
-    }
-    return tiers[tiers.length - 1];
+  /** Maps whatever labels StarCommentParser produced onto S/T/A/R */
+  private static mapSectionsToStar(sections: StarSection[]): Partial<Record<StarKey, string>> {
+    const map: Partial<Record<StarKey, string>> = {};
+    sections.forEach((section) => {
+      const rawLabel = section.label?.trim().toUpperCase() ?? "";
+      const firstLetter = rawLabel.charAt(0) as StarKey;
+      if (STAR_ORDER.includes(firstLetter)) {
+        map[firstLetter] = section.text;
+      }
+    });
+    return map;
   }
 
-  private static isShortComment(comment: string) {
-    const starSections = StarCommentParser.parse(comment);
-    const textLength = starSections.length > 0
-      ? starSections.reduce((sum, section) => sum + section.text.trim().length, 0)
-      : comment.trim().length;
+  private static renderDiamondLogo() {
+    const letters: { char: string; filled: boolean }[] = [
+      { char: "T", filled: false },
+      { char: "B", filled: true },
+      { char: "H", filled: false },
+    ];
 
-    return textLength > 0 && textLength <= 220;
+    return (
+      <div style={{ display: "flex", flexShrink: 0 }}>
+        {letters.map((l, i) => (
+          <div
+            key={l.char}
+            style={{
+              display: "flex",
+              width: "52px",
+              height: "52px",
+              marginLeft: i === 0 ? "0px" : "-9px",
+              border: `3px solid ${PALETTE.darkGreen}`,
+              backgroundColor: l.filled ? PALETTE.darkGreen : PALETTE.cream,
+              transform: "rotate(45deg)",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <span
+              style={{
+                display: "flex",
+                transform: "rotate(-45deg)",
+                fontFamily: "Roboto",
+                fontWeight: 500,
+                fontSize: "18px",
+                color: l.filled ? "#ffffff" : PALETTE.darkGreen,
+              }}
+            >
+              {l.char}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
   }
 
-  /* ── CORE VALUES BOX (matches .core-values in template) ── */
-  private static renderCoreValues(coreValues: string[]) {
-    const dense = coreValues.length > 4;
+  private static renderHeader(recipientName: string, recognizedByName: string) {
+    const logoUri = getImageDataUri("logo.png", "image/png");
 
     return (
       <div
         style={{
           display: "flex",
-          flexDirection: "row",
           alignItems: "center",
           width: "100%",
-          backgroundColor: COLORS.accentSofter,
-          border: `1px solid ${COLORS.accentBorder}`,
-          borderRadius: "10px",
-          padding: dense ? "12px 16px" : "16px 20px",
-          gap: "12px",
+          gap: "22px",
+          padding: "28px 40px",
+          backgroundImage: `linear-gradient(115deg, ${PALETTE.cream} 0%, ${PALETTE.cream} 52%, ${PALETTE.green1} 58%, ${PALETTE.darkGreen} 100%)`,
         }}
       >
-        <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "10px", flexShrink: 0 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "40px",
-              height: "40px",
-              borderRadius: "20px",
-              backgroundColor: COLORS.accent,
-              flexShrink: 0,
-            }}
-          >
-            <Icon name="star" size={18} color="#ffffff" filled />
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              fontFamily: "IBM Plex Sans",
-              fontSize: "13px",
-              fontWeight: 700,
-              color: COLORS.heading,
-              textTransform: "uppercase",
-              letterSpacing: "0.04em",
-              lineHeight: 1.35,
-            }}
-          >
-            <span>Core Values</span>
-            <span>Demonstrated</span>
-          </div>
-        </div>
+        {logoUri ? (
+          <img src={logoUri} style={{ width: "120px", height: "70px", objectFit: "contain", display: "flex", flexShrink: 0 }} />
+        ) : (
+          this.renderDiamondLogo()
+        )}
 
-        <div style={{ width: "1px", height: "32px", backgroundColor: COLORS.lineSoft, flexShrink: 0 }} />
+        <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+          <span
+            style={{
+              fontFamily: "Roboto",
+              fontWeight: 500,
+              fontSize: "38px",
+              color: PALETTE.darkGreen,
+              letterSpacing: "0.5px",
+            }}
+          >
+            RECOGNITION CARD
+          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", margin: "3px 0" }}>
+            <span style={{ fontFamily: "GreatVibes", fontSize: "28px", color: PALETTE.green2 }}>
+              You make a difference!
+            </span>
+            <SparkleIcon size={16} color={PALETTE.green2} />
+          </div>
+          <span style={{ fontFamily: "Roboto", fontSize: "16px", color: "#4a5a47", fontWeight: 500 }}>
+            Thank you for living our values and inspiring others every day.
+          </span>
+        </div>
 
         <div
           style={{
             display: "flex",
-            flexDirection: "row",
-            flexWrap: "wrap",
-            alignItems: "center",
-            gap: dense ? "12px" : "20px",
-            flex: 1,
-            minWidth: 0,
+            flexDirection: "column",
+            backgroundColor: "#ffffff",
+            borderRadius: "14px",
+            padding: "10px 18px",
+            width: "360px",
+            flexShrink: 0,
           }}
         >
-          {coreValues.map((val) => {
-            const cleanVal = val.trim().toUpperCase();
-            const meta = CORE_VALUE_STYLE[cleanVal] || { icon: "star" as IconName, name: val };
+          {/* FROM Row */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "6px 0", borderBottom: "1px solid #e0e5da", width: "100%" }}>
+            <div
+              style={{
+                display: "flex",
+                width: "24px",
+                height: "24px",
+                borderRadius: "12px",
+                backgroundColor: PALETTE.darkGreen,
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <svg viewBox="0 0 24 24" style={{ width: 12, height: 12 }}>
+                <path fill="#ffffff" d="M2 21l21-9L2 3v7l15 2-15 2z" />
+              </svg>
+            </div>
+            <span style={{ fontFamily: "Roboto", fontWeight: 700, fontSize: "14px", color: "#022e10ff", whiteSpace: "nowrap" }}>
+              FROM
+            </span>
+            <span
+              style={{
+                fontFamily: "Roboto",
+                fontWeight: 600,
+                fontSize: "14px",
+                color: PALETTE.black,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {this.truncateText(recognizedByName, 20)}
+            </span>
+          </div>
 
-            return (
-              <div
-                key={val}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "7px",
-                  padding: "2px 0",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: dense ? "28px" : "32px",
-                    height: dense ? "28px" : "32px",
-                    borderRadius: "16px",
-                    backgroundColor: COLORS.accentSoft,
-                    flexShrink: 0,
-                  }}
-                >
-                  <Icon name={meta.icon} size={15} color={COLORS.accent} />
-                </div>
-                <span
-                  style={{
-                    fontFamily: "IBM Plex Sans Thai",
-                    fontSize: dense ? "13.5px" : "14.5px",
-                    fontWeight: 500,
-                    color: COLORS.valueText,
-                    lineHeight: 1.2,
-                  }}
-                >
-                  {meta.name}
-                </span>
-              </div>
-            );
-          })}
+          {/* TO Row */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "6px 0", width: "100%" }}>
+            <div
+              style={{
+                display: "flex",
+                width: "24px",
+                height: "24px",
+                borderRadius: "12px",
+                backgroundColor: PALETTE.darkGreen,
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <svg viewBox="0 0 24 24" style={{ width: 12, height: 12 }}>
+                <path
+                  fill="#ffffff"
+                  d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"
+                />
+              </svg>
+            </div>
+            <span style={{ fontFamily: "Roboto", fontWeight: 700, fontSize: "14px", color: "#022e10ff", whiteSpace: "nowrap" }}>
+              TO
+              {/* <span style={{ fontWeight: 500, fontSize: "10px", color: "#7a8875" }}>(Receiver)</span> */}
+            </span>
+            {/* <div style={{ display: "flex", flex: 1, borderBottom: `1.5px solid ${PALETTE.lineGray}`, margin: "0 6px" }} /> */}
+            <span
+              style={{
+                fontFamily: "Roboto",
+                fontWeight: 600,
+                fontSize: "14px",
+                color: PALETTE.black,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {this.truncateText(recipientName, 20)}
+            </span>
+          </div>
         </div>
       </div>
     );
   }
 
-  /* ── ONE STAR ROW (matches .star-row in template) ── */
-  private static renderStarSection(
-    section: StarSection,
-    lines: string[],
-    fontSize: number,
-    isLast: boolean,
-    roomy: boolean
-  ) {
-    const lineHeight = roomy ? 1.7 : 1.6;
-    const iconSize = roomy ? STAR_ICON_SIZE : 44;
-    const textColumnWidth = CARD_WIDTH - CARD_PADDING_X * 2 - 28 - iconSize - STAR_ROW_GAP;
-    const STAR_LABELS: Record<string, string> = {
-      S: "Situation",
-      T: "Task",
-      A: "Action",
-      R: "Result",
-    };
+  /**
+   * Figures out how much taller than the baseline design the card needs to
+   * be so that no comment text is ever clipped or truncated, based on the
+   * real pixel widths of the boxes the text will render into.
+   */
+  private static computeExtraHeight(comment: string): number {
+    const LEFT_COLUMN_WIDTH = CARD_WIDTH - 80 - 380; // outer padding + core-values panel
+
+    const sections = StarCommentParser.parse(comment);
+    const map = this.mapSectionsToStar(sections);
+    const hasAnyStarText = STAR_ORDER.some((k) => !!map[k]);
+
+    if (!hasAnyStarText) {
+      const boxWidth = LEFT_COLUMN_WIDTH - 56; // freeform panel padding (28px x2)
+      const lines = this.estimateLineCount(comment, boxWidth, 16);
+      const contentHeight = lines * 16 * 1.55 + 44; // line-height + vertical padding
+      const baseline = 193;
+      return Math.max(0, Math.ceil(contentHeight - baseline));
+    }
+
+    const answerBoxWidth = LEFT_COLUMN_WIDTH - 108 - 150 - 32; // badge + question col + padding
+    let totalRowsHeight = 0;
+    STAR_ORDER.forEach((letter) => {
+      const lines = this.estimateLineCount(map[letter] ?? "", answerBoxWidth, 14);
+      const contentHeight = lines * 14 * 1.4 + 24; // line-height + vertical padding
+      totalRowsHeight += Math.max(88, contentHeight);
+    });
+    totalRowsHeight += 30; // gaps between the 4 rows
+
+    const baseline = 4 * 88 + 30;
+    return Math.max(0, Math.ceil(totalRowsHeight - baseline));
+  }
+
+  private static renderStarRow(letter: StarKey, text: string) {
+    const meta = STAR_META[letter];
+    const displayText = (text || "").replace(/\s+/g, " ").trim();
 
     return (
-      <div
-        key={section.label}
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "flex-start",
-          width: "100%",
-          gap: `${STAR_ROW_GAP}px`,
-          padding: roomy ? "18px 14px" : "12px 14px",
-          borderBottom: isLast ? "none" : `1.5px dashed ${COLORS.line}`,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: `${iconSize}px`,
-            height: `${iconSize}px`,
-            borderRadius: "9px",
-            backgroundColor: COLORS.accentSoft,
-            flexShrink: 0,
-            marginTop: "1px",
-          }}
-        >
-          <Icon name={getStarIcon(section.label)} size={roomy ? 24 : 22} color={COLORS.accent} />
-        </div>
+      <div key={letter} style={{ display: "flex", alignItems: "stretch", minHeight: "88px", width: "100%" }}>
         <div
           style={{
             display: "flex",
             flexDirection: "column",
-            flex: 1,
-            minWidth: 0,
-            width: `${textColumnWidth}px`,
-            maxWidth: `${textColumnWidth}px`,
-            overflow: "hidden",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "108px",
+            flexShrink: 0,
+            borderRadius: "16px",
+            backgroundColor: meta.bg,
+            gap: "3px",
+            padding: "10px 6px",
           }}
         >
-          <span
-            style={{
-              fontFamily: "IBM Plex Sans",
-              fontSize: "12px",
-              fontWeight: 700,
-              color: COLORS.heading,
-              textTransform: "uppercase",
-              letterSpacing: "0.12em",
-              marginBottom: "6px",
-            }}
-          >
-            {STAR_LABELS[section.label] ?? section.label}
+          <span style={{ fontFamily: "Roboto", fontSize: "30px", fontWeight: 500, color: "#ffffff", lineHeight: 1 }}>
+            {letter}
           </span>
           <div
             style={{
               display: "flex",
-              flexDirection: "column",
-              fontFamily: "IBM Plex Sans Thai",
-              fontSize: `${fontSize}px`,
-              color: COLORS.body,
-              lineHeight,
-              fontWeight: 400,
-              width: "100%",
-              maxWidth: "100%",
-              overflow: "hidden",
+              width: "28px",
+              height: "28px",
+              borderRadius: "14px",
+              backgroundColor: "rgba(255,255,255,0.22)",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "2px 0",
             }}
           >
-            {lines.map((line, lineIndex) => (
-              <span key={`${section.label}-${lineIndex}`}>{line}</span>
-            ))}
+            <StarIcon letter={letter} />
           </div>
+          <span style={{ fontFamily: "Roboto", fontSize: "14px", fontWeight: 500, color: "#ffffff", letterSpacing: "1px" }}>
+            {meta.word}
+          </span>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            width: "150px",
+            flexShrink: 0,
+            alignItems: "center",
+            backgroundColor: "#ffffff",
+            padding: "0 14px",
+            fontFamily: "Roboto",
+            fontSize: "16px",
+            fontWeight: 600,
+            color: PALETTE.textDark,
+            lineHeight: 1.3,
+          }}
+        >
+          {meta.question}
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            flex: 1,
+            backgroundColor: PALETTE.panelBg,
+            borderRadius: "8px",
+            margin: "6px 0 6px 0",
+            padding: "12px 16px",
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "Roboto",
+              fontSize: "14px",
+              fontStyle: "italic",
+              color: PALETTE.textDark,
+              lineHeight: 1.4,
+              wordBreak: "break-word",
+            }}
+          >
+            {displayText || " "}
+          </span>
         </div>
       </div>
     );
   }
 
-  private static renderComment(comment: string, roomy = false) {
-    const starSections = StarCommentParser.parse(comment);
-
-    // Text-area width available inside a STAR row: horizontal section padding,
-    // the icon column, and the gap on the left.
-    const starTextWidth = CARD_WIDTH - CARD_PADDING_X * 2 - 28 - (roomy ? STAR_ICON_SIZE : 44) - STAR_ROW_GAP;
-    // Text-area width for the no-STAR fallback, leaving room for its framed box.
-    const plainTextWidth = CARD_WIDTH - CARD_PADDING_X * 2 - 48;
-    // Conservative glyph width estimate so wide Latin text (e.g. repeated
-    // "W") wraps before it can touch the right edge.
-    const GLYPH_RATIO = 0.82;
-    const charsPerLine = (width: number, fontSize: number) => Math.max(8, Math.floor(width / (fontSize * GLYPH_RATIO)));
-
-    if (starSections.length === 0) {
-      const tiers = (roomy ? [17, 16, 15, 14, 13] : [15, 14, 13, 12, 11]).map((fontSize) => ({
-        fontSize,
-        maxLineChars: charsPerLine(plainTextWidth, fontSize),
-      }));
-      // Available vertical room for the paragraph, in lines.
-      const lineBudget = 10;
-      const tier = this.pickFontTier([comment], tiers, lineBudget);
-      const fittedText = this.wrapText(comment, tier.maxLineChars);
-
-      return (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            fontFamily: "IBM Plex Sans Thai",
-            fontSize: `${tier.fontSize}px`,
-            color: COLORS.body,
-            lineHeight: 1.65,
-            textAlign: "left",
-            backgroundColor: COLORS.surface,
-            border: `1px solid ${COLORS.line}`,
-            borderRadius: "14px",
-            padding: "22px 24px",
-          }}
-        >
-          {fittedText.lines.map((line, index) => (
-            <span key={index}>{line}</span>
-          ))}
-        </div>
-      );
-    }
-
-    const tiers = (roomy ? [16.5, 15.5, 14.5, 13.5, 12.5] : [15, 14, 13, 12, 11]).map((fontSize) => ({
-      fontSize,
-      maxLineChars: charsPerLine(starTextWidth, fontSize),
-    }));
-    // Total lines budget shared across all STAR rows so the whole block
-    // fits the fixed-height canvas; shrinks font instead of truncating.
-    const lineBudget = roomy ? 14 : 18;
-    const tier = this.pickFontTier(
-      starSections.map((s) => s.text),
-      tiers,
-      lineBudget
-    );
-
+  private static renderFreeformPanel(comment: string) {
+    const displayText = (comment || "").replace(/\s+/g, " ").trim();
     return (
       <div
         style={{
           display: "flex",
           flexDirection: "column",
+          flex: 1,
+          justifyContent: "center",
+          backgroundColor: PALETTE.panelBg,
+          borderRadius: "10px",
+          padding: "22px 28px",
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "Roboto",
+            fontSize: "16px",
+            fontStyle: "italic",
+            color: PALETTE.textDark,
+            lineHeight: 1.55,
+            textAlign: "center",
+            wordBreak: "break-word",
+          }}
+        >
+          {displayText || " "}
+        </span>
+      </div>
+    );
+  }
+
+  private static renderStarSection(comment: string) {
+    const sections = StarCommentParser.parse(comment);
+    const map = this.mapSectionsToStar(sections);
+    const hasAnyStarText = STAR_ORDER.some((k) => !!map[k]);
+
+    if (!hasAnyStarText) {
+      return (
+        <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: "10px" }}>
+          {this.renderFreeformPanel(comment)}
+        </div>
+      );
+    }
+
+    return (
+      <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: "10px" }}>
+        {STAR_ORDER.map((letter) => this.renderStarRow(letter, map[letter] ?? ""))}
+      </div>
+    );
+  }
+
+  private static renderBottomStrip(dateString: string, recognizedByName: string) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          backgroundColor: PALETTE.panelBg,
+          borderRadius: "10px",
+          marginTop: "4px",
+          minHeight: "76px",
           width: "100%",
         }}
       >
-        {starSections.map((section, index) =>
-          this.renderStarSection(
-            section,
-            this.wrapText(section.text, tier.maxLineChars).lines,
-            tier.fontSize,
-            index === starSections.length - 1,
-            roomy
-          )
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            padding: "12px 18px",
+            flex: 1,
+            borderRight: `1px solid ${PALETTE.dashGray}`,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              width: "42px",
+              height: "42px",
+              borderRadius: "21px",
+              border: `2px solid ${PALETTE.green3}`,
+              backgroundColor: "#ffffff",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <svg viewBox="0 0 24 24" style={{ width: 18, height: 18 }}>
+              <path
+                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                fill="none"
+                stroke={PALETTE.green3}
+                strokeWidth={1.5}
+              />
+            </svg>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontFamily: "GreatVibes", fontSize: "40px", color: PALETTE.green2, fontWeight: 500 }}>
+              Thank you!
+            </span>
+            {/* <span style={{ fontFamily: "Roboto", fontSize: "10px", color: PALETTE.textMuted, lineHeight: 1.3 }}>
+                            Your contribution makes a real impact.
+                        </span> */}
+          </div>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "12px 20px", minWidth: "230px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <svg viewBox="0 0 24 24" style={{ width: 16, height: 16 }}>
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" fill="none" stroke={PALETTE.textDark} strokeWidth={2} />
+              <line x1="16" y1="2" x2="16" y2="6" stroke={PALETTE.textDark} strokeWidth={2} />
+              <line x1="8" y1="2" x2="8" y2="6" stroke={PALETTE.textDark} strokeWidth={2} />
+              <line x1="3" y1="10" x2="21" y2="10" stroke={PALETTE.textDark} strokeWidth={2} />
+            </svg>
+            <span style={{ fontFamily: "Roboto", fontWeight: 500, fontSize: "16px", color: PALETTE.textDark }}>DATE</span>
+            <span style={{ fontFamily: "Roboto", fontWeight: 600, fontSize: "16px", color: PALETTE.textDark }}>
+              {dateString}
+            </span>
+          </div>
+          {/* <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <svg viewBox="0 0 24 24" style={{ width: 13, height: 13 }}>
+                            <path
+                                d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"
+                                fill="none"
+                                stroke={PALETTE.textDark}
+                                strokeWidth={2}
+                            />
+                            <path
+                                d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
+                                fill="none"
+                                stroke={PALETTE.textDark}
+                                strokeWidth={2}
+                            />
+                        </svg>
+                        <span style={{ fontFamily: "Roboto", fontWeight: 500, fontSize: "11px", color: PALETTE.textDark }}>
+                            SIGNATURE
+                        </span>
+                        <span style={{ fontFamily: "Roboto", fontWeight: 600, fontSize: "11.5px", color: PALETTE.textDark }}>
+                            {this.truncateText(recognizedByName, 20)}
+                        </span>
+                    </div> */}
+        </div>
+      </div>
+    );
+  }
+
+  private static renderCoreValues(coreValues: string[]) {
+    const selected = new Set(coreValues.map((v) => v.trim().toUpperCase()));
+    const mascotUri = getImageDataUri("mascot1.png", "image/png");
+
+    return (
+      <div style={{ display: "flex", flexDirection: "column", width: "380px", flexShrink: 0, paddingLeft: "28px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            backgroundImage: `linear-gradient(90deg, ${PALETTE.darkGreen}, ${PALETTE.green2})`,
+            color: "#ffffff",
+            borderRadius: "30px",
+            padding: "11px 20px",
+            fontFamily: "Roboto",
+            fontWeight: 500,
+            fontSize: "16px",
+            letterSpacing: "0.4px",
+            marginBottom: "8px",
+          }}
+        >
+          <StarBadgeIcon size={18} color="#ffffff" />
+          <span>OUR 5 CORE VALUES</span>
+        </div>
+        {/* <span style={{ fontFamily: "Roboto", fontSize: "14px", fontWeight: 600, color: PALETTE.textDark, marginBottom: "8px" }}>
+          This recognition demonstrates:
+        </span> */}
+
+        {CORE_VALUES_META.map((cv, i) => {
+          const isChecked = selected.has(cv.key);
+          return (
+            <div
+              key={cv.key}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                padding: "9px 0",
+                borderBottom: i === CORE_VALUES_META.length - 1 ? "none" : `1px dashed ${PALETTE.dashGray}`,
+                width: "100%",
+                marginTop: "2px",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  width: "42px",
+                  height: "42px",
+                  borderRadius: "21px",
+                  backgroundColor: cv.circleColor,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                {cv.icon}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+                <span style={{ fontFamily: "Roboto", fontWeight: 500, fontSize: "16px", color: PALETTE.darkGreen }}>
+                  {cv.name}
+                </span>
+                <span style={{ fontFamily: "Roboto", fontWeight: 500, fontSize: "16px", color: PALETTE.darkGreen }}>
+                  {cv.description}
+                </span>
+                {/* <span style={{ fontFamily: "Roboto", fontSize: "14px", color: PALETTE.textMuted, lineHeight: 1.3 }}>
+                  {cv.description}
+                </span> */}
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "9px",
+                  flexShrink: 0,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: isChecked ? PALETTE.darkGreen : "#ffffff",
+                  border: isChecked ? "none" : `2.5px solid ${PALETTE.lineGray}`,
+                }}
+              >
+                {isChecked && <CheckIcon size={18} color="#ffffff" strokeWidth={3} />}
+              </div>
+            </div>
+          );
+        })}
+
+        {mascotUri && (
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "5px", width: "100%" }}>
+            <img src={mascotUri} style={{ width: "200px", height: "200px", objectFit: "contain", borderRadius: "10px" }} />
+          </div>
         )}
       </div>
     );
   }
 
-  private static renderImage({ comment, coreValues, dateString, recipientName, recognizedByName }: RecognitionCardImageProps) {
-    const shortComment = this.isShortComment(comment);
+  private static renderFooter() {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          backgroundImage: `linear-gradient(90deg, ${PALETTE.darkGreen} 0%, ${PALETTE.green2} 60%, ${PALETTE.green3} 100%)`,
+          padding: "14px",
+        }}
+      >
+        <span style={{ fontFamily: "Roboto", fontWeight: 500, fontSize: "13.5px", letterSpacing: "2.5px", color: "#ffffff" }}>
+          ONE TEAM.{" "}
+        </span>
+        <span style={{ fontFamily: "Roboto", fontWeight: 500, fontSize: "13.5px", letterSpacing: "2.5px", color: PALETTE.accent }}>
+          ONE PURPOSE.{" "}
+        </span>
+        <span style={{ fontFamily: "Roboto", fontWeight: 500, fontSize: "13.5px", letterSpacing: "2.5px", color: "#ffffff" }}>
+          LIMITLESS IMPACT.
+        </span>
+      </div>
+    );
+  }
 
+  private static renderImage({ comment, coreValues, dateString, recipientName, recognizedByName }: RecognitionCardImageProps) {
     return (
       <div
         style={{
@@ -583,245 +875,52 @@ export class RecognitionCardImageRenderer {
           flexDirection: "column",
           width: "100%",
           height: "100%",
-          backgroundColor: COLORS.card,
-          boxSizing: "border-box",
+          backgroundColor: PALETTE.cream,
+          // borderRadius: "18px",
           overflow: "hidden",
         }}
       >
-        {/* ── HEADER (accent bar + label + name, matches .card-header) ── */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "stretch",
-            gap: "14px",
-            padding: "24px 36px 18px 28px",
-            flexShrink: 0,
-          }}
-        >
-          <div
-            style={{
-              width: "4px",
-              minHeight: "82px",
-              backgroundColor: COLORS.accent,
-              borderRadius: "0 2px 2px 0",
-              flexShrink: 0,
-            }}
-          />
-          <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
-            <div
-              style={{
-                fontFamily: "IBM Plex Sans",
-                fontSize: "12px",
-                fontWeight: 600,
-                letterSpacing: "0.22em",
-                color: COLORS.labelMuted,
-                textTransform: "uppercase",
-                lineHeight: 1.2,
-                marginBottom: "7px",
-              }}
-            >
-              Recognition Card
-            </div>
-            <div
-              style={{
-                fontFamily: "IBM Plex Sans",
-                fontWeight: 700,
-                fontStyle: "italic",
-                fontSize: recipientName.length > 24 ? "31px" : "38px",
-                color: COLORS.heading,
-                lineHeight: 1.05,
-                marginBottom: "9px",
-              }}
-            >
-              {this.truncateText(recipientName, 34)}
-            </div>
-            <div
-              style={{
-                fontFamily: "IBM Plex Sans Thai",
-                fontSize: "14px",
-                color: "#5a6e63",
-                lineHeight: 1.35,
-              }}
-            >
-              Thank you for your dedication and outstanding contribution to our team and organization.
-            </div>
-          </div>
-        </div>
+        {this.renderHeader(recipientName, recognizedByName)}
 
-        {/* ── CORE VALUES ── */}
-        <div style={{ display: "flex", width: "100%", padding: `0 ${CARD_PADDING_X}px`, margin: "12px 0" }}>
+        <div style={{ display: "flex", flex: 1, padding: "26px 40px", gap: "0px" }}>
+          <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+            {this.renderStarSection(comment)}
+            {this.renderBottomStrip(dateString, recognizedByName)}
+          </div>
+
           {this.renderCoreValues(coreValues)}
         </div>
 
-        {/* ── STAR SECTIONS / COMMENT (fills remaining space) ── */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: shortComment ? "center" : "flex-start",
-            flexGrow: 1,
-            flexShrink: 1,
-            minHeight: 0,
-            width: "100%",
-            overflow: "hidden",
-            padding: shortComment ? `10px ${CARD_PADDING_X}px 18px` : `4px ${CARD_PADDING_X}px 0`,
-          }}
-        >
-          {this.renderComment(comment, shortComment)}
-        </div>
-
-        {/* ── FOOTER (matches .card-footer) ── */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            width: `${CARD_WIDTH - CARD_PADDING_X * 2}px`,
-            borderTop: `1.5px solid ${COLORS.line}`,
-            paddingTop: "15px",
-            margin: `8px ${CARD_PADDING_X}px 24px`,
-            flexShrink: 0,
-          }}
-        >
-          <div style={{ display: "flex", flexDirection: "column", width: "218px", minWidth: 0 }}>
-            <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "34px",
-                  height: "34px",
-                  borderRadius: "17px",
-                  backgroundColor: COLORS.accent,
-                  flexShrink: 0,
-                }}
-              >
-                <Icon name="heart" size={15} color="#ffffff" filled />
-              </div>
-              <span
-                style={{
-                  fontFamily: "IBM Plex Sans",
-                  fontSize: "17px",
-                  fontWeight: 700,
-                  color: COLORS.heading,
-                }}
-              >
-                Thank you
-              </span>
-            </div>
-            {/* <span
-              style={{
-                fontFamily: "IBM Plex Sans Thai",
-                fontSize: "12.5px",
-                color: COLORS.labelMuted,
-                lineHeight: 1.35,
-                paddingLeft: "42px",
-              }}
-            >
-              Your commitment strengthens<br />our team
-            </span> */}
-          </div>
-
-          <div style={{ width: "1px", height: "52px", backgroundColor: COLORS.lineSoft, flexShrink: 0 }} />
-
-          <div style={{ display: "flex", flexDirection: "column", width: "216px", minWidth: 0, paddingLeft: "16px", paddingRight: "14px" }}>
-            <span
-              style={{
-                fontFamily: "IBM Plex Sans",
-                fontSize: "10.5px",
-                fontWeight: 700,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                color: COLORS.labelFaint,
-                marginBottom: "5px",
-              }}
-            >
-              Recognized By
-            </span>
-            <span
-              style={{
-                fontFamily: "IBM Plex Sans Thai",
-                fontSize: recognizedByName.length > 24 ? "12.5px" : "14.5px",
-                fontWeight: 700,
-                color: COLORS.heading,
-                lineHeight: 1.3,
-              }}
-            >
-              {this.truncateText(recognizedByName, 32)}
-            </span>
-          </div>
-
-          <div style={{ width: "1px", height: "52px", backgroundColor: COLORS.lineSoft, flexShrink: 0 }} />
-
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", width: "166px", minWidth: 0, paddingLeft: "14px" }}>
-            <span
-              style={{
-                fontFamily: "IBM Plex Sans",
-                fontSize: "10.5px",
-                fontWeight: 700,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                color: COLORS.labelFaint,
-                marginBottom: "5px",
-              }}
-            >
-              Date
-            </span>
-            <span
-              style={{
-                fontFamily: "IBM Plex Sans",
-                fontSize: dateString.length > 13 ? "13px" : "15px",
-                fontWeight: 500,
-                color: COLORS.valueText,
-              }}
-            >
-              {dateString}
-            </span>
-          </div>
-        </div>
+        {this.renderFooter()}
       </div>
     );
   }
 
   static async renderToBuffer(props: RecognitionCardImageProps): Promise<Buffer> {
-    // "IBM Plex Sans Thai" / "IBM Plex Sans" are used to match the visual
-    // language of templatePriDew.html and to render Thai glyphs correctly
-    // (Roboto has no Thai coverage). Drop the .ttf files below into
-    // public/fonts — if a weight is missing, it is skipped instead of
-    // crashing the render, but Thai text will look off without it.
-    const fontCandidates: Array<{ name: string; file: string; style: "normal" | "italic"; weight: 400 | 500 | 700 }> = [
-      { name: "IBM Plex Sans Thai", file: "IBMPlexSansThai-Regular.ttf", style: "normal", weight: 400 },
-      { name: "IBM Plex Sans Thai", file: "IBMPlexSansThai-Medium.ttf", style: "normal", weight: 500 },
-      { name: "IBM Plex Sans Thai", file: "IBMPlexSansThai-Bold.ttf", style: "normal", weight: 700 },
-      { name: "IBM Plex Sans", file: "IBMPlexSans-Regular.ttf", style: "normal", weight: 400 },
-      { name: "IBM Plex Sans", file: "IBMPlexSans-SemiBold.ttf", style: "normal", weight: 700 },
-      { name: "IBM Plex Sans", file: "IBMPlexSans-BoldItalic.ttf", style: "italic", weight: 700 },
-    ];
-
-    const fonts = fontCandidates
-      .map(({ name, file, style, weight }) => {
-        const data = getFontDataSafe(file);
-        return data ? { name, data, style, weight } : null;
-      })
-      .filter((f): f is NonNullable<typeof f> => f !== null);
-
-    // Fallback so the render never crashes even if no Thai font file has
-    // been added yet (Latin text will still show, Thai glyphs may be blank).
-    if (fonts.length === 0) {
-      fonts.push({
-        name: "IBM Plex Sans Thai",
-        data: getFontData("Roboto-Regular.ttf"),
-        style: "normal",
-        weight: 400,
-      });
-    }
-
+    const cardHeight = CARD_HEIGHT + this.computeExtraHeight(props.comment);
     const imageResponse = new ImageResponse(this.renderImage(props), {
       width: CARD_WIDTH,
-      height: CARD_HEIGHT,
-      fonts,
+      height: cardHeight,
+      fonts: [
+        {
+          name: "Roboto",
+          data: getFontData("Roboto-Regular.ttf"),
+          style: "normal",
+          weight: 400,
+        },
+        {
+          name: "Roboto",
+          data: getFontData("Roboto-Medium.ttf"),
+          style: "normal",
+          weight: 500,
+        },
+        {
+          name: "GreatVibes",
+          data: getFontData("GreatVibes-Regular.ttf"),
+          style: "normal",
+          weight: 400,
+        },
+      ],
     });
 
     const arrayBuffer = await imageResponse.arrayBuffer();
