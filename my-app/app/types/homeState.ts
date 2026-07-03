@@ -11,6 +11,7 @@ export type HomeState = {
   selectedTypes: CommentType[];
   comment: string;
   searchQuery: string;
+  selectedBranch: string;
   pendingSubmissions: PendingSubmission[];
   editingId: string | null;
   formError: string;

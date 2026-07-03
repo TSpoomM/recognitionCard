@@ -1,24 +1,26 @@
 'use client';
 
 import { Component } from "react";
-import Alert from "../../ui/Alert";
+import Toast from "../../ui/Toast";
 
 type FormMessagesProps = {
   error: string;
   success: string;
+  onClearError?: () => void;
+  onClearSuccess?: () => void;
 };
 
 export default class FormMessages extends Component<FormMessagesProps> {
   render() {
-    const { error, success } = this.props;
+    const { error, success, onClearError = () => { }, onClearSuccess = () => { } } = this.props;
 
     return (
       <>
         {error ? (
-          <Alert tone="error">{error}</Alert>
+          <Toast type="error" message={error} onClose={onClearError} />
         ) : null}
         {success ? (
-          <Alert tone="success">{success}</Alert>
+          <Toast type="success" message={success} onClose={onClearSuccess} />
         ) : null}
       </>
     );

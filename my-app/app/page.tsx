@@ -16,6 +16,7 @@ import FormMessages from "./components/features/recognition/FormMessages";
 import FormActions from "./components/features/recognition/FormActions";
 import RecognitionQueueButton from "./components/features/recognition/QueueButton";
 import Card from "./components/ui/Card";
+import Navbar from "./components/ui/Navbar";
 import { RecognitionEngine } from "./lib/RecognitionEngine";
 import { getClientCurrentUserId, isSameUserId } from "./lib/currentUser";
 import { STAR_COMMENT_MAX_LENGTH, STAR_COMMENT_MIN_LENGTH } from "./constants/recognitionFlow";
@@ -39,6 +40,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
       selectedTypes: [],
       comment: "",
       searchQuery: "",
+      selectedBranch: "",
       pendingSubmissions: [],
       editingId: null,
       formError: "",
@@ -57,11 +59,24 @@ export default class Home extends Component<Record<string, never>, PageState> {
     );
   }
 
+  private get availableBranches() {
+    const branches = new Set(
+      this.state.users
+        .filter(user => !isSameUserId(user.user_id, this.state.currentUserId))
+        .map(user => user.location)
+        .filter((location): location is string => !!location)
+    );
+    return Array.from(branches).sort();
+  }
+
   private get filteredUsers() {
     const query = this.state.searchQuery.toLowerCase();
+    const { selectedBranch } = this.state;
 
     return this.state.users.filter((user) => {
       if (isSameUserId(user.user_id, this.state.currentUserId)) return false;
+
+      if (selectedBranch && user.location !== selectedBranch) return false;
 
       return (
         user.firstName.toLowerCase().includes(query) ||
@@ -219,6 +234,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
       selectedTypes: [],
       comment: "",
       searchQuery: "",
+      selectedBranch: "",
       editingId: null,
       formError: "",
       formSuccess: "",
@@ -349,6 +365,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
       editingId: submission.id,
       formError: "",
       formSuccess: "",
+      selectedBranch: "",
       currentStep: 1,
     });
   };
@@ -363,7 +380,30 @@ export default class Home extends Component<Record<string, never>, PageState> {
   };
 
   private handleConfirmPending = (submissionId: string) => {
-    const submission = this.state.pendingSubmissions.find((item) => item.id === submissionId);
+    const { pendingSubmissions, editingId, selectedTypes, comment } = this.state;
+
+    // If this submission is currently being edited, use the live form values
+    // instead of the stale data stored in pendingSubmissions.
+    if (editingId === submissionId) {
+      const base = pendingSubmissions.find((item) => item.id === submissionId);
+      if (base) {
+        const updated = {
+          ...base,
+          users: this.selectedUsers,
+          types: selectedTypes,
+          comment,
+        };
+        // Persist the edits first so the queue UI reflects them
+        const next = pendingSubmissions.map((item) =>
+          item.id === submissionId ? updated : item
+        );
+        this.persistSubmissions(next);
+        this.sendSubmission(updated);
+      }
+      return;
+    }
+
+    const submission = pendingSubmissions.find((item) => item.id === submissionId);
     if (submission) {
       this.sendSubmission(submission);
     }
@@ -400,8 +440,11 @@ export default class Home extends Component<Record<string, never>, PageState> {
           selectedUsers={this.selectedUsers}
           selectedUserIds={selectedUserIds}
           searchQuery={searchQuery}
+          selectedBranch={this.state.selectedBranch}
+          availableBranches={this.availableBranches}
           onSearchChange={this.handleSearchChange}
           onToggleUser={this.handleToggleUser}
+          onBranchChange={(branch) => this.setState({ selectedBranch: branch })}
         />
       );
     }
@@ -444,19 +487,25 @@ export default class Home extends Component<Record<string, never>, PageState> {
           setLang: this.handleSetLang,
         }}
       >
-        <div className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 sm:px-6 lg:px-8">
+        <Navbar currentUserId={currentUserId} />
+        <div className="min-h-screen bg-background px-4 py-8 text-slate-900 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl">
+            <RecognitionStepper currentStep={currentStep} steps={t.stepLabels as unknown as string[]} />
             <Card bordered={false} padding="xl" shadow="xl" className="mb-10">
               <RecognitionHeader currentUserId={currentUserId} />
 
-              <RecognitionStepper currentStep={currentStep} steps={t.stepLabels as unknown as string[]} />
 
               <form onSubmit={this.handleSubmit} className="space-y-8">
                 <Card padding="lg">
                   {this.renderCurrentStep()}
                 </Card>
 
-                <FormMessages error={formError} success={formSuccess} />
+                <FormMessages
+                  error={formError}
+                  success={formSuccess}
+                  onClearError={() => this.setState({ formError: "" })}
+                  onClearSuccess={() => this.setState({ formSuccess: "" })}
+                />
                 <FormActions
                   currentStep={currentStep}
                   onPrevStep={this.handlePrevStep}

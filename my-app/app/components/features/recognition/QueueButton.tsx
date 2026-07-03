@@ -5,8 +5,8 @@ import { PendingSubmission } from "../../../types/pendingSubmission";
 import { COMMENT_TYPE_META } from "../../../types/commentType";
 import { RecognitionEngine } from "../../../lib/RecognitionEngine";
 import Card from "../../ui/Card";
-import { Logs, Clock, Check, Pencil, Trash, Send, X } from 'lucide-react';
 import { useLanguage } from "../../../context/LanguageContext";
+import { QueueIcon, ClockIcon, CheckIcon, PencilIcon, TrashIcon, SendIcon, CloseIcon } from "../../ui/Icons";
 
 type RecognitionQueueButtonProps = {
   submissions: PendingSubmission[];
@@ -14,48 +14,6 @@ type RecognitionQueueButtonProps = {
   onDeletePending: (submissionId: string) => void;
   onConfirmPending: (submissionId: string) => void;
 };
-
-function QueueIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <Logs className={className} stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
-  );
-}
-
-function ClockIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <Clock className={className} stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
-  );
-}
-
-function CheckIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <Check className={className} stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
-  );
-}
-
-function PencilIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <Pencil className={className} stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
-  );
-}
-
-function TrashIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <Trash className={className} stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
-  );
-}
-
-function SendIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <Send className={className} stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
-  );
-}
-
-function CloseIcon({ className = "h-5 w-5" }: { className?: string }) {
-  return (
-    <X className={className} stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
-  );
-}
 
 function getSubmissionTypes(submission: PendingSubmission) {
   return submission.types?.length ? submission.types : submission.type ? [submission.type] : [];

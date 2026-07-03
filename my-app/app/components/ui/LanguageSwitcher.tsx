@@ -13,11 +13,10 @@ export default function LanguageSwitcher() {
           key={code}
           type="button"
           onClick={() => setLang(code)}
-          className={`inline-flex h-8 min-w-[2.5rem] items-center justify-center rounded-full px-3 text-sm font-semibold transition-all duration-200 ${
-            lang === code
-              ? 'bg-slate-950 text-white shadow-sm'
-              : 'text-slate-500 hover:text-slate-900'
-          }`}
+          className={`inline-flex h-8 min-w-[2.5rem] items-center justify-center rounded-full px-3 text-sm font-semibold transition-all duration-200 ${lang === code
+            ? 'bg-slate-950 text-white shadow-sm'
+            : 'text-slate-500 hover:text-slate-900'
+            }`}
           aria-label={`Switch to ${code === 'en' ? 'English' : 'Thai'}`}
         >
           {code.toUpperCase()}

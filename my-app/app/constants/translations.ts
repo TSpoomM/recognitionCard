@@ -4,7 +4,7 @@ export const TRANSLATIONS = {
   en: {
     // Header
     headerLabel: 'Recognition Card',
-    headerTitle: 'Send Recognition',
+    // headerTitle: 'Send Recognition',
     headerReport: 'Report',
     headerHistory: 'History',
 
@@ -67,12 +67,41 @@ export const TRANSLATIONS = {
     errorLoadUsers: (msg: string) => `Unable to load employee data: ${msg}`,
     errorSaveCard: (msg: string) => `Unable to save recognition card: ${msg}`,
     errorNoUser: 'Please select at least one user.',
+
+    // History Page
+    historyTitle: 'History',
+    historySubtitle: 'Recognitions you have sent will appear here.',
+    historyRecognitionsSent: (count: number) => `${count} recognitions sent`,
+    historyFilters: 'Filters',
+    historyChooseYear: 'Choose a year to view sent recognitions.',
+    historyYear: 'Year',
+    historyAllYears: 'All years',
+    historyBackButton: 'Back',
+    historyLoading: 'Loading history...',
+    historyNoRecognitions: 'No recognitions found.',
+
+    // Report Page
+    reportTitle: 'Recognition Report',
+    reportSubtitle: 'Filter by people, branch, or year, then export PDF or CSV.',
+    reportBackButton: 'Back',
+    reportCheckingAccess: 'Checking report access...',
+    reportAccessDenied: 'Access denied',
+    reportOnlyAdmin: 'Only admin users can access the recognition report.',
+    reportExportCsv: 'Export CSV',
+    reportExportPdf: 'Export PDF',
+    reportFilters: 'Filters',
+    reportFilterPeople: 'Filter by people',
+    reportFilterBranch: 'Filter by branch',
+    reportFilterYear: 'Filter by year',
+    reportClearFilters: 'Clear filters',
+    reportNoFilters: 'No filters applied',
+    reportRecognitionCard: 'Recognition Card',
   },
 
   th: {
     // Header
     headerLabel: 'Recognition Card',
-    headerTitle: 'ส่ง Recognition',
+    // headerTitle: 'ส่ง Recognition',
     headerReport: 'รายงาน',
     headerHistory: 'ประวัติ',
 
@@ -135,6 +164,35 @@ export const TRANSLATIONS = {
     errorLoadUsers: (msg: string) => `ไม่สามารถโหลดข้อมูลพนักงาน: ${msg}`,
     errorSaveCard: (msg: string) => `ไม่สามารถบันทึก Recognition Card: ${msg}`,
     errorNoUser: 'กรุณาเลือกผู้รับอย่างน้อยหนึ่งคน',
+
+    // History Page
+    historyTitle: 'ประวัติ',
+    historySubtitle: 'Recognition ที่คุณส่งจะแสดงที่นี่',
+    historyRecognitionsSent: (count: number) => `ส่ง Recognition ${count} รายการ`,
+    historyFilters: 'ตัวกรอง',
+    historyChooseYear: 'เลือกปีเพื่อดูการส่ง Recognition',
+    historyYear: 'ปี',
+    historyAllYears: 'ทุกปี',
+    historyBackButton: 'ย้อนกลับ',
+    historyLoading: 'กำลังโหลดประวัติ...',
+    historyNoRecognitions: 'ไม่พบ Recognition',
+
+    // Report Page
+    reportTitle: 'รายงาน Recognition',
+    reportSubtitle: 'กรองตามคน สาขา หรือปี จากนั้นส่งออก PDF หรือ CSV',
+    reportBackButton: 'ย้อนกลับ',
+    reportCheckingAccess: 'กำลังตรวจสอบสิทธิ์เข้าถึงรายงาน...',
+    reportAccessDenied: 'ปฏิเสธการเข้าถึง',
+    reportOnlyAdmin: 'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถเข้าถึงรายงาน Recognition ได้',
+    reportExportCsv: 'ส่งออก CSV',
+    reportExportPdf: 'ส่งออก PDF',
+    reportFilters: 'ตัวกรอง',
+    reportFilterPeople: 'กรองตามคน',
+    reportFilterBranch: 'กรองตามสาขา',
+    reportFilterYear: 'กรองตามปี',
+    reportClearFilters: 'ล้างตัวกรอง',
+    reportNoFilters: 'ไม่มีการใช้ตัวกรอง',
+    reportRecognitionCard: 'Recognition Card',
   },
 };
 

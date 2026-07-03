@@ -107,7 +107,7 @@ export function downloadReportPdf(rows: ReportRow[]) {
 
   autoTable(doc, {
     startY: 31,
-    head: [["Recipients", "Branch", "Core Value", "Comment", "Sent By", "Date"]],
+    head: [["Recipients", "Branch", "Core Value", "Comment", "Given By", "Date"]],
     body: rows.map((row) => [
       row.personName,
       row.branch,
@@ -183,7 +183,7 @@ function csvEscape(value: string) {
 }
 
 export function downloadReportCsv(rows: ReportRow[]) {
-  const headers = ["Employee", "Branch", "Core Value", "Comment", "Sent By", "Date"];
+  const headers = ["Employee", "Branch", "Core Value", "Comment", "Given By", "Date"];
   const lines = [headers.join(",")];
 
   for (const row of rows) {

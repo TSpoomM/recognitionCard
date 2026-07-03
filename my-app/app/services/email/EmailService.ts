@@ -83,6 +83,11 @@ export class EmailService {
           content: imageBuffer,
           cid: "recognitionCard",
         },
+        {
+          filename: "compliment-card.png",
+          content: imageBuffer,
+          contentDisposition: "attachment",
+        },
       ],
     });
 

@@ -3,6 +3,7 @@
 import { Component } from "react";
 import { ArrowLeft, History as HistoryIcon } from "lucide-react";
 import { buildCurrentUserHref } from "../../../lib/currentUser";
+import { LanguageContext } from "../../../context/LanguageContext";
 
 type HistoryHeaderProps = {
   currentUserId: string;
@@ -10,19 +11,23 @@ type HistoryHeaderProps = {
 };
 
 export default class HistoryHeader extends Component<HistoryHeaderProps> {
+  static contextType = LanguageContext;
+  declare context: React.ContextType<typeof LanguageContext>;
+
   render() {
     const { currentUserId, totalRecipients } = this.props;
+    const { t } = this.context;
 
     return (
       <header className="mb-8 flex flex-col gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="mb-2 text-base uppercase tracking-[0.2em] text-slate-500">Recognition Card</p>
+          <p className="mb-2 text-base uppercase tracking-[0.2em] text-slate-500">{t.reportRecognitionCard}</p>
           <h1 className="flex items-center gap-3 text-4xl font-bold text-slate-950">
             <HistoryIcon className="h-9 w-9" />
-            History
+            {t.historyTitle}
           </h1>
           <p className="mt-2 text-base text-slate-600">
-            {totalRecipients > 0 ? `${totalRecipients} recognitions sent` : "Recognitions you have sent will appear here."}
+            {totalRecipients > 0 ? t.historyRecognitionsSent(totalRecipients) : t.historySubtitle}
           </p>
         </div>
         <a
@@ -30,7 +35,7 @@ export default class HistoryHeader extends Component<HistoryHeaderProps> {
           className="inline-flex h-12 items-center justify-center gap-2 rounded-3xl border border-slate-300 bg-white px-5 text-base font-semibold text-slate-900 transition hover:border-slate-400"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back
+          {t.historyBackButton}
         </a>
       </header>
     );

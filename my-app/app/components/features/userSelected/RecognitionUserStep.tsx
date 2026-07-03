@@ -4,14 +4,19 @@ import { ChangeEvent, Component } from "react";
 import { User } from "../../../types/user";
 import RecognitionUserSelect from "../userSelected/RecognitionUserSelect";
 import { LanguageContext } from "../../../context/LanguageContext";
+import Input from "../../ui/Input";
+import Select from "../../ui/Select";
 
 type RecognitionUserStepProps = {
   filteredUsers: User[];
   selectedUsers: User[];
   selectedUserIds: string[];
   searchQuery: string;
+  selectedBranch: string;
+  availableBranches: string[];
   onSearchChange: (value: string) => void;
   onToggleUser: (userId: string) => void;
+  onBranchChange: (branch: string) => void;
 };
 
 export default class RecognitionUserStep extends Component<RecognitionUserStepProps> {
@@ -22,8 +27,12 @@ export default class RecognitionUserStep extends Component<RecognitionUserStepPr
     this.props.onSearchChange(event.target.value);
   };
 
+  private handleBranchChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    this.props.onBranchChange(event.target.value);
+  };
+
   render() {
-    const { filteredUsers, selectedUsers, selectedUserIds, searchQuery, onToggleUser } = this.props;
+    const { filteredUsers, selectedUsers, selectedUserIds, searchQuery, selectedBranch, availableBranches, onToggleUser } = this.props;
     const { t } = this.context;
 
     return (
@@ -32,14 +41,27 @@ export default class RecognitionUserStep extends Component<RecognitionUserStepPr
         <p className="mb-6 text-base text-slate-600">
           {t.step1Description}
         </p>
-        <div className="mb-4 relative">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={this.handleSearchChange}
-            placeholder={t.step1SearchPlaceholder}
-            className="w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-lg text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-          />
+
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="sm:w-48">
+            <Select
+              label="Branch / Location"
+              value={selectedBranch}
+              onChange={this.handleBranchChange}
+              options={[
+                { value: "", label: "All branches" },
+                ...availableBranches.map((branch) => ({ value: branch, label: branch })),
+              ]}
+            />
+          </div>
+          <div className="flex-1">
+            <Input
+              type="text"
+              value={searchQuery}
+              onChange={this.handleSearchChange}
+              placeholder={t.step1SearchPlaceholder}
+            />
+          </div>
         </div>
 
         {selectedUsers.length > 0 && (
@@ -67,3 +89,4 @@ export default class RecognitionUserStep extends Component<RecognitionUserStepPr
     );
   }
 }
+

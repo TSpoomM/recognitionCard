@@ -49,7 +49,7 @@ export async function GET(request: Request) {
         ON d.diary_emp_id = e.fs_id
       LEFT JOIN tb_emp_email em
         ON d.diary_emp_id = em.Code
-      WHERE d.createdBy = ?
+      WHERE d.createdBy = ? AND YEAR(d.createdDate) >= YEAR(CURRENT_DATE) - 2
       ORDER BY d.createdDate DESC, d.diary_list DESC
       `,
       [currentUserId]

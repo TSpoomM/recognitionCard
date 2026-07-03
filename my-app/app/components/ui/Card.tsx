@@ -2,7 +2,7 @@
 
 import { Component, HTMLAttributes, ReactNode } from "react";
 
-type CardSurface = "white" | "muted";
+type CardSurface = "white" | "muted" | "primary";
 type CardPadding = "none" | "sm" | "md" | "lg" | "xl";
 type CardShadow = "none" | "sm" | "xl";
 
@@ -16,25 +16,37 @@ type CardProps = HTMLAttributes<HTMLDivElement> & {
 
 export default class Card extends Component<CardProps> {
   private get surfaceClassName() {
-    return this.props.surface === "muted" ? "bg-slate-50" : "bg-white";
+    switch (this.props.surface) {
+      case "muted":
+        return "bg-muted";
+      case "primary":
+        return "bg-primary text-primary-foreground";
+      case "white":
+      default:
+        return "bg-card text-card-foreground";
+    }
   }
 
   private get paddingClassName() {
     const padding = this.props.padding ?? "md";
 
-    if (padding === "none") return "";
-    if (padding === "sm") return "p-4";
-    if (padding === "lg") return "p-6";
-    if (padding === "xl") return "p-8 sm:p-10";
-    return "p-5";
+    switch (padding) {
+      case "none": return "";
+      case "sm": return "p-4";
+      case "lg": return "p-6";
+      case "xl": return "p-8 sm:p-10";
+      default: return "p-5";
+    }
   }
 
   private get shadowClassName() {
     const shadow = this.props.shadow ?? "sm";
 
-    if (shadow === "none") return "";
-    if (shadow === "xl") return "shadow-xl shadow-slate-200/80";
-    return "shadow-sm";
+    switch (shadow) {
+      case "none": return "";
+      case "xl": return "shadow-xl shadow-slate-200/80";
+      default: return "shadow-sm";
+    }
   }
 
   render() {
@@ -54,7 +66,7 @@ export default class Card extends Component<CardProps> {
     return (
       <div
         {...divProps}
-        className={`rounded-3xl ${bordered ? "border border-slate-200" : ""} ${this.surfaceClassName} ${this.paddingClassName} ${this.shadowClassName} ${className}`}
+        className={`rounded-3xl ${bordered ? "border border-border" : ""} ${this.surfaceClassName} ${this.paddingClassName} ${this.shadowClassName} ${className}`}
       >
         {children}
       </div>

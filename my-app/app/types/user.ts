@@ -6,4 +6,5 @@ export interface User {
   photoUrl?: string;
   role?: string; // e.g. "Product Designer"
   team?: string; // e.g. "Design"
+  location?: string; // e.g. "Bangkok", "Chiang Mai"
 };

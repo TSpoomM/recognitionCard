@@ -419,7 +419,7 @@ export class RecognitionCardImageRenderer {
               </svg>
             </div>
             <span style={{ fontFamily: "Roboto", fontWeight: 700, fontSize: "14px", color: "#022e10ff", whiteSpace: "nowrap" }}>
-              FROM
+              Given By
             </span>
             <span
               style={{

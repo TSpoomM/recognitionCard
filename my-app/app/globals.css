@@ -1,42 +1,138 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ===========================
+   Theme Mapping
+=========================== */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Fonts */
   --font-sans: Arial, Helvetica, sans-serif;
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  /* Radius */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ===========================
+   Light Theme
+=========================== */
+
+:root {
+  --radius: 0.75rem;
+
+  --background: rgb(252, 245, 240);
+  /* --background: rgb(149, 212, 203); */
+  --foreground: rgb(15, 22, 36);
+
+  --card: rgb(255, 255, 255);
+  --card-foreground: rgb(15, 22, 36);
+
+  --primary: rgb(137, 79, 93);
+  --primary-foreground: rgb(248, 250, 252);
+
+  --secondary: rgb(247, 241, 231);
+  --secondary-foreground: rgb(56, 44, 21);
+
+  --muted: rgb(244, 237, 232);
+  --muted-foreground: rgb(85, 100, 122);
+
+  --accent: rgb(250, 233, 240);
+  --accent-foreground: rgb(65, 35, 48);
+
+  --border: rgb(229, 221, 208);
+  --input: rgb(229, 221, 208);
+}
+
+/* ===========================
+   Dark Theme
+=========================== */
+
+.dark {
+  --background: oklch(0.129 0.042 264.695);
+  --foreground: oklch(0.984 0.003 247.858);
+
+  --card: oklch(0.208 0.042 265.755);
+  --card-foreground: oklch(0.984 0.003 247.858);
+
+  /* --primary: oklch(0.929 0.013 255.508);
+  --primary-foreground: oklch(0.208 0.042 265.755); */
+  --primary: oklch(0.62 0.17 145);
+  --primary-foreground: oklch(1 0 0);
+
+  --secondary: oklch(0.279 0.041 260.031);
+  --secondary-foreground: oklch(0.984 0.003 247.858);
+
+  --muted: oklch(0.279 0.041 260.031);
+  --muted-foreground: oklch(0.704 0.04 256.788);
+
+  --accent: oklch(0.279 0.041 260.031);
+  --accent-foreground: oklch(0.984 0.003 247.858);
+
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(91.806% 0.15602 144.205 / 0.15);
+}
+
+/* ===========================
+   Base
+=========================== */
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: Arial, Helvetica, sans-serif;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+/* ===========================
+   Utilities
+=========================== */
 
-/* Prevent long unbroken text from overflowing boxes across the app */
-html, body, p, span, div, a, li, button, input, textarea {
+html,
+body,
+p,
+span,
+div,
+a,
+li,
+button,
+input,
+textarea {
   overflow-wrap: anywhere;
   word-break: break-word;
-  -webkit-hyphens: auto;
-  -ms-hyphens: auto;
   hyphens: auto;
 }
 
-/* Make textareas wrap and scroll appropriately */
 textarea {
   white-space: pre-wrap;
-  word-wrap: break-word;
   overflow: auto;
 }
