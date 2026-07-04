@@ -1,15 +1,16 @@
 'use client';
 import { Component } from "react";
+import { CalendarDays, FileText, Filter, MapPin, Search, Users } from "lucide-react";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Navbar from "../components/ui/Navbar";
-import { buildCurrentUserHref, getClientCurrentUserId } from "../lib/currentUser";
+import Select from "../components/ui/Select";
+import { getClientCurrentUserId } from "../lib/currentUser";
 import { reportAccessClient } from "../lib/reportAccessClient";
 import { downloadReportCsv, downloadReportPdf } from "../lib/reportExport";
 import { ReportData, ReportEmployee, ReportRow } from "../types/report";
 import { Language, TRANSLATIONS } from "../constants/translations";
-import { LanguageContext } from "../context/LanguageContext";
-import { ArrowLeft } from "lucide-react";
+import { getInitialLanguage, LanguageContext, persistLanguage } from "../context/LanguageContext";
 type ReportPageState = {
   lang: Language;
   currentUserId: string;
@@ -48,6 +49,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
     return TRANSLATIONS[this.state.lang];
   }
   componentDidMount() {
+    this.setState({ lang: getInitialLanguage() });
     this.loadAccess();
   }
   componentWillUnmount() {
@@ -199,176 +201,224 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
     } = this.state;
     const rows = this.filteredRows;
     const employees = this.filteredEmployees;
+    const totalRows = data?.rows.length ?? 0;
+    const activeFilterCount = selectedBranches.length + selectedPeople.length + (selectedYear ? 1 : 0);
+    const visibleRecipientCount = new Set(rows.map((row) => row.personId)).size;
+    const visibleBranchCount = new Set(rows.map((row) => row.branch).filter(Boolean)).size;
+    const reportLabels = this.state.lang === "th"
+      ? {
+        results: "ผลลัพธ์",
+        rows: "รายการ",
+        allRows: "รายการทั้งหมด",
+        recipients: "ผู้รับ",
+        branches: "สาขา",
+        year: "ปี",
+        allYears: "ทุกปี",
+        activeFilters: "ตัวกรองที่เลือก",
+        noActiveFilters: "ยังไม่ได้เลือกตัวกรอง",
+        searchPeople: "ค้นหาชื่อพนักงาน",
+      }
+      : {
+        results: "Results",
+        rows: "rows",
+        allRows: "Total rows",
+        recipients: "Recipients",
+        branches: "Branches",
+        year: "Year",
+        allYears: "All years",
+        activeFilters: "Active filters",
+        noActiveFilters: "No active filters",
+        searchPeople: "Search people",
+      };
     if (isLoadingAccess) {
       return (
-        <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6">
+        <main className="flex min-h-screen items-center justify-center px-6">
           <p className="text-sm text-slate-600">{this.t.reportCheckingAccess}</p>
         </main>
       );
     }
     if (!isAdmin) {
       return (
-        <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6">
-          <Card padding="xl" shadow="xl" className="max-w-md text-center">
+        <main className="flex min-h-screen items-center justify-center px-6">
+          <Card padding="xl" shadow="xl" className="app-surface max-w-md text-center">
             <p className="text-lg font-semibold text-slate-900">{this.t.reportAccessDenied}</p>
             <p className="mt-2 text-sm text-slate-600">{error || this.t.reportOnlyAdmin}</p>
-            <a
-              href={buildCurrentUserHref("/", currentUserId)}
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-3xl border border-slate-300 bg-white px-5 text-base font-semibold text-slate-900 transition hover:border-slate-400"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              {this.t.reportBackButton}
-            </a>
           </Card>
         </main>
       );
     }
     return (
-      <LanguageContext.Provider value={{ lang: this.state.lang, t: TRANSLATIONS[this.state.lang], setLang: (newLang: Language) => this.setState({ lang: newLang }) }}>
+      <LanguageContext.Provider value={{
+        lang: this.state.lang, t: TRANSLATIONS[this.state.lang], setLang: (newLang: Language) => {
+          persistLanguage(newLang);
+          this.setState({ lang: newLang });
+        }
+      }}>
         <Navbar currentUserId={currentUserId} />
-        <div className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-6xl">
-            <Card bordered={false} padding="xl" shadow="xl" className="mb-10">
-              <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+        <div className="app-page-shell">
+          <div className="mx-auto max-w-[96rem]">
+            <Card bordered={false} padding="none" shadow="xl" className="app-surface mb-8 overflow-hidden">
+              <div className="flex flex-col gap-5 border-b-[1.5px] border-amber-300/80 px-6 py-6 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-800">
                     {this.t.reportRecognitionCard}
                   </p>
-                  <h1 className="mt-2 text-2xl font-bold text-slate-900">{this.t.reportTitle}</h1>
-                  <p className="mt-1 text-base text-slate-500">{this.t.reportSubtitle}</p>
+                  <h1 className="mt-2 text-3xl font-bold text-slate-950">{this.t.reportTitle}</h1>
+                  <p className="mt-2 max-w-2xl text-base leading-7 text-slate-600">{this.t.reportSubtitle}</p>
                 </div>
-                <a
-                  href={buildCurrentUserHref("/", currentUserId)}
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-3xl border border-slate-300 bg-white px-5 text-base font-semibold text-slate-900 transition hover:border-slate-400"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  {this.t.reportBackButton}
-                </a>
+                <div className="flex flex-wrap gap-2 lg:justify-end">
+                  <Button
+                    variant="secondary"
+                    className="h-12 rounded-full"
+                    icon={<FileText className="h-5 w-5" />}
+                    disabled={rows.length === 0}
+                    onClick={() => downloadReportCsv(rows)}
+                  >
+                    {this.t.reportExportCsv}
+                  </Button>
+                  <Button
+                    className="h-12 rounded-full px-5"
+                    icon={<FileText className="h-5 w-5" />}
+                    disabled={rows.length === 0}
+                    onClick={() => downloadReportPdf(rows)}
+                  >
+                    {this.t.reportExportPdf}
+                  </Button>
+                </div>
               </div>
-              <div className="mb-6 flex flex-wrap justify-end gap-2">
-                <Button
-                  variant="secondary"
-                  className="h-11 rounded-full border border-slate-300 bg-white px-5 text-slate-900 hover:border-slate-400"
-                  disabled={rows.length === 0}
-                  onClick={() => downloadReportCsv(rows)}
-                >
-                  {this.t.reportExportCsv}
-                </Button>
-                <Button
-                  className="h-11 rounded-full bg-slate-900 px-5 text-white hover:bg-slate-800"
-                  disabled={rows.length === 0}
-                  onClick={() => downloadReportPdf(rows)}
-                >
-                  {this.t.reportExportPdf}
-                </Button>
+              <div className="grid gap-3 px-6 py-5 sm:grid-cols-2 sm:px-8 xl:grid-cols-4">
+                {[
+                  { label: reportLabels.results, value: rows.length.toLocaleString(), helper: `${totalRows.toLocaleString()} ${reportLabels.allRows}`, icon: FileText },
+                  { label: reportLabels.recipients, value: visibleRecipientCount.toLocaleString(), helper: `${employees.length.toLocaleString()} ${reportLabels.recipients}`, icon: Users },
+                  { label: reportLabels.branches, value: visibleBranchCount.toLocaleString(), helper: `${data?.branches.length ?? 0} ${reportLabels.branches}`, icon: MapPin },
+                  { label: reportLabels.year, value: selectedYear || reportLabels.allYears, helper: `${activeFilterCount} ${reportLabels.activeFilters}`, icon: CalendarDays },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div key={item.label} className="rounded-2xl border-[1.5px] border-amber-300 bg-white/75 p-4 shadow-sm shadow-teal-900/5">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-slate-500">{item.label}</p>
+                          <p className="mt-2 text-2xl font-bold text-slate-950">{item.value}</p>
+                        </div>
+                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-teal-50 text-teal-800">
+                          <Icon className="h-5 w-5" />
+                        </span>
+                      </div>
+                      <p className="mt-3 text-sm text-slate-500">{item.helper}</p>
+                    </div>
+                  );
+                })}
               </div>
               {error && (
-                <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="mx-6 mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 sm:mx-8">
                   {error}
                 </div>
               )}
               {isLoadingData ? (
-                <Card padding="lg" className="p-12 text-center text-sm text-slate-500">
+                <Card padding="lg" className="mx-6 mb-6 p-12 text-center text-sm text-slate-500 sm:mx-8">
                   {this.t.historyLoading}
                 </Card>
               ) : (
-                <div className="space-y-6">
-                  <aside className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-5">
-                      <h2 className="text-xl font-semibold text-slate-900">{this.t.reportFilters}</h2>
+                <div className="grid gap-5 px-6 pb-6 sm:px-8 lg:grid-cols-[18rem_minmax(0,1fr)] xl:grid-cols-[19rem_minmax(0,1fr)]">
+                  <aside className="app-panel rounded-3xl p-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
+                    <div className="mb-5 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="grid h-10 w-10 place-items-center rounded-xl bg-teal-50 text-teal-800">
+                          <Filter className="h-5 w-5" />
+                        </span>
+                        <div>
+                          <h2 className="text-xl font-semibold text-slate-900">{this.t.reportFilters}</h2>
+                          <p className="text-sm text-slate-500">
+                            {activeFilterCount > 0 ? `${activeFilterCount} ${reportLabels.activeFilters}` : reportLabels.noActiveFilters}
+                          </p>
+                        </div>
+                      </div>
                       <button
                         type="button"
                         onClick={this.clearFilters}
-                        className="text-sm font-semibold text-slate-500 hover:text-slate-900"
+                        className="shrink-0 text-sm font-semibold text-slate-500 hover:text-slate-900"
                       >
                         {this.t.reportClearFilters}
                       </button>
                     </div>
-                    <div className="grid gap-8 lg:grid-cols-2">
-                      {/* Branch and Year */}
-                      <div className="space-y-6">
-                        <div>
-                          <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
-                            {this.t.reportFilterBranch}
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {(data?.branches || []).map((branch) => {
-                              const active = selectedBranches.includes(branch);
-                              return (
-                                <label
-                                  key={branch}
-                                  className={`flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-base font-medium transition ${active
-                                    ? "border-slate-900 bg-slate-900 text-white"
-                                    : "border-slate-200 text-slate-700 hover:border-slate-400"
-                                    }`}
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={active}
-                                    onChange={() => this.toggleBranch(branch)}
-                                    className="hidden"
-                                  />
-                                  {branch}
-                                </label>
-                              );
-                            })}
-                            {(data?.branches.length || 0) === 0 && (
-                              <p className="text-sm text-slate-400">{this.t.reportNoFilters}</p>
-                            )}
-                          </div>
-                        </div>
 
-                        <div>
-                          <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
-                            {this.t.reportFilterYear}
-                          </p>
-                          <select
-                            value={selectedYear}
-                            onChange={(e) => this.setState({ selectedYear: e.target.value })}
-                            className="h-12 w-full max-w-xs rounded-xl border border-slate-200 bg-white pl-4 pr-10 text-base font-medium text-slate-900 outline-none transition focus:border-slate-400 sm:w-auto"
-                          >
-                            <option value="">{this.t.historyAllYears}</option>
-                            {(data?.years || []).map((year) => (
-                              <option key={year} value={year}>
-                                {year}
-                              </option>
-                            ))}
-                          </select>
+                    <div className="space-y-6">
+                      <div>
+                        <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+                          {this.t.reportFilterBranch}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {(data?.branches || []).map((branch) => {
+                            const active = selectedBranches.includes(branch);
+                            return (
+                              <label
+                                key={branch}
+                                className={`flex cursor-pointer items-center gap-2 rounded-full border-[1.5px] px-4 py-2 text-base font-medium transition ${active
+                                  ? "border-amber-400 bg-teal-800 text-white"
+                                  : "border-amber-300 bg-white/75 text-slate-700 hover:border-amber-400 hover:bg-amber-50"
+                                  }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={active}
+                                  onChange={() => this.toggleBranch(branch)}
+                                  className="hidden"
+                                />
+                                {branch}
+                              </label>
+                            );
+                          })}
+                          {(data?.branches.length || 0) === 0 && (
+                            <p className="text-sm text-slate-400">{this.t.reportNoFilters}</p>
+                          )}
                         </div>
                       </div>
 
-                      {/* People */}
+                      <div>
+                        <Select
+                          label={this.t.reportFilterYear}
+                          value={selectedYear}
+                          onChange={(e) => this.setState({ selectedYear: e.target.value })}
+                          options={[
+                            { value: "", label: this.t.historyAllYears },
+                            ...(data?.years || []).map((year) => ({ value: String(year), label: String(year) })),
+                          ]}
+                        />
+                      </div>
+
                       <div>
                         <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
                           {this.t.reportFilterPeople}
                         </p>
-                        <input
-                          type="text"
-                          placeholder={this.t.reportFilterPeople}
-                          value={query}
-                          onChange={(e) => this.setState({ query: e.target.value })}
-                          className="mb-3 w-full rounded-xl border border-slate-200 px-3 py-2 text-base outline-none transition focus:border-slate-400"
-                        />
-                        <div className="max-h-56 space-y-1 overflow-y-auto rounded-xl border border-slate-100 p-2">
+                        <div className="relative mb-3">
+                          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                          <input
+                            type="text"
+                            placeholder={reportLabels.searchPeople}
+                            value={query}
+                            onChange={(e) => this.setState({ query: e.target.value })}
+                            className="app-input w-full rounded-xl py-2 pl-9 pr-3 text-base"
+                          />
+                        </div>
+                        <div className="max-h-72 space-y-1 overflow-y-auto rounded-2xl border-[1.5px] border-amber-300 bg-white/70 p-2">
                           {employees.map((employee) => {
                             const active = selectedPeople.includes(employee.user_id);
                             return (
                               <label
                                 key={employee.user_id}
-                                className={`flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 transition ${active ? "bg-slate-100" : "hover:bg-slate-50"
+                                className={`flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition ${active ? "bg-teal-50 text-teal-950" : "hover:bg-teal-50/60"
                                   }`}
                               >
                                 <input
                                   type="checkbox"
                                   checked={active}
                                   onChange={() => this.togglePerson(employee.user_id)}
-                                  className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                                  className="h-4 w-4 rounded border-amber-300 text-teal-800 focus:ring-amber-300"
                                 />
-                                <span className="min-w-0 flex-1 truncate text-base text-slate-700">
-                                  {employee.name}
-                                </span>
-                                <span className="shrink-0 text-sm text-slate-400">
-                                  {employee.branch}
+                                <span className="min-w-0 flex-1">
+                                  <span className="block truncate text-base font-semibold text-slate-800">{employee.name}</span>
+                                  <span className="block truncate text-sm text-slate-500">{employee.branch}</span>
                                 </span>
                               </label>
                             );
@@ -380,19 +430,25 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                       </div>
                     </div>
                   </aside>
-                  <section className="rounded-3xl border border-slate-200 bg-white shadow-sm">
-                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 p-4">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="text-xl font-semibold text-slate-900">Results</h2>
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
-                          {rows.length} rows
-                        </span>
+
+                  <section className="app-panel min-w-0 overflow-hidden rounded-3xl">
+                    <div className="flex flex-col gap-3 border-b-[1.5px] border-amber-300 p-5 xl:flex-row xl:items-center xl:justify-between">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h2 className="text-2xl font-semibold text-slate-900">{reportLabels.results}</h2>
+                          <span className="app-chip rounded-full px-3 py-1 text-sm font-semibold">
+                            {rows.length} {reportLabels.rows}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-sm text-slate-500">
+                          {activeFilterCount > 0 ? `${activeFilterCount} ${reportLabels.activeFilters}` : reportLabels.noActiveFilters}
+                        </p>
                       </div>
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-1.5">
                         {selectedBranches.map((branch) => (
                           <span
                             key={branch}
-                            className="rounded-full border border-slate-200 px-2 py-0.5 text-xs text-slate-600"
+                            className="app-chip rounded-full px-3 py-1 text-xs font-semibold"
                           >
                             {branch}
                           </span>
@@ -402,19 +458,19 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                           return employee ? (
                             <span
                               key={personId}
-                              className="rounded-full border border-slate-200 px-2 py-0.5 text-xs text-slate-600"
+                              className="app-chip rounded-full px-3 py-1 text-xs font-semibold"
                             >
                               {employee.name}
                             </span>
                           ) : null;
                         })}
                         {selectedPeople.length > 3 && (
-                          <span className="rounded-full border border-slate-200 px-2 py-0.5 text-xs text-slate-600">
+                          <span className="app-chip rounded-full px-3 py-1 text-xs font-semibold">
                             +{selectedPeople.length - 3} more
                           </span>
                         )}
                         {selectedYear && (
-                          <span className="rounded-full border border-slate-200 px-2 py-0.5 text-xs text-slate-600">
+                          <span className="app-chip rounded-full px-3 py-1 text-xs font-semibold">
                             {selectedYear}
                           </span>
                         )}
@@ -425,19 +481,19 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                         {this.t.historyNoRecognitions}
                       </div>
                     ) : (
-                      <div className="max-h-[640px] overflow-y-auto overflow-x-auto">
-                        <table className="w-full min-w-[1320px] table-fixed border-collapse text-lg">
+                      <div className="max-h-[650px] overflow-y-auto overflow-x-auto 2xl:overflow-x-visible">
+                        <table className="w-full min-w-[1080px] table-fixed border-collapse text-base 2xl:min-w-0">
                           <colgroup>
-                            <col className="w-[13%]" />
+                            <col className="w-[15%]" />
                             <col className="w-[9%]" />
                             <col className="w-[14%]" />
-                            <col className="w-[32%]" />
-                            <col className="w-[15%]" />
-                            <col className="w-[17%]" />
+                            <col className="w-[37%]" />
+                            <col className="w-[13%]" />
+                            <col className="w-[12%]" />
                           </colgroup>
-                          <thead className="sticky top-0 z-10 border-b border-slate-200 bg-slate-50/95 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-500 backdrop-blur">
+                          <thead className="sticky top-0 z-10 border-b-[1.5px] border-amber-300 bg-teal-50/95 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-500 backdrop-blur">
                             <tr>
-                              <th className="whitespace-nowrap px-4 py-3">Receivers</th>
+                              <th className="whitespace-nowrap px-4 py-3">Recipients</th>
                               <th className="whitespace-nowrap px-4 py-3">Branch</th>
                               <th className="whitespace-nowrap px-4 py-3">Core Value</th>
                               <th className="whitespace-nowrap px-4 py-3">Comment</th>
@@ -451,14 +507,14 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                               const isLongComment = row.comment.length > 220;
                               const createdAt = this.formatDateParts(row.createdAt);
                               return (
-                                <tr key={row.id} className="border-b border-slate-100 align-top last:border-b-0">
+                                <tr key={row.id} className="border-b border-amber-100 align-top transition hover:bg-teal-50/35 last:border-b-0">
                                   <td className="truncate px-4 py-4 font-medium text-slate-900">
                                     {row.personName}
                                   </td>
                                   <td className="truncate px-4 py-4 text-slate-600">{row.branch}</td>
                                   <td className="px-4 py-4">
                                     {row.coreValueLabel ? (
-                                      <span className="inline-block max-w-full truncate rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
+                                      <span className="app-chip inline-block max-w-full truncate rounded-full px-2 py-0.5 text-xs font-semibold">
                                         {row.coreValueLabel}
                                       </span>
                                     ) : (

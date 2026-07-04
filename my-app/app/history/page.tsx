@@ -3,12 +3,13 @@
 import { Component } from "react";
 import Card from "../components/ui/Card";
 import Navbar from "../components/ui/Navbar";
+import Select from "../components/ui/Select";
 import HistoryHeader from "../components/features/history/HistoryHeader";
 import HistoryList from "../components/features/history/HistoryList";
 import { getClientCurrentUserId } from "../lib/currentUser";
 import { HistoryItem } from "../types/history";
 import { Language, TRANSLATIONS } from "../constants/translations";
-import { LanguageContext } from "../context/LanguageContext";
+import { getInitialLanguage, LanguageContext, persistLanguage } from "../context/LanguageContext";
 
 type HistoryPageState = {
   lang: Language;
@@ -40,6 +41,7 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
   }
 
   componentDidMount() {
+    this.setState({ lang: getInitialLanguage() });
     this.loadHistory();
   }
 
@@ -105,35 +107,32 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
     const items = this.filteredItems;
 
     return (
-      <LanguageContext.Provider value={{ lang, t: TRANSLATIONS[lang], setLang: (newLang: Language) => this.setState({ lang: newLang }) }}>
+      <LanguageContext.Provider value={{ lang, t: TRANSLATIONS[lang], setLang: (newLang: Language) => {
+        persistLanguage(newLang);
+        this.setState({ lang: newLang });
+      } }}>
         <Navbar currentUserId={currentUserId} />
-        <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 sm:px-6 lg:px-8">
+        <main className="app-page-shell">
           <div className="mx-auto max-w-5xl">
-            <Card bordered={false} padding="xl" shadow="xl">
-              <HistoryHeader currentUserId={currentUserId} totalRecipients={items.length} />
-              <section className="mb-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <Card bordered={false} padding="xl" shadow="xl" className="app-surface">
+              <HistoryHeader totalRecipients={items.length} />
+              <section className="app-panel mb-6 rounded-3xl p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <h2 className="text-xl font-semibold text-slate-900">{this.t.historyFilters}</h2>
                     <p className="mt-1 text-base text-slate-500">{this.t.historyChooseYear}</p>
                   </div>
-                  <label className="w-full sm:w-56">
-                    <span className="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">
-                      {this.t.historyYear}
-                    </span>
-                    <select
+                  <div className="w-full sm:w-56">
+                    <Select
+                      label={this.t.historyYear}
                       value={selectedYear}
                       onChange={(event) => this.setState({ selectedYear: event.target.value })}
-                      className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-lg font-medium text-slate-900"
-                    >
-                      <option value="">{this.t.historyAllYears}</option>
-                      {this.availableYears.map((year) => (
-                        <option key={year} value={year}>
-                          {year}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                      options={[
+                        { value: "", label: this.t.historyAllYears },
+                        ...this.availableYears.map((year) => ({ value: String(year), label: String(year) })),
+                      ]}
+                    />
+                  </div>
                 </div>
               </section>
               <HistoryList error={error} isLoading={isLoading} items={items} />

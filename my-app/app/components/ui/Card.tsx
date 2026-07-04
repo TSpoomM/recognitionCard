@@ -44,7 +44,7 @@ export default class Card extends Component<CardProps> {
 
     switch (shadow) {
       case "none": return "";
-      case "xl": return "shadow-xl shadow-slate-200/80";
+      case "xl": return "shadow-xl shadow-teal-900/10";
       default: return "shadow-sm";
     }
   }

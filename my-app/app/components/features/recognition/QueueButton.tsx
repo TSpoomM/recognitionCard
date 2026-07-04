@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PendingSubmission } from "../../../types/pendingSubmission";
 import { COMMENT_TYPE_META } from "../../../types/commentType";
 import { RecognitionEngine } from "../../../lib/RecognitionEngine";
@@ -10,6 +10,7 @@ import { QueueIcon, ClockIcon, CheckIcon, PencilIcon, TrashIcon, SendIcon, Close
 
 type RecognitionQueueButtonProps = {
   submissions: PendingSubmission[];
+  editingSubmissionId?: string | null;
   onEditPending: (submission: PendingSubmission) => void;
   onDeletePending: (submissionId: string) => void;
   onConfirmPending: (submissionId: string) => void;
@@ -21,20 +22,32 @@ function getSubmissionTypes(submission: PendingSubmission) {
 
 export default function RecognitionQueueButton({
   submissions,
+  editingSubmissionId = null,
   onEditPending,
   onDeletePending,
   onConfirmPending,
 }: RecognitionQueueButtonProps) {
   const [open, setOpen] = useState(false);
+  const [, setTick] = useState(0);
   const { t } = useLanguage();
   const pendingCount = useMemo(() => submissions.filter((item) => item.status === "pending").length, [submissions]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const intervalId = window.setInterval(() => {
+      setTick((tick) => tick + 1);
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [open]);
 
   return (
     <>
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed bottom-5 right-5 z-50 inline-flex min-h-12 items-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-base font-semibold text-white shadow-xl shadow-slate-900/20 transition hover:bg-slate-800"
+        className="fixed bottom-5 right-5 z-50 inline-flex min-h-12 items-center gap-2 rounded-full bg-teal-800 px-5 py-3 text-base font-semibold text-white shadow-xl shadow-teal-900/25 transition hover:bg-teal-900"
         aria-label="Open recognition queue"
       >
         <QueueIcon />
@@ -47,14 +60,14 @@ export default function RecognitionQueueButton({
       </button>
 
       {open ? (
-        <div className="fixed inset-0 z-[60] bg-slate-950/30" onClick={() => setOpen(false)}>
+        <div className="fixed inset-0 z-[60] bg-slate-950/30 backdrop-blur-sm" onClick={() => setOpen(false)}>
           <aside
             className="fixed bottom-20 right-5 w-[min(94vw,34rem)] overflow-hidden"
             aria-label="Recognition queue"
             onClick={(event) => event.stopPropagation()}
           >
             <Card padding="none" shadow="xl" className="max-h-[80vh] overflow-hidden flex flex-col">
-              <header className="border-b border-slate-200 p-6">
+              <header className="border-b-[1.5px] border-amber-300 bg-teal-50/40 p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <h2 className="flex items-center gap-2 text-2xl font-bold text-slate-950">
@@ -68,7 +81,7 @@ export default function RecognitionQueueButton({
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
-                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-slate-300 hover:text-slate-900"
+                    className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-[1.5px] border-amber-300 bg-white text-slate-500 transition hover:border-amber-400 hover:text-teal-900"
                     aria-label="Close recognition queue"
                   >
                     <CloseIcon />
@@ -78,17 +91,18 @@ export default function RecognitionQueueButton({
 
               <div className="min-h-0 flex-1 overflow-y-auto p-6 overscroll-contain space-y-4">
                 {submissions.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-10 text-center text-base text-slate-500">
+                  <div className="app-muted-panel rounded-2xl border-dashed p-10 text-center text-base text-slate-500">
                     {t.queueEmpty}
                   </div>
                 ) : (
                   submissions.map((submission) => {
                     const pending = submission.status === "pending";
+                    const editing = editingSubmissionId === submission.id;
 
                     return (
                       <article
                         key={submission.id}
-                        className={`rounded-2xl border p-5 ${pending ? "border-amber-200 bg-amber-50/50" : "border-emerald-200 bg-emerald-50/50"
+                        className={`rounded-2xl border-[1.5px] p-5 ${pending ? "border-amber-300 bg-amber-50/50" : "border-emerald-300 bg-emerald-50/50"
                           }`}
                       >
                         <div className="flex items-start justify-between gap-2">
@@ -103,7 +117,11 @@ export default function RecognitionQueueButton({
                               );
                             })}
                           </div>
-                          {pending ? (
+                          {editing ? (
+                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-600">
+                              <PencilIcon /> {t.editing}
+                            </span>
+                          ) : pending ? (
                             <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-100 px-3 py-1.5 text-sm font-bold text-amber-800">
                               <ClockIcon /> {RecognitionEngine.formatRemaining(submission.createdAt)}
                             </span>
@@ -122,14 +140,14 @@ export default function RecognitionQueueButton({
                         <p className="mt-3 whitespace-pre-wrap text-lg leading-relaxed font-medium text-slate-900">{submission.comment}</p>
 
                         {pending ? (
-                          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-amber-200/70 pt-4">
+                          <div className="mt-4 flex flex-wrap items-center gap-2 border-t-[1.5px] border-amber-300/70 pt-4">
                             <button
                               type="button"
                               onClick={() => {
                                 onEditPending(submission);
                                 setOpen(false);
                               }}
-                              className="inline-flex min-h-10 items-center gap-1 rounded-xl border border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950"
+                              className="inline-flex min-h-10 items-center gap-1 rounded-xl border-[1.5px] border-amber-300 bg-white px-4 py-2 text-base font-semibold text-slate-700 transition hover:border-amber-400 hover:bg-amber-50 hover:text-teal-950"
                             >
                               <PencilIcon /> {t.edit}
                             </button>
@@ -143,9 +161,11 @@ export default function RecognitionQueueButton({
                             <button
                               type="button"
                               onClick={() => onConfirmPending(submission.id)}
-                              className="ml-auto inline-flex min-h-10 items-center gap-1 rounded-xl bg-slate-950 px-4 py-2 text-base font-semibold text-white transition hover:bg-slate-800"
+                              disabled={editing}
+                              title={editing ? "Finish editing before confirming this card." : undefined}
+                              className="ml-auto inline-flex min-h-10 items-center gap-1 rounded-xl bg-teal-800 px-4 py-2 text-base font-semibold text-white transition hover:bg-teal-900 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600"
                             >
-                              <SendIcon /> {t.confirmNow}
+                              <SendIcon /> {editing ? t.editing : t.confirmNow}
                             </button>
                           </div>
                         ) : null}

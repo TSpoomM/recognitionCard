@@ -45,27 +45,27 @@
 :root {
   --radius: 0.75rem;
 
-  --background: rgb(252, 245, 240);
-  /* --background: rgb(149, 212, 203); */
-  --foreground: rgb(15, 22, 36);
+  --background: rgb(166, 232, 220);
+  /* Original mint reference: rgb(149, 212, 203) */
+  --foreground: rgb(24, 38, 45);
 
-  --card: rgb(255, 255, 255);
-  --card-foreground: rgb(15, 22, 36);
+  --card: rgb(255, 255, 252);
+  --card-foreground: rgb(24, 38, 45);
 
-  --primary: rgb(137, 79, 93);
-  --primary-foreground: rgb(248, 250, 252);
+  --primary: rgb(0, 128, 112);
+  --primary-foreground: rgb(248, 253, 251);
 
-  --secondary: rgb(247, 241, 231);
-  --secondary-foreground: rgb(56, 44, 21);
+  --secondary: rgb(220, 242, 235);
+  --secondary-foreground: rgb(28, 83, 73);
 
-  --muted: rgb(244, 237, 232);
-  --muted-foreground: rgb(85, 100, 122);
+  --muted: rgb(224, 246, 240);
+  --muted-foreground: rgb(58, 94, 93);
 
-  --accent: rgb(250, 233, 240);
-  --accent-foreground: rgb(65, 35, 48);
+  --accent: rgb(255, 239, 220);
+  --accent-foreground: rgb(92, 65, 42);
 
-  --border: rgb(229, 221, 208);
-  --input: rgb(229, 221, 208);
+  --border: rgb(252, 211, 77);
+  --input: rgb(252, 211, 77);
 }
 
 /* ===========================
@@ -106,10 +106,83 @@
     border-color: var(--color-border);
   }
 
+  html {
+    min-height: 100%;
+    background:
+      radial-gradient(circle at 12% 16%, rgba(118, 221, 204, 0.26) 0, rgba(118, 221, 204, 0) 38rem),
+      radial-gradient(circle at 78% 18%, rgba(0, 128, 112, 0.1) 0, rgba(0, 128, 112, 0) 36rem),
+      radial-gradient(circle at 86% 24%, rgba(255, 239, 220, 0.58) 0, rgba(255, 239, 220, 0) 30rem),
+      linear-gradient(135deg, rgb(216, 244, 238) 0%, rgb(229, 248, 241) 48%, rgb(249, 247, 232) 100%);
+    background-attachment: fixed;
+    background-color: rgb(216, 244, 238);
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
   body {
-    background: var(--color-background);
+    min-height: 100%;
+    background: transparent;
     color: var(--color-foreground);
     font-family: Arial, Helvetica, sans-serif;
+  }
+}
+
+@layer components {
+  .app-page-shell {
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    color: rgb(15 23 42);
+  }
+
+  @media (min-width: 640px) {
+    .app-page-shell {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .app-page-shell {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+
+  .app-surface {
+    border: 1.5px solid rgba(252, 211, 77, 0.9);
+    background: rgba(252, 255, 250, 0.88);
+    box-shadow: 0 24px 60px rgba(0, 96, 84, 0.16), 0 0 0 1px rgba(255, 236, 178, 0.55) inset;
+    backdrop-filter: blur(16px);
+  }
+
+  .app-panel {
+    border: 1.5px solid rgba(252, 211, 77, 0.9);
+    background: rgba(252, 255, 250, 0.84);
+    box-shadow: 0 1px 2px rgba(0, 96, 84, 0.08);
+  }
+
+  .app-muted-panel {
+    border: 1.5px solid rgba(252, 211, 77, 0.9);
+    background: rgba(217, 246, 238, 0.78);
+  }
+
+  .app-input {
+    border: 1.5px solid rgba(252, 211, 77, 0.9);
+    background: rgb(255, 255, 255);
+    color: rgb(15, 23, 42);
+    outline: none;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .app-input:focus {
+    border-color: rgb(245, 158, 11);
+    box-shadow: 0 0 0 3px rgba(252, 211, 77, 0.38);
+  }
+
+  .app-chip {
+    border: 1.5px solid rgba(252, 211, 77, 0.9);
+    background: rgb(255, 249, 232);
+    color: rgb(71, 85, 105);
   }
 }
 

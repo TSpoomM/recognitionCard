@@ -71,10 +71,10 @@ export default class RecognitionUserStep extends Component<RecognitionUserStepPr
                 key={user.user_id}
                 type="button"
                 onClick={() => onToggleUser(user.user_id)}
-                className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-slate-800"
+                className="inline-flex items-center gap-2 rounded-full border-[1.5px] border-amber-400 bg-teal-800 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:border-amber-400 hover:bg-teal-900"
               >
                 {user.firstName} {user.lastName}
-                <span className="text-slate-300">x</span>
+                <span className="text-teal-100">x</span>
               </button>
             ))}
           </div>

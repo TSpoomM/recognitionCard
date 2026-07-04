@@ -6,7 +6,7 @@ import { PendingSubmission } from "./types/pendingSubmission";
 import { HomeState } from "./types/homeState";
 import { User } from "./types/user";
 import { Language, TRANSLATIONS } from "./constants/translations";
-import { LanguageContext } from "./context/LanguageContext";
+import { getInitialLanguage, LanguageContext, persistLanguage } from "./context/LanguageContext";
 import RecognitionStepper from "./components/features/recognition/Stepper";
 import RecognitionHeader from "./components/features/recognition/RecognitionHeader";
 import RecognitionUserStep from "./components/features/userSelected/RecognitionUserStep";
@@ -19,9 +19,17 @@ import Card from "./components/ui/Card";
 import Navbar from "./components/ui/Navbar";
 import { RecognitionEngine } from "./lib/RecognitionEngine";
 import { getClientCurrentUserId, isSameUserId } from "./lib/currentUser";
-import { STAR_COMMENT_MAX_LENGTH, STAR_COMMENT_MIN_LENGTH } from "./constants/recognitionFlow";
+import { STAR_COMMENT_MAX_LENGTH, STAR_COMMENT_MIN_LENGTH, STAR_SECTION_MIN_LENGTH } from "./constants/recognitionFlow";
 
 type PageState = HomeState & { lang: Language };
+type StarSectionKey = "s" | "t" | "a" | "r";
+
+const STAR_SECTION_LABELS: Record<StarSectionKey, string> = {
+  s: "Situation",
+  t: "Task",
+  a: "Action",
+  r: "Result",
+};
 
 export default class Home extends Component<Record<string, never>, PageState> {
   private intervalId: number | null = null;
@@ -89,10 +97,52 @@ export default class Home extends Component<Record<string, never>, PageState> {
   }
 
   private get commentLength() {
-    return this.state.comment.trim().length;
+    const sections = this.starSections;
+    return (Object.keys(sections) as StarSectionKey[]).reduce((total, key) => total + sections[key].trim().length, 0);
+  }
+
+  private get starSections(): Record<StarSectionKey, string> {
+    const sections: Record<StarSectionKey, string> = { s: "", t: "", a: "", r: "" };
+
+    if (!this.state.comment.trim()) {
+      return sections;
+    }
+
+    const sectionMap: Record<string, StarSectionKey> = {
+      S: "s",
+      T: "t",
+      A: "a",
+      R: "r",
+    };
+    let currentSection: StarSectionKey | null = null;
+
+    this.state.comment.split(/\n/).forEach((line) => {
+      const match = line.match(/^(S|T|A|R)\s*[:\-]?\s*(.*)$/i);
+
+      if (match) {
+        const key = sectionMap[match[1].toUpperCase()];
+        if (key) {
+          sections[key] = match[2];
+          currentSection = key;
+          return;
+        }
+      }
+
+      if (currentSection) {
+        sections[currentSection] = `${sections[currentSection]}${sections[currentSection] ? "\n" : ""}${line}`;
+      }
+    });
+
+    return sections;
+  }
+
+  private get firstInvalidStarSection() {
+    const sections = this.starSections;
+    return (Object.keys(sections) as StarSectionKey[]).find((key) => sections[key].trim().length < STAR_SECTION_MIN_LENGTH) ?? null;
   }
 
   componentDidMount() {
+    this.setState({ lang: getInitialLanguage() });
     this.loadUsers();
     this.setState({
       pendingSubmissions: RecognitionEngine.loadSubmissions(),
@@ -184,8 +234,12 @@ export default class Home extends Component<Record<string, never>, PageState> {
   }
 
   private confirmExpiredSubmissions() {
-    const next = RecognitionEngine.updatePendingStatuses(this.state.pendingSubmissions);
+    const next = this.state.pendingSubmissions.map((submission) => {
+      if (submission.id === this.state.editingId) return submission;
+      return RecognitionEngine.updatePendingStatuses([submission])[0];
+    });
     const expired = next.filter((submission, index) =>
+      submission.id !== this.state.editingId &&
       submission.status === "sent" &&
       this.state.pendingSubmissions[index]?.status === "pending"
     );
@@ -286,7 +340,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
   };
 
   private submitRecognition = () => {
-    const { selectedUserIds, selectedTypes, comment, editingId, pendingSubmissions, currentUserId } = this.state;
+    const { selectedUserIds, selectedTypes, comment, editingId, pendingSubmissions, currentUserId, lang } = this.state;
     const { t } = this;
 
     if (!currentUserId) {
@@ -309,6 +363,16 @@ export default class Home extends Component<Record<string, never>, PageState> {
       return;
     }
 
+    const invalidStarSection = this.firstInvalidStarSection;
+    if (invalidStarSection) {
+      const label = STAR_SECTION_LABELS[invalidStarSection];
+      const formError = lang === "th"
+        ? `${label} ต้องมีอย่างน้อย ${STAR_SECTION_MIN_LENGTH} ตัวอักษร`
+        : `${label} must be at least ${STAR_SECTION_MIN_LENGTH} characters.`;
+      this.setState({ currentStep: 3, formError, formSuccess: "" });
+      return;
+    }
+
     if (this.commentLength < STAR_COMMENT_MIN_LENGTH) {
       this.setState({ currentStep: 3, formError: t.errorCommentTooShort(this.commentLength), formSuccess: "" });
       return;
@@ -322,7 +386,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
     if (editingId) {
       const updated = pendingSubmissions.map((submission) =>
         submission.id === editingId
-          ? { ...submission, users: this.selectedUsers, types: selectedTypes, comment }
+          ? { ...submission, users: this.selectedUsers, types: selectedTypes, comment, createdAt: Date.now(), status: "pending" as const }
           : submission
       );
       this.persistSubmissions(updated);
@@ -380,26 +444,13 @@ export default class Home extends Component<Record<string, never>, PageState> {
   };
 
   private handleConfirmPending = (submissionId: string) => {
-    const { pendingSubmissions, editingId, selectedTypes, comment } = this.state;
+    const { pendingSubmissions, editingId } = this.state;
 
-    // If this submission is currently being edited, use the live form values
-    // instead of the stale data stored in pendingSubmissions.
     if (editingId === submissionId) {
-      const base = pendingSubmissions.find((item) => item.id === submissionId);
-      if (base) {
-        const updated = {
-          ...base,
-          users: this.selectedUsers,
-          types: selectedTypes,
-          comment,
-        };
-        // Persist the edits first so the queue UI reflects them
-        const next = pendingSubmissions.map((item) =>
-          item.id === submissionId ? updated : item
-        );
-        this.persistSubmissions(next);
-        this.sendSubmission(updated);
-      }
+      this.setState({
+        formError: "Finish updating this card before confirming it.",
+        formSuccess: "",
+      });
       return;
     }
 
@@ -410,6 +461,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
   };
 
   private handleSetLang = (lang: Language) => {
+    persistLanguage(lang);
     this.setState({ lang });
   };
 
@@ -469,6 +521,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
         comment={comment}
         commentLength={this.commentLength}
         minLength={STAR_COMMENT_MIN_LENGTH}
+        sectionMinLength={STAR_SECTION_MIN_LENGTH}
         maxLength={STAR_COMMENT_MAX_LENGTH}
         onCommentChange={this.handleCommentChange}
       />
@@ -488,37 +541,43 @@ export default class Home extends Component<Record<string, never>, PageState> {
         }}
       >
         <Navbar currentUserId={currentUserId} />
-        <div className="min-h-screen bg-background px-4 py-8 text-slate-900 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-6xl">
-            <RecognitionStepper currentStep={currentStep} steps={t.stepLabels as unknown as string[]} />
-            <Card bordered={false} padding="xl" shadow="xl" className="mb-10">
-              <RecognitionHeader currentUserId={currentUserId} />
+        <div className="app-page-shell">
+          <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[300px_minmax(0,1fr)] lg:items-start">
+            <aside className="lg:sticky lg:top-24">
+              <RecognitionStepper currentStep={currentStep} steps={t.stepLabels as unknown as string[]} />
+            </aside>
+
+            <main className="min-w-0">
+              <Card bordered={false} padding="xl" shadow="xl" className="app-surface mb-10">
+                <RecognitionHeader currentUserId={currentUserId} />
 
 
-              <form onSubmit={this.handleSubmit} className="space-y-8">
-                <Card padding="lg">
-                  {this.renderCurrentStep()}
-                </Card>
+                <form onSubmit={this.handleSubmit} className="space-y-8">
+                  <div className="app-panel rounded-3xl p-5 sm:p-6">
+                    {this.renderCurrentStep()}
+                  </div>
 
-                <FormMessages
-                  error={formError}
-                  success={formSuccess}
-                  onClearError={() => this.setState({ formError: "" })}
-                  onClearSuccess={() => this.setState({ formSuccess: "" })}
-                />
-                <FormActions
-                  currentStep={currentStep}
-                  onPrevStep={this.handlePrevStep}
-                  onNextStep={this.handleNextStep}
-                  onSubmitRecognition={() => {
-                    this.submitRecognition();
-                  }}
-                />
-              </form>
-            </Card>
+                  <FormMessages
+                    error={formError}
+                    success={formSuccess}
+                    onClearError={() => this.setState({ formError: "" })}
+                    onClearSuccess={() => this.setState({ formSuccess: "" })}
+                  />
+                  <FormActions
+                    currentStep={currentStep}
+                    onPrevStep={this.handlePrevStep}
+                    onNextStep={this.handleNextStep}
+                    onSubmitRecognition={() => {
+                      this.submitRecognition();
+                    }}
+                  />
+                </form>
+              </Card>
+            </main>
           </div>
           <RecognitionQueueButton
             submissions={this.state.pendingSubmissions}
+            editingSubmissionId={this.state.editingId}
             onEditPending={this.handleEditPending}
             onDeletePending={this.handleDeletePending}
             onConfirmPending={this.handleConfirmPending}

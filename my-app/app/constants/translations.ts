@@ -7,6 +7,7 @@ export const TRANSLATIONS = {
     // headerTitle: 'Send Recognition',
     headerReport: 'Report',
     headerHistory: 'History',
+    headerHome: 'Home',
 
     // Stepper
     stepperTitle: (current: number, total: number) => `Step ${current} of ${total}`,
@@ -51,6 +52,7 @@ export const TRANSLATIONS = {
     queueConfirmed: 'Confirmed',
     queueTo: 'To:',
     edit: 'Edit',
+    editing: 'Editing',
     delete: 'Delete',
     confirmNow: 'Confirm now',
 
@@ -104,6 +106,7 @@ export const TRANSLATIONS = {
     // headerTitle: 'ส่ง Recognition',
     headerReport: 'รายงาน',
     headerHistory: 'ประวัติ',
+    headerHome: 'หน้าหลัก',
 
     // Stepper
     stepperTitle: (current: number, total: number) => `ขั้นตอนที่ ${current} จาก ${total}`,
@@ -148,6 +151,7 @@ export const TRANSLATIONS = {
     queueConfirmed: 'ยืนยันแล้ว',
     queueTo: 'ถึง:',
     edit: 'แก้ไข',
+    editing: 'กำลังแก้ไข',
     delete: 'ลบ',
     confirmNow: 'ยืนยันทันที',
 

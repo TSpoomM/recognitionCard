@@ -43,7 +43,7 @@ export default class HistoryList extends Component<HistoryListProps> {
 
     if (items.length === 0) {
       return (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-10 text-center text-base text-slate-500">
+        <div className="app-muted-panel rounded-2xl border-dashed p-10 text-center text-base text-slate-500">
           No sent recognitions yet.
         </div>
       );
@@ -52,7 +52,7 @@ export default class HistoryList extends Component<HistoryListProps> {
     return (
       <div className="space-y-5">
         {items.map((item) => (
-          <article key={item.id} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <article key={item.id} className="app-panel rounded-3xl p-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
                 <h2 className="text-2xl font-bold text-slate-950">
@@ -62,7 +62,7 @@ export default class HistoryList extends Component<HistoryListProps> {
                   {item.recipient.role || item.recipient.email || `Employee #${item.recipient.user_id}`}
                 </p>
               </div>
-              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-600">
+              <span className="app-chip inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-sm font-semibold">
                 <Clock className="h-4 w-4" />
                 {formatDate(item.createdDate)}
               </span>

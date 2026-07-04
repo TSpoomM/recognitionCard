@@ -38,14 +38,14 @@ export default function Modal({ open, onClose, title, description, children, foo
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/30 p-4" onClick={onClose}>
             <div
-                className="w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-xl shadow-slate-200/80"
+                className="app-surface w-full max-w-lg overflow-hidden rounded-3xl"
                 onClick={(event) => event.stopPropagation()}
                 role="dialog"
                 aria-modal="true"
                 aria-label={title}
             >
                 {title || description ? (
-                    <div className="border-b border-slate-200 px-6 py-5">
+                    <div className="border-b-[1.5px] border-amber-300 px-6 py-5">
                         <div className="flex items-start justify-between gap-4">
                             <div className="min-w-0 flex-1">
                                 {title ? (
@@ -58,7 +58,7 @@ export default function Modal({ open, onClose, title, description, children, foo
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-slate-300 hover:text-slate-900"
+                                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-[1.5px] border-amber-300 bg-white text-slate-500 transition hover:border-amber-400 hover:text-teal-900"
                                 aria-label="Close"
                             >
                                 <CloseIcon />
@@ -70,7 +70,7 @@ export default function Modal({ open, onClose, title, description, children, foo
                 <div className="px-6 py-5">{children}</div>
 
                 {footer ? (
-                    <div className="border-t border-slate-200 px-6 py-4">{footer}</div>
+                    <div className="border-t-[1.5px] border-amber-300 px-6 py-4">{footer}</div>
                 ) : null}
             </div>
         </div>

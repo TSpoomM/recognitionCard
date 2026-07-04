@@ -1,6 +1,7 @@
 'use client';
 
 import { Component, ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { AlertCircleIcon, CheckIcon } from "./Icons";
 
@@ -14,11 +15,24 @@ type ToastProps = {
   duration?: number;
 };
 
-export default class Toast extends Component<ToastProps> {
+type ToastState = {
+  mounted: boolean;
+};
+
+export default class Toast extends Component<ToastProps, ToastState> {
   private timeoutId: number | null = null;
+
+  constructor(props: ToastProps) {
+    super(props);
+    this.state = {
+      mounted: false,
+    };
+  }
 
   componentDidMount() {
     const { autoClose = true, duration = 4000, onClose } = this.props;
+    this.setState({ mounted: true });
+
     if (autoClose) {
       this.timeoutId = window.setTimeout(() => {
         onClose();
@@ -35,36 +49,41 @@ export default class Toast extends Component<ToastProps> {
   private get icon() {
     const { type } = this.props;
     if (type === "error") {
-      return <AlertCircleIcon className="h-5 w-5 flex-shrink-0" />;
+      return <AlertCircleIcon className="h-7 w-7 flex-shrink-0 text-red-600" />;
     }
-    return <CheckIcon className="h-5 w-5 flex-shrink-0" />;
+    return <CheckIcon className="h-7 w-7 flex-shrink-0 text-emerald-700" />;
   }
 
-  private get backgroundColor() {
+  private get toneClassName() {
     const { type } = this.props;
     if (type === "error") {
-      return "bg-red-500";
+      return "border-red-300 bg-red-50/95 text-red-800 shadow-red-900/10";
     }
-    return "bg-emerald-500";
+    return "border-emerald-300 bg-emerald-50/95 text-emerald-900 shadow-emerald-900/10";
   }
 
   render() {
     const { message, onClose } = this.props;
-    const bgColor = this.backgroundColor;
 
-    return (
+    if (!this.state.mounted) {
+      return null;
+    }
+
+    return createPortal(
       <div
-        className={`fixed bottom-6 right-6 z-50 flex max-w-sm items-center gap-3 rounded-xl ${bgColor} px-4 py-4 text-white shadow-lg shadow-slate-900/20`}
+        className={`fixed right-6 top-6 z-[80] flex w-[min(92vw,34rem)] items-center gap-4 rounded-2xl border-2 px-5 py-4 shadow-lg backdrop-blur ${this.toneClassName}`}
       >
         {this.icon}
-        <p className="flex-1 text-sm font-medium">{message}</p>
+        <p className="flex-1 text-lg font-semibold leading-7">{message}</p>
         <button
           onClick={onClose}
-          className="inline-flex h-6 w-6 items-center justify-center rounded-full hover:bg-white hover:bg-opacity-20 transition"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition hover:bg-white/70"
+          aria-label="Close notification"
         >
-          <X className="h-4 w-4" />
+          <X className="h-5 w-5" />
         </button>
-      </div>
+      </div>,
+      document.body
     );
   }
 }

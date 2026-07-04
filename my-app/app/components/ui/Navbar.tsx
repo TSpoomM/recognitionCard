@@ -5,7 +5,7 @@ import { buildCurrentUserHref } from "../../lib/currentUser";
 import { reportAccessClient } from "../../lib/reportAccessClient";
 import { LanguageContext } from "../../context/LanguageContext";
 import LanguageSwitcher from "./LanguageSwitcher";
-import { FileText, Clock } from "lucide-react";
+import { FileText, Clock, House } from "lucide-react";
 
 type NavbarProps = {
   currentUserId: string;
@@ -14,6 +14,7 @@ type NavbarProps = {
 type NavbarState = {
   isAdmin: boolean;
   isLoadingAccess: boolean;
+  currentPath: string;
 };
 
 export default class Navbar extends Component<NavbarProps, NavbarState> {
@@ -28,11 +29,19 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
     this.state = {
       isAdmin: false,
       isLoadingAccess: true,
+      currentPath: "",
     };
   }
 
   componentDidMount() {
+    this.setState({ currentPath: window.location.pathname });
     this.loadAdminAccess();
+  }
+
+  componentDidUpdate(prevProps: NavbarProps) {
+    if (prevProps.currentUserId !== this.props.currentUserId) {
+      this.loadAdminAccess();
+    }
   }
 
   componentWillUnmount() {
@@ -46,6 +55,8 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
       return;
     }
 
+    this.setState({ isLoadingAccess: true });
+
     try {
       const access = await reportAccessClient.getAccess(currentUserId);
       if (this.cancelled) return;
@@ -58,18 +69,28 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
 
   render() {
     const { currentUserId } = this.props;
-    const { isAdmin } = this.state;
+    const { currentPath, isAdmin } = this.state;
     const { t } = this.context;
+    const showReport = isAdmin || currentPath === "/report";
+    const getNavItemClassName = (active: boolean, tone: "default" | "report" = "default") => {
+      if (active) {
+        return tone === "report"
+          ? "inline-flex h-12 items-center justify-center gap-2 rounded-2xl border-[1.5px] border-amber-400 bg-amber-100 px-5 text-base font-bold text-amber-950 shadow-sm shadow-amber-900/10 transition hover:border-amber-400 hover:bg-amber-100"
+          : "inline-flex h-12 items-center justify-center gap-2 rounded-2xl border-[1.5px] border-amber-400 bg-teal-800 px-5 text-base font-bold text-white shadow-sm shadow-teal-900/20 transition hover:bg-teal-900";
+      }
+
+      return "inline-flex h-12 items-center justify-center gap-2 rounded-2xl border-[1.5px] border-amber-300 bg-white/90 px-5 text-base font-semibold text-slate-900 transition hover:border-amber-400 hover:bg-amber-50";
+    };
 
     return (
-      <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white shadow-sm">
+      <nav className="sticky top-0 z-40 border-b-[1.5px] border-amber-300 bg-white/85 shadow-sm shadow-teal-900/5 backdrop-blur">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between gap-4">
+          <div className="flex h-20 items-center justify-between gap-4">
             <a
               href={buildCurrentUserHref("/", currentUserId)}
-              className="flex items-center gap-2 text-xl font-bold text-slate-900 transition hover:text-slate-700"
+              className="flex items-center gap-3 text-2xl font-bold text-slate-900 transition hover:text-teal-800"
             >
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-violet-500 to-slate-900" />
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-400 via-teal-700 to-teal-950" />
               <span className="hidden sm:inline">Recognition</span>
             </a>
 
@@ -77,19 +98,27 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
               <LanguageSwitcher />
 
               <a
-                href={buildCurrentUserHref("/history", currentUserId)}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-900 transition hover:border-slate-400 hover:bg-slate-50"
+                href={buildCurrentUserHref("/", currentUserId)}
+                className={getNavItemClassName(currentPath === "/")}
               >
-                <Clock className="h-4 w-4" />
+                <House className="h-5 w-5" />
+                <span className="hidden sm:inline">{t.headerHome ?? "Home"}</span>
+              </a>
+
+              <a
+                href={buildCurrentUserHref("/history", currentUserId)}
+                className={getNavItemClassName(currentPath === "/history")}
+              >
+                <Clock className="h-5 w-5" />
                 <span className="hidden sm:inline">{t.headerHistory}</span>
               </a>
 
-              {isAdmin && (
+              {showReport && (
                 <a
                   href={buildCurrentUserHref("/report", currentUserId)}
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-violet-300 bg-violet-50 px-4 text-sm font-semibold text-violet-800 transition hover:border-violet-400 hover:bg-violet-100"
+                  className={getNavItemClassName(currentPath === "/report", "report")}
                 >
-                  <FileText className="h-4 w-4" />
+                  <FileText className="h-5 w-5" />
                   <span className="hidden sm:inline">{t.headerReport}</span>
                 </a>
               )}

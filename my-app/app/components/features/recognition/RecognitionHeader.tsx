@@ -16,7 +16,7 @@ export default class RecognitionHeader extends Component<RecognitionHeaderProps>
 
     return (
       <div>
-        <p className="mb-2 text-4xl uppercase tracking-[0.2em] text-slate-500">{t.headerLabel}</p>
+        <p className="mb-5 text-4xl uppercase tracking-[0.2em] text-slate-500">{t.headerLabel}</p>
       </div>
     );
   }

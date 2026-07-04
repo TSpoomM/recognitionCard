@@ -11,6 +11,7 @@ type RecognitionCommentStepProps = {
   comment: string;
   commentLength: number;
   minLength: number;
+  sectionMinLength: number;
   maxLength: number;
   onCommentChange: (comment: string) => void;
 };
@@ -104,10 +105,15 @@ export default class RecognitionCommentStep extends Component<RecognitionComment
   };
 
   render() {
-    const { users, selectedTypes, commentLength, minLength, maxLength } = this.props;
+    const { users, selectedTypes, commentLength, minLength, sectionMinLength, maxLength } = this.props;
     const { t, lang } = this.context;
-    const isBelowMinimum = commentLength < minLength;
     const remainingCharacters = maxLength - commentLength;
+    const sectionMinimumLabel = lang === "th"
+      ? `ขั้นต่ำ ${sectionMinLength} ตัวอักษร`
+      : `Min ${sectionMinLength} characters`;
+    const allSectionsMinimumLabel = lang === "th"
+      ? `แต่ละช่อง STAR ต้องมีอย่างน้อย ${sectionMinLength} ตัวอักษร`
+      : `Each STAR box needs at least ${sectionMinLength} characters.`;
 
     const starSections = [
       { key: "s" as const, label: "S", title: t.step3Situation, placeholder: t.step3SituationPlaceholder },
@@ -119,7 +125,7 @@ export default class RecognitionCommentStep extends Component<RecognitionComment
     return (
       <div className="mx-auto max-w-5xl">
         <div className="mb-6 flex items-start gap-3">
-          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-slate-950 text-white">
+          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-teal-800 text-white shadow-sm shadow-teal-900/25">
             <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M5 5h14v12H8l-3 3V5Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
               <path d="m9 11 2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -131,11 +137,11 @@ export default class RecognitionCommentStep extends Component<RecognitionComment
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <div className="rounded-2xl border-[1.5px] border-amber-300 bg-teal-50/50 p-4">
           <div className="flex flex-wrap items-center gap-2 text-base text-slate-600">
             <span className="font-medium">{t.step3To}</span>
             {users.map((user) => (
-              <span key={user.user_id} className="rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 ring-1 ring-slate-200">
+              <span key={user.user_id} className="rounded-full border-[1.5px] border-amber-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700">
                 {user.firstName} {user.lastName}
               </span>
             ))}
@@ -154,34 +160,60 @@ export default class RecognitionCommentStep extends Component<RecognitionComment
           </div>
         </div>
 
-        <div className="mt-5 grid gap-4 xl:grid-cols-4 lg:grid-cols-2">
-          {starSections.map((section) => (
-            <div key={section.key} className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
-              <div className="mb-2 flex items-center gap-2">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-950 text-base font-semibold text-white">
-                  {section.label}
-                </span>
-                <div>
-                  <p className="text-base font-semibold text-slate-900">{section.title}</p>
-                  <p className="text-sm text-slate-500">{section.placeholder}</p>
+        <div className="mt-5 grid gap-4 lg:grid-cols-2">
+          {starSections.map((section) => {
+            const sectionLength = this.state[section.key].trim().length;
+            const sectionIsTooShort = sectionLength < sectionMinLength;
+
+            return (
+              <div
+                key={section.key}
+                className={`rounded-3xl border-[1.5px] p-4 shadow-sm shadow-teal-900/5 transition ${sectionIsTooShort
+                  ? "border-amber-300 bg-amber-50/20"
+                  : "border-amber-300 bg-white"
+                  }`}
+              >
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-teal-800 text-base font-semibold text-white">
+                    {section.label}
+                  </span>
+                  <div>
+                    <p className="text-base font-semibold text-slate-900">{section.title}</p>
+                    <p className="text-sm text-slate-500">{section.placeholder}</p>
+                  </div>
+                </div>
+                <textarea
+                  value={this.state[section.key]}
+                  onChange={this.handleChange(section.key)}
+                  maxLength={maxLength}
+                  rows={5}
+                  placeholder={section.placeholder}
+                  className={`min-h-[150px] w-full rounded-2xl border-[1.5px] p-3 text-lg text-slate-900 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-100 ${sectionIsTooShort
+                    ? "border-amber-300 bg-white"
+                    : "border-amber-300 bg-teal-50/30"
+                    }`}
+                />
+                <div className="mt-2 flex items-center justify-between gap-3 text-xs font-medium">
+                  <span className={sectionIsTooShort ? "text-amber-600" : "text-emerald-700"}>
+                    {sectionMinimumLabel}
+                  </span>
+                  <span className={sectionIsTooShort ? "text-amber-600" : "text-slate-500"}>
+                    {/* {sectionLength}/{sectionMinLength} */}
+                    {sectionLength}
+                  </span>
                 </div>
               </div>
-              <textarea
-                value={this.state[section.key]}
-                onChange={this.handleChange(section.key)}
-                maxLength={maxLength}
-                rows={5}
-                placeholder={section.placeholder}
-                className="min-h-[150px] w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 text-lg text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-              />
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="mt-3 flex items-center justify-between gap-3 text-sm">
-          <span className={isBelowMinimum ? "text-amber-600" : "text-emerald-700"}>
-            {t.step3LengthRequirement(minLength)}
-          </span>
+          <div className="flex flex-col gap-1 text-slate-500 sm:flex-row sm:items-center sm:gap-3">
+            <span>{allSectionsMinimumLabel}</span>
+            <span className={commentLength < minLength ? "text-amber-600" : "text-emerald-700"}>
+              {t.step3LengthRequirement(minLength)}
+            </span>
+          </div>
           <span className={remainingCharacters <= 30 ? "font-semibold text-amber-600" : "text-slate-500"}>
             {commentLength}/{maxLength}
           </span>
