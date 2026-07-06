@@ -19,7 +19,7 @@ export default class RecognitionUserSelect extends Component<RecognitionUserSele
 
     return (
       <div className="max-h-[640px] overflow-y-auto pr-2 sm:max-h-[360px]">
-        <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
+        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
           {users.map((user) => {
             const selected = selectedUserIds.includes(user.user_id);
             return (

@@ -111,7 +111,7 @@ export function downloadReportPdf(rows: ReportRow[]) {
     body: rows.map((row) => [
       row.personName,
       row.branch,
-      row.coreValueLabel || "-",
+      (row.coreValueLabel || "-").replace(/,\s*/g, "\n\n"),
       row.comment,
       row.senderName,
       formatDate(row.createdAt),
@@ -129,6 +129,8 @@ export function downloadReportPdf(rows: ReportRow[]) {
       textColor: COLORS.ink,
       valign: "middle",
       minCellHeight: 7,
+      cellWidth: 'wrap',
+      halign: 'left',
     },
     headStyles: {
       font: FONT,

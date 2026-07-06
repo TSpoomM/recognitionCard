@@ -9,6 +9,7 @@ import { getClientCurrentUserId } from "../lib/currentUser";
 import { reportAccessClient } from "../lib/reportAccessClient";
 import { downloadReportCsv, downloadReportPdf } from "../lib/reportExport";
 import { ReportData, ReportEmployee, ReportRow } from "../types/report";
+import { COMMENT_TYPE_META, COMMENT_TYPES, CommentType } from "../types/commentType";
 import { Language, TRANSLATIONS } from "../constants/translations";
 import { getInitialLanguage, LanguageContext, persistLanguage } from "../context/LanguageContext";
 type ReportPageState = {
@@ -25,6 +26,38 @@ type ReportPageState = {
   query: string;
   expandedRowIds: string[];
 };
+type GroupedReportRow = Omit<ReportRow, "coreValue" | "coreValueLabel"> & {
+  coreValues: string[];
+  coreValueLabels: string[];
+};
+
+function normalizeCoreValueCode(value: string) {
+  const raw = value.trim().toUpperCase();
+  const beforeParen = raw.replace(/\(.*\)$/, "").trim();
+  const candidate = beforeParen.replace(/\s+/g, "_").replace(/[^A-Z0-9_]/g, "_").replace(/^_+|_+$/g, "");
+  if (COMMENT_TYPES.includes(candidate as CommentType)) return candidate;
+  const fallback = COMMENT_TYPES.find((type) => beforeParen.includes(type));
+  return fallback || candidate;
+}
+
+function getCoreValueDisplayLabel(value: string) {
+  const code = normalizeCoreValueCode(value);
+  const meta = COMMENT_TYPE_META[code as CommentType];
+  return meta ? meta.en : value.trim();
+}
+
+function sortReportCoreValues(values: string[]) {
+  return [...values].sort((a, b) => {
+    const indexA = COMMENT_TYPES.indexOf(a.toUpperCase() as CommentType);
+    const indexB = COMMENT_TYPES.indexOf(b.toUpperCase() as CommentType);
+
+    if (indexA === -1 && indexB === -1) return 0;
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+  });
+}
+
 export default class ReportPage extends Component<Record<string, never>, ReportPageState> {
   private cancelled = false;
   constructor(props: Record<string, never>) {
@@ -79,6 +112,40 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
       if (selectedYear && row.year !== Number(selectedYear)) return false;
       return true;
     });
+  }
+
+  private get groupedRows(): GroupedReportRow[] {
+    const grouped = new Map<string, GroupedReportRow>();
+
+    for (const row of this.filteredRows) {
+      const groupKey = row.id.split("-").slice(0, 2).join("-");
+      const coreValueCode = normalizeCoreValueCode(row.coreValue || "");
+      const displayLabel = getCoreValueDisplayLabel(row.coreValue || "");
+      const existing = grouped.get(groupKey);
+
+      if (!existing) {
+        grouped.set(groupKey, {
+          ...row,
+          id: groupKey,
+          coreValues: coreValueCode ? [coreValueCode] : [],
+          coreValueLabels: coreValueCode ? [displayLabel] : [],
+        });
+        continue;
+      }
+
+      if (coreValueCode && !existing.coreValues.includes(coreValueCode)) {
+        existing.coreValues.push(coreValueCode);
+      }
+      if (coreValueCode && displayLabel && !existing.coreValueLabels.includes(displayLabel)) {
+        existing.coreValueLabels.push(displayLabel);
+      }
+    }
+
+    return Array.from(grouped.values()).map((row) => ({
+      ...row,
+      coreValues: sortReportCoreValues(row.coreValues),
+      coreValueLabels: row.coreValueLabels,
+    }));
   }
   private async loadAccess() {
     const currentUserId = getClientCurrentUserId();
@@ -200,11 +267,17 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
       expandedRowIds,
     } = this.state;
     const rows = this.filteredRows;
+    const displayRows = this.groupedRows;
+    const exportRows = displayRows.map((row) => ({
+      ...row,
+      coreValue: row.coreValues.join(", "),
+      coreValueLabel: row.coreValueLabels.join(", "),
+    }));
     const employees = this.filteredEmployees;
     const totalRows = data?.rows.length ?? 0;
     const activeFilterCount = selectedBranches.length + selectedPeople.length + (selectedYear ? 1 : 0);
-    const visibleRecipientCount = new Set(rows.map((row) => row.personId)).size;
-    const visibleBranchCount = new Set(rows.map((row) => row.branch).filter(Boolean)).size;
+    const visibleRecipientCount = displayRows.length;
+    const visibleBranchCount = new Set(displayRows.map((row) => row.branch).filter(Boolean)).size;
     const reportLabels = this.state.lang === "th"
       ? {
         results: "ผลลัพธ์",
@@ -271,16 +344,16 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                     variant="secondary"
                     className="h-12 rounded-full"
                     icon={<FileText className="h-5 w-5" />}
-                    disabled={rows.length === 0}
-                    onClick={() => downloadReportCsv(rows)}
+                    disabled={displayRows.length === 0}
+                    onClick={() => downloadReportCsv(exportRows)}
                   >
                     {this.t.reportExportCsv}
                   </Button>
                   <Button
                     className="h-12 rounded-full px-5"
                     icon={<FileText className="h-5 w-5" />}
-                    disabled={rows.length === 0}
-                    onClick={() => downloadReportPdf(rows)}
+                    disabled={displayRows.length === 0}
+                    onClick={() => downloadReportPdf(exportRows)}
                   >
                     {this.t.reportExportPdf}
                   </Button>
@@ -288,7 +361,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
               </div>
               <div className="grid gap-3 px-6 py-5 sm:grid-cols-2 sm:px-8 xl:grid-cols-4">
                 {[
-                  { label: reportLabels.results, value: rows.length.toLocaleString(), helper: `${totalRows.toLocaleString()} ${reportLabels.allRows}`, icon: FileText },
+                  { label: reportLabels.results, value: displayRows.length.toLocaleString(), helper: `${totalRows.toLocaleString()} ${reportLabels.allRows}`, icon: FileText },
                   { label: reportLabels.recipients, value: visibleRecipientCount.toLocaleString(), helper: `${employees.length.toLocaleString()} ${reportLabels.recipients}`, icon: Users },
                   { label: reportLabels.branches, value: visibleBranchCount.toLocaleString(), helper: `${data?.branches.length ?? 0} ${reportLabels.branches}`, icon: MapPin },
                   { label: reportLabels.year, value: selectedYear || reportLabels.allYears, helper: `${activeFilterCount} ${reportLabels.activeFilters}`, icon: CalendarDays },
@@ -320,8 +393,8 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                   {this.t.historyLoading}
                 </Card>
               ) : (
-                <div className="grid gap-5 px-6 pb-6 sm:px-8 lg:grid-cols-[18rem_minmax(0,1fr)] xl:grid-cols-[19rem_minmax(0,1fr)]">
-                  <aside className="app-panel rounded-3xl p-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
+                <div className="grid gap-5 px-6 pb-6 sm:px-8 lg:grid-cols-[18rem_minmax(0,1fr)] xl:grid-cols-[19rem_minmax(0,1fr)] lg:items-stretch">
+                  <aside className="app-panel rounded-3xl p-5 lg:h-full lg:self-stretch">
                     <div className="mb-5 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2">
                         <span className="grid h-10 w-10 place-items-center rounded-xl bg-teal-50 text-teal-800">
@@ -329,9 +402,9 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                         </span>
                         <div>
                           <h2 className="text-xl font-semibold text-slate-900">{this.t.reportFilters}</h2>
-                          <p className="text-base text-slate-500">
+                          {/* <p className="text-base text-slate-500">
                             {activeFilterCount > 0 ? `${activeFilterCount} ${reportLabels.activeFilters}` : reportLabels.noActiveFilters}
-                          </p>
+                          </p> */}
                         </div>
                       </div>
                       <button
@@ -476,7 +549,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                         )}
                       </div>
                     </div>
-                    {rows.length === 0 ? (
+                    {displayRows.length === 0 ? (
                       <div className="p-12 text-center text-base text-slate-500">
                         {this.t.historyNoRecognitions}
                       </div>
@@ -486,10 +559,10 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                           <colgroup>
                             <col className="w-[15%]" />
                             <col className="w-[9%]" />
-                            <col className="w-[14%]" />
-                            <col className="w-[37%]" />
-                            <col className="w-[13%]" />
+                            <col className="w-[15%]" />
+                            <col className="w-[32%]" />
                             <col className="w-[12%]" />
+                            <col className="w-[11%]" />
                           </colgroup>
                           <thead className="sticky top-0 z-10 border-b-[1.5px] border-amber-300 bg-teal-50/95 text-left text-sm font-semibold uppercase tracking-wide text-slate-500 backdrop-blur">
                             <tr>
@@ -502,9 +575,8 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                             </tr>
                           </thead>
                           <tbody>
-                            {rows.map((row) => {
+                            {displayRows.map((row) => {
                               const isExpanded = expandedRowIds.includes(row.id);
-                              const isLongComment = row.comment.length > 220;
                               const createdAt = this.formatDateParts(row.createdAt);
                               return (
                                 <tr key={row.id} className="border-b border-amber-100 align-top transition hover:bg-teal-50/35 last:border-b-0">
@@ -513,33 +585,39 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                                   </td>
                                   <td className="truncate px-4 py-4 text-slate-600">{row.branch}</td>
                                   <td className="px-4 py-4">
-                                    {row.coreValueLabel ? (
-                                      <span className="app-chip inline-block max-w-full truncate rounded-full px-2 py-0.5 text-xs font-semibold">
-                                        {row.coreValueLabel}
-                                      </span>
+                                    {row.coreValueLabels?.length ? (
+                                      <div className="flex flex-wrap gap-2">
+                                        {row.coreValueLabels.map((label) => (
+                                          <span key={label} className="app-chip inline-block max-w-full truncate rounded-full px-3 py-1 text-sm font-semibold">
+                                            {label}
+                                          </span>
+                                        ))}
+                                      </div>
                                     ) : (
                                       <span className="text-slate-400">-</span>
                                     )}
                                   </td>
                                   <td className="px-4 py-4 text-slate-700">
-                                    <div
-                                      className={
-                                        isExpanded
-                                          ? "whitespace-pre-wrap break-words"
-                                          : "max-h-24 overflow-y-auto whitespace-pre-wrap break-words pr-1"
-                                      }
-                                    >
-                                      {row.comment || <span className="text-slate-400">-</span>}
-                                    </div>
-                                    {isLongComment && (
-                                      <button
-                                        type="button"
-                                        onClick={() => this.toggleRowExpanded(row.id)}
-                                        className="mt-1 text-xs font-semibold text-slate-500 hover:text-slate-800"
+                                    <div className="flex h-full min-h-[6rem] flex-col">
+                                      <div
+                                        className={
+                                          isExpanded
+                                            ? "whitespace-pre-wrap break-words pr-1"
+                                            : "h-full overflow-y-auto whitespace-pre-wrap break-words pr-1"
+                                        }
                                       >
-                                        {isExpanded ? "Show less" : "Show full comment"}
-                                      </button>
-                                    )}
+                                        {row.comment || <span className="text-slate-400">-</span>}
+                                      </div>
+                                      {/* {row.comment.trim() ? (
+                                        <button
+                                          type="button"
+                                          onClick={() => this.toggleRowExpanded(row.id)}
+                                          className="mt-1 text-xs font-semibold text-slate-500 hover:text-slate-800"
+                                        >
+                                          {isExpanded ? "Show less" : "Show full comment"}
+                                        </button>
+                                      ) : null} */}
+                                    </div>
                                   </td>
                                   <td className="truncate px-4 py-4 text-slate-600">{row.senderName}</td>
                                   <td className="px-4 py-4 text-slate-500">
