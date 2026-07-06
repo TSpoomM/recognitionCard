@@ -218,9 +218,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
         })
       );
 
-      const next = this.state.pendingSubmissions.map((item) =>
-        item.id === submission.id ? { ...item, status: "sent" as const } : item
-      );
+      const next = this.state.pendingSubmissions.filter((item) => item.id !== submission.id);
       this.persistSubmissions(next);
       this.setState({ formError: "", formSuccess: this.t.successSaved });
     } catch (error) {

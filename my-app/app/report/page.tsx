@@ -233,7 +233,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
     if (isLoadingAccess) {
       return (
         <main className="flex min-h-screen items-center justify-center px-6">
-          <p className="text-sm text-slate-600">{this.t.reportCheckingAccess}</p>
+          <p className="text-base text-slate-600">{this.t.reportCheckingAccess}</p>
         </main>
       );
     }
@@ -242,7 +242,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
         <main className="flex min-h-screen items-center justify-center px-6">
           <Card padding="xl" shadow="xl" className="app-surface max-w-md text-center">
             <p className="text-lg font-semibold text-slate-900">{this.t.reportAccessDenied}</p>
-            <p className="mt-2 text-sm text-slate-600">{error || this.t.reportOnlyAdmin}</p>
+            <p className="mt-2 text-base text-slate-600">{error || this.t.reportOnlyAdmin}</p>
           </Card>
         </main>
       );
@@ -298,25 +298,25 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                     <div key={item.label} className="rounded-2xl border-[1.5px] border-amber-300 bg-white/75 p-4 shadow-sm shadow-teal-900/5">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <p className="text-sm font-semibold text-slate-500">{item.label}</p>
+                          <p className="text-base font-semibold text-slate-500">{item.label}</p>
                           <p className="mt-2 text-2xl font-bold text-slate-950">{item.value}</p>
                         </div>
                         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-teal-50 text-teal-800">
                           <Icon className="h-5 w-5" />
                         </span>
                       </div>
-                      <p className="mt-3 text-sm text-slate-500">{item.helper}</p>
+                      <p className="mt-3 text-base text-slate-500">{item.helper}</p>
                     </div>
                   );
                 })}
               </div>
               {error && (
-                <div className="mx-6 mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 sm:mx-8">
+                <div className="mx-6 mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-base text-red-700 sm:mx-8">
                   {error}
                 </div>
               )}
               {isLoadingData ? (
-                <Card padding="lg" className="mx-6 mb-6 p-12 text-center text-sm text-slate-500 sm:mx-8">
+                <Card padding="lg" className="mx-6 mb-6 p-12 text-center text-base text-slate-500 sm:mx-8">
                   {this.t.historyLoading}
                 </Card>
               ) : (
@@ -329,7 +329,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                         </span>
                         <div>
                           <h2 className="text-xl font-semibold text-slate-900">{this.t.reportFilters}</h2>
-                          <p className="text-sm text-slate-500">
+                          <p className="text-base text-slate-500">
                             {activeFilterCount > 0 ? `${activeFilterCount} ${reportLabels.activeFilters}` : reportLabels.noActiveFilters}
                           </p>
                         </div>
@@ -337,7 +337,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                       <button
                         type="button"
                         onClick={this.clearFilters}
-                        className="shrink-0 text-sm font-semibold text-slate-500 hover:text-slate-900"
+                        className="shrink-0 text-base font-semibold text-slate-500 hover:text-slate-900"
                       >
                         {this.t.reportClearFilters}
                       </button>
@@ -345,7 +345,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
 
                     <div className="space-y-6">
                       <div>
-                        <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+                        <p className="mb-3 text-base font-semibold uppercase tracking-wide text-slate-500">
                           {this.t.reportFilterBranch}
                         </p>
                         <div className="flex flex-wrap gap-2">
@@ -370,7 +370,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                             );
                           })}
                           {(data?.branches.length || 0) === 0 && (
-                            <p className="text-sm text-slate-400">{this.t.reportNoFilters}</p>
+                            <p className="text-base text-slate-400">{this.t.reportNoFilters}</p>
                           )}
                         </div>
                       </div>
@@ -388,7 +388,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                       </div>
 
                       <div>
-                        <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+                        <p className="mb-3 text-base font-semibold uppercase tracking-wide text-slate-500">
                           {this.t.reportFilterPeople}
                         </p>
                         <div className="relative mb-3">
@@ -418,7 +418,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                                 />
                                 <span className="min-w-0 flex-1">
                                   <span className="block truncate text-base font-semibold text-slate-800">{employee.name}</span>
-                                  <span className="block truncate text-sm text-slate-500">{employee.branch}</span>
+                                  <span className="block truncate text-base text-slate-500">{employee.branch}</span>
                                 </span>
                               </label>
                             );
@@ -436,11 +436,11 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
                           <h2 className="text-2xl font-semibold text-slate-900">{reportLabels.results}</h2>
-                          <span className="app-chip rounded-full px-3 py-1 text-sm font-semibold">
+                          <span className="app-chip rounded-full px-3 py-1 text-base font-semibold">
                             {rows.length} {reportLabels.rows}
                           </span>
                         </div>
-                        <p className="mt-1 text-sm text-slate-500">
+                        <p className="mt-1 text-base text-slate-500">
                           {activeFilterCount > 0 ? `${activeFilterCount} ${reportLabels.activeFilters}` : reportLabels.noActiveFilters}
                         </p>
                       </div>
@@ -477,7 +477,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                       </div>
                     </div>
                     {rows.length === 0 ? (
-                      <div className="p-12 text-center text-sm text-slate-500">
+                      <div className="p-12 text-center text-base text-slate-500">
                         {this.t.historyNoRecognitions}
                       </div>
                     ) : (

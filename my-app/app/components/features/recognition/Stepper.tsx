@@ -21,8 +21,8 @@ export default class RecognitionStepper extends Component<RecognitionStepperProp
       <Card surface="muted" padding="lg" className="border-[1.5px] border-amber-300 bg-white/70 shadow-sm shadow-teal-900/5 backdrop-blur">
         <div className="flex flex-col gap-6">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-teal-800">{t.stepperTitle(currentStep, steps.length)}</p>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{t.stepperDescription}</p>
+            <p className="text-lg font-semibold uppercase tracking-[0.18em] text-teal-800">{t.stepperTitle(currentStep, steps.length)}</p>
+            <p className="mt-2 text-base leading-6 text-slate-600">{t.stepperDescription}</p>
           </div>
           <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-1">
             {steps.map((label, index) => {

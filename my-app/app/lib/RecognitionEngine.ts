@@ -71,7 +71,7 @@ export class RecognitionEngine {
 
       return parsed
         .map((item) => this.normalizeSubmission(item))
-        .filter((item): item is PendingSubmission => item !== null);
+        .filter((item): item is PendingSubmission => item !== null && item.status === "pending");
     } catch {
       window.localStorage.removeItem(this.STORAGE_KEY);
       return [];
