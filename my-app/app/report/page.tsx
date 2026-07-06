@@ -257,7 +257,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
         <Navbar currentUserId={currentUserId} />
         <div className="app-page-shell">
           <div className="mx-auto max-w-[96rem]">
-            <Card bordered={false} padding="none" shadow="xl" className="app-surface mb-8 overflow-hidden">
+            <Card bordered={false} padding="none" shadow="xl" className="app-surface mb-8 overflow-hidden text-base sm:text-lg">
               <div className="flex flex-col gap-5 border-b-[1.5px] border-amber-300/80 px-6 py-6 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
                 <div className="min-w-0">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-800">
@@ -298,8 +298,8 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                     <div key={item.label} className="rounded-2xl border-[1.5px] border-amber-300 bg-white/75 p-4 shadow-sm shadow-teal-900/5">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <p className="text-base font-semibold text-slate-500">{item.label}</p>
-                          <p className="mt-2 text-2xl font-bold text-slate-950">{item.value}</p>
+                          <p className="text-lg font-semibold text-slate-500">{item.label}</p>
+                          <p className="mt-2 text-3xl font-bold text-slate-950">{item.value}</p>
                         </div>
                         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-teal-50 text-teal-800">
                           <Icon className="h-5 w-5" />
@@ -345,7 +345,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
 
                     <div className="space-y-6">
                       <div>
-                        <p className="mb-3 text-base font-semibold uppercase tracking-wide text-slate-500">
+                        <p className="mb-3 text-lg font-semibold uppercase tracking-wide text-slate-500">
                           {this.t.reportFilterBranch}
                         </p>
                         <div className="flex flex-wrap gap-2">
@@ -398,7 +398,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                             placeholder={reportLabels.searchPeople}
                             value={query}
                             onChange={(e) => this.setState({ query: e.target.value })}
-                            className="app-input w-full rounded-xl py-2 pl-9 pr-3 text-base"
+                            className="app-input w-full rounded-xl py-3 pl-9 pr-3 text-lg"
                           />
                         </div>
                         <div className="max-h-72 space-y-1 overflow-y-auto rounded-2xl border-[1.5px] border-amber-300 bg-white/70 p-2">
@@ -417,7 +417,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                                   className="h-4 w-4 rounded border-amber-300 text-teal-800 focus:ring-amber-300"
                                 />
                                 <span className="min-w-0 flex-1">
-                                  <span className="block truncate text-base font-semibold text-slate-800">{employee.name}</span>
+                                  <span className="block truncate text-lg font-semibold text-slate-800">{employee.name}</span>
                                   <span className="block truncate text-base text-slate-500">{employee.branch}</span>
                                 </span>
                               </label>
@@ -435,8 +435,8 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                     <div className="flex flex-col gap-3 border-b-[1.5px] border-amber-300 p-5 xl:flex-row xl:items-center xl:justify-between">
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
-                          <h2 className="text-2xl font-semibold text-slate-900">{reportLabels.results}</h2>
-                          <span className="app-chip rounded-full px-3 py-1 text-base font-semibold">
+                          <h2 className="text-3xl font-semibold text-slate-900">{reportLabels.results}</h2>
+                          <span className="app-chip rounded-full px-3 py-1 text-lg font-semibold">
                             {rows.length} {reportLabels.rows}
                           </span>
                         </div>
@@ -482,7 +482,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                       </div>
                     ) : (
                       <div className="max-h-[650px] overflow-y-auto overflow-x-auto 2xl:overflow-x-visible">
-                        <table className="w-full min-w-[1080px] table-fixed border-collapse text-base 2xl:min-w-0">
+                        <table className="w-full min-w-[1080px] table-fixed border-collapse text-lg 2xl:min-w-0">
                           <colgroup>
                             <col className="w-[15%]" />
                             <col className="w-[9%]" />
@@ -491,7 +491,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                             <col className="w-[13%]" />
                             <col className="w-[12%]" />
                           </colgroup>
-                          <thead className="sticky top-0 z-10 border-b-[1.5px] border-amber-300 bg-teal-50/95 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-500 backdrop-blur">
+                          <thead className="sticky top-0 z-10 border-b-[1.5px] border-amber-300 bg-teal-50/95 text-left text-sm font-semibold uppercase tracking-wide text-slate-500 backdrop-blur">
                             <tr>
                               <th className="whitespace-nowrap px-4 py-3">Recipients</th>
                               <th className="whitespace-nowrap px-4 py-3">Branch</th>

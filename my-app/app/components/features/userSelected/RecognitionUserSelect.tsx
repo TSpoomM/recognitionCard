@@ -19,7 +19,7 @@ export default class RecognitionUserSelect extends Component<RecognitionUserSele
 
     return (
       <div className="max-h-[640px] overflow-y-auto pr-2 sm:max-h-[360px]">
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
           {users.map((user) => {
             const selected = selectedUserIds.includes(user.user_id);
             return (
@@ -36,7 +36,7 @@ export default class RecognitionUserSelect extends Component<RecognitionUserSele
                   {getInitials(user)}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-lg font-semibold text-slate-900">{user.firstName} {user.lastName}</p>
+                  <p title={`${user.firstName} ${user.lastName}`} className="truncate text-lg font-semibold text-slate-900">{user.firstName} {user.lastName}</p>
                   <p className="mt-1 truncate text-sm text-slate-500">{user.role ? `${user.role}` : user.email}</p>
                   {user.team && <p className="truncate text-sm text-slate-500">{user.team}</p>}
                 </div>

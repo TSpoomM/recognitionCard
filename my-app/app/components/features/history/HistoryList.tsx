@@ -2,7 +2,7 @@
 
 import { Component } from "react";
 import { Clock } from "lucide-react";
-import { COMMENT_TYPE_META, CommentType } from "../../../types/commentType";
+import { COMMENT_TYPE_META, COMMENT_TYPES, CommentType } from "../../../types/commentType";
 import { HistoryItem } from "../../../types/history";
 
 type HistoryListProps = {
@@ -23,6 +23,18 @@ function formatDate(value: string | null) {
 function getCoreValueMeta(value: string) {
   const key = value.toUpperCase() as CommentType;
   return COMMENT_TYPE_META[key];
+}
+
+function sortCoreValues(values: string[]) {
+  return [...values].sort((a, b) => {
+    const indexA = COMMENT_TYPES.indexOf(a.toUpperCase() as CommentType);
+    const indexB = COMMENT_TYPES.indexOf(b.toUpperCase() as CommentType);
+
+    if (indexA === -1 && indexB === -1) return 0;
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+  });
 }
 
 export default class HistoryList extends Component<HistoryListProps> {
@@ -70,12 +82,12 @@ export default class HistoryList extends Component<HistoryListProps> {
 
             {item.coreValues.length > 0 ? (
               <div className="mt-4 flex flex-wrap gap-2">
-                {item.coreValues.map((value) => {
+                {sortCoreValues(item.coreValues).map((value) => {
                   const meta = getCoreValueMeta(value);
                   return (
                     <span
-                      key={value}
-                      className={`rounded-full px-3 py-1.5 text-sm font-bold ${meta?.tint || "bg-slate-100 text-slate-700"}`}
+                      key={`${item.id}-${value}`}
+                      className={`rounded-full px-4 py-2 text-base font-bold ${meta?.tint || "bg-slate-100 text-slate-700"}`}
                     >
                       {meta ? `${meta.emoji} ${meta.en}` : value}
                     </span>
