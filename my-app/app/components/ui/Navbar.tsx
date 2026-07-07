@@ -95,8 +95,6 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
             </a>
 
             <div className="flex items-center gap-2 sm:gap-3">
-              <LanguageSwitcher />
-
               <a
                 href={buildCurrentUserHref("/", currentUserId)}
                 className={getNavItemClassName(currentPath === "/")}
@@ -130,6 +128,8 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
                   <span className="hidden sm:inline">{t.headerReport}</span>
                 </a>
               )}
+
+              <LanguageSwitcher />
             </div>
           </div>
         </div>
