@@ -477,31 +477,33 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                             className="app-input w-full rounded-xl py-3 pl-9 pr-3 text-lg"
                           />
                         </div>
-                        <div className="max-h-72 space-y-1 overflow-y-auto rounded-2xl border-[1.5px] border-amber-300 bg-white/70 p-2">
-                          {employees.map((employee) => {
-                            const active = selectedPeople.includes(employee.user_id);
-                            return (
-                              <label
-                                key={employee.user_id}
-                                className={`flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition ${active ? "bg-teal-50 text-teal-950" : "hover:bg-teal-50/60"
-                                  }`}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={active}
-                                  onChange={() => this.togglePerson(employee.user_id)}
-                                  className="h-4 w-4 rounded border-amber-300 text-teal-800 focus:ring-amber-300"
-                                />
-                                <span className="min-w-0 flex-1">
-                                  <span className="block truncate text-lg font-semibold text-slate-800">{employee.name}</span>
-                                  <span className="block truncate text-base text-slate-500">{employee.branch}</span>
-                                </span>
-                              </label>
-                            );
-                          })}
-                          {employees.length === 0 && (
-                            <p className="py-4 text-center text-xs text-slate-400">{this.t.reportNoFilters}</p>
-                          )}
+                        <div className="rounded-2xl border-[1.5px] border-amber-300 bg-white/70 p-1.5">
+                          <div className="max-h-72 space-y-1 overflow-y-auto rounded-xl p-1">
+                            {employees.map((employee) => {
+                              const active = selectedPeople.includes(employee.user_id);
+                              return (
+                                <label
+                                  key={employee.user_id}
+                                  className={`flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition ${active ? "bg-teal-50 text-teal-950" : "hover:bg-teal-50/60"
+                                    }`}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={active}
+                                    onChange={() => this.togglePerson(employee.user_id)}
+                                    className="h-4 w-4 rounded border-amber-300 text-teal-800 focus:ring-amber-300"
+                                  />
+                                  <span className="min-w-0 flex-1">
+                                    <span className="block truncate text-lg font-semibold text-slate-800">{employee.name}</span>
+                                    <span className="block truncate text-base text-slate-500">{employee.branch}</span>
+                                  </span>
+                                </label>
+                              );
+                            })}
+                            {employees.length === 0 && (
+                              <p className="py-4 text-center text-xs text-slate-400">{this.t.reportNoFilters}</p>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
