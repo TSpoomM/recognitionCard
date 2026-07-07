@@ -5,7 +5,7 @@ import { buildCurrentUserHref } from "../../lib/currentUser";
 import { reportAccessClient } from "../../lib/reportAccessClient";
 import { LanguageContext } from "../../context/LanguageContext";
 import LanguageSwitcher from "./LanguageSwitcher";
-import { FileText, Clock, House } from "lucide-react";
+import { FileText, Clock, House, BookOpen } from "lucide-react";
 
 type NavbarProps = {
   currentUserId: string;
@@ -111,6 +111,14 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
               >
                 <Clock className="h-5 w-5" />
                 <span className="hidden sm:inline">{t.headerHistory}</span>
+              </a>
+
+              <a
+                href={buildCurrentUserHref("/guide", currentUserId)}
+                className={getNavItemClassName(currentPath === "/guide")}
+              >
+                <BookOpen className="h-5 w-5" />
+                <span className="hidden sm:inline">{t.headerGuide}</span>
               </a>
 
               {showReport && (
