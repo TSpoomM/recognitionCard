@@ -42,6 +42,7 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
 
   componentDidMount() {
     this.setState({ lang: getInitialLanguage() });
+    this.setState({ currentUserId: getClientCurrentUserId() });
     this.loadHistory();
   }
 
@@ -75,7 +76,11 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
     this.setState({ currentUserId });
 
     try {
-      const response = await fetch(`/api/diary/history?currentUserId=${encodeURIComponent(currentUserId)}`);
+      const response = await fetch(`/api/diary/history`, {
+        headers: {
+          "x-current-user-id": currentUserId,
+        },
+      });
       const result = await response.json();
 
       if (!response.ok || !result.success || !Array.isArray(result.data)) {
@@ -107,10 +112,12 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
     const items = this.filteredItems;
 
     return (
-      <LanguageContext.Provider value={{ lang, t: TRANSLATIONS[lang], setLang: (newLang: Language) => {
-        persistLanguage(newLang);
-        this.setState({ lang: newLang });
-      } }}>
+      <LanguageContext.Provider value={{
+        lang, t: TRANSLATIONS[lang], setLang: (newLang: Language) => {
+          persistLanguage(newLang);
+          this.setState({ lang: newLang });
+        }
+      }}>
         <Navbar currentUserId={currentUserId} />
         <main className="app-page-shell">
           <div className="mx-auto max-w-5xl">

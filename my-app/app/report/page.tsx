@@ -83,6 +83,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
   }
   componentDidMount() {
     this.setState({ lang: getInitialLanguage() });
+    this.setState({ currentUserId: getClientCurrentUserId() });
     this.loadAccess();
   }
   componentWillUnmount() {
@@ -182,9 +183,11 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
   private async loadReportData(currentUserId: string) {
     this.setState({ isLoadingData: true, error: "" });
     try {
-      const response = await fetch(
-        `/api/report?currentUserId=${encodeURIComponent(currentUserId)}`
-      );
+      const response = await fetch(`/api/report`, {
+        headers: {
+          "x-current-user-id": currentUserId,
+        },
+      });
       const result = await response.json();
       if (!response.ok || !result.success || !result.data) {
         throw new Error(result.error || "Could not load recognition report.");

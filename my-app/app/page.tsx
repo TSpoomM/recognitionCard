@@ -41,7 +41,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
     this.state = {
       lang: 'en',
       currentStep: 1,
-      currentUserId: getClientCurrentUserId(),
+      currentUserId: "",
       users: [],
       isLoadingUsers: true,
       selectedUserIds: [],
@@ -143,6 +143,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
 
   componentDidMount() {
     this.setState({ lang: getInitialLanguage() });
+    this.setState({ currentUserId: getClientCurrentUserId() });
     this.loadUsers();
     this.setState({
       pendingSubmissions: RecognitionEngine.loadSubmissions(),
@@ -539,6 +540,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
         }}
       >
         <Navbar currentUserId={currentUserId} />
+        {JSON.stringify({ currentUserId, clientCurrentUserId: getClientCurrentUserId() })}
         <div className="app-page-shell">
           <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[300px_minmax(0,1fr)] lg:items-start">
             <aside className="lg:sticky lg:top-24">

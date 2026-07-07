@@ -7,9 +7,11 @@ export type ReportAccessResult = {
 
 export class ReportAccessClient {
   async getAccess(currentUserId: string): Promise<ReportAccessResult> {
-    const response = await fetch(
-      `/api/report/access?currentUserId=${encodeURIComponent(currentUserId)}`
-    );
+    const response = await fetch(`/api/report/access`, {
+      headers: {
+        "x-current-user-id": currentUserId,
+      },
+    });
     const result = await response.json();
 
     if (!response.ok || !result.success) {

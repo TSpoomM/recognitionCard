@@ -3,7 +3,7 @@ const USER_ID_KEYS = ["currentUserId", "user_id", "emp_id", "fs_id", "createdBy"
 const USER_ID_HEADERS = ["x-current-user-id", "x-user-id", "x-employee-id", "x-fs-id"];
 
 export const TEST_CURRENT_USER = {
-  user_id: "10180",
+  user_id: "10183",
   firstName: "Pumin",
   lastName: "Intarasri",
   email: "pumin@teckbeehang.com",
@@ -23,6 +23,25 @@ export class CurrentUserService {
     return Boolean(left && right && left === right);
   }
 
+  private cleanUserIdParamsFromUrl() {
+    if (typeof window === "undefined") return;
+
+    const url = new URL(window.location.href);
+    let hasChanges = false;
+
+    USER_ID_KEYS.forEach((key) => {
+      if (url.searchParams.has(key)) {
+        url.searchParams.delete(key);
+        hasChanges = true;
+      }
+    });
+
+    if (hasChanges) {
+      const nextUrl = `${url.pathname}${url.search ? `?${url.search}` : ""}${url.hash}`;
+      window.history.replaceState({}, "", nextUrl);
+    }
+  }
+
   getClientCurrentUserId() {
     if (typeof window === "undefined") return TEST_CURRENT_USER.user_id;
 
@@ -32,16 +51,25 @@ export class CurrentUserService {
 
     if (fromUrl) {
       window.localStorage.setItem(CURRENT_USER_STORAGE_KEY, fromUrl);
+      this.cleanUserIdParamsFromUrl();
       return fromUrl;
     }
+
+    this.cleanUserIdParamsFromUrl();
 
     const fromStorage = this.normalizeUserId(window.localStorage.getItem(CURRENT_USER_STORAGE_KEY));
     return fromStorage || TEST_CURRENT_USER.user_id;
   }
 
-  buildCurrentUserHref(pathname: string, currentUserId: string) {
-    if (!currentUserId) return pathname;
-    return `${pathname}?currentUserId=${encodeURIComponent(currentUserId)}`;
+  buildCurrentUserHref(pathname: string, _currentUserId: string) {
+    if (!pathname) return pathname;
+
+    const [path, search = ""] = pathname.split("?");
+    const params = new URLSearchParams(search);
+    params.delete("currentUserId");
+
+    const suffix = params.toString() ? `?${params.toString()}` : "";
+    return `${path}${suffix}`;
   }
 
   async getRequestCurrentUserId(request: Request, body?: Record<string, unknown>) {
