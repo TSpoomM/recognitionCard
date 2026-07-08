@@ -1,6 +1,7 @@
 import { CommentType } from "../types/commentType";
 import { PendingSubmission } from "../types/pendingSubmission";
 import { User } from "../types/user";
+import { CardLanguage } from "../types/cardLanguage";
 
 export class RecognitionEngine {
   static STORAGE_KEY = "recognition-card-submissions";
@@ -34,6 +35,7 @@ export class RecognitionEngine {
     const comment = typeof submission.comment === "string" ? submission.comment : "";
     const createdAt = typeof submission.createdAt === "number" ? submission.createdAt : Date.now();
     const status = submission.status === "sent" ? "sent" : "pending";
+    const cardLanguage: CardLanguage = submission.cardLanguage === "th" ? "th" : "en";
 
     const validTypes = ["RESPECT", "LEADERSHIP", "COMMUNICATION", "PROFESSIONALISM", "INTEGRITY"];
     const rawTypes = Array.isArray(submission.types)
@@ -54,6 +56,7 @@ export class RecognitionEngine {
       users,
       types,
       type,
+      cardLanguage,
       comment,
       createdAt,
       status,
@@ -83,11 +86,12 @@ export class RecognitionEngine {
     window.localStorage.setItem(this.STORAGE_KEY, JSON.stringify(submissions));
   }
 
-  static createPendingSubmission(users: User[], types: CommentType[], comment: string): PendingSubmission {
+  static createPendingSubmission(users: User[], types: CommentType[], comment: string, cardLanguage: CardLanguage): PendingSubmission {
     return {
       id: `${Date.now()}`,
       users,
       types,
+      cardLanguage,
       comment,
       createdAt: Date.now(),
       status: "pending",

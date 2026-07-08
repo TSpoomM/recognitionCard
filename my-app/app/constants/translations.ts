@@ -14,7 +14,7 @@ export const TRANSLATIONS = {
     // Stepper
     stepperTitle: (current: number, total: number) => `Step ${current} of ${total}`,
     stepperDescription: 'Complete each step to submit your recognition card.',
-    stepLabels: ['Choose Recipients', 'Select Core Values', 'Write STAR'],
+    stepLabels: ['Choose Recipients', 'Select Core Values', 'Write STAR', 'Choose Card Language'],
 
     // Step 1 – User Selection
     step1Title: 'Choose Recipients',
@@ -195,7 +195,7 @@ export const TRANSLATIONS = {
     // Stepper
     stepperTitle: (current: number, total: number) => `ขั้นตอนที่ ${current} จาก ${total}`,
     stepperDescription: 'ทำแต่ละขั้นตอนให้ครบเพื่อส่ง Recognition Card',
-    stepLabels: ['เลือกผู้รับ', 'เลือก Core Values', 'เขียน STAR'],
+    stepLabels: ['เลือกผู้รับ', 'เลือก Core Values', 'เขียน STAR', 'เลือกภาษา Card'],
 
     // Step 1 – User Selection
     step1Title: 'เลือกผู้รับ',

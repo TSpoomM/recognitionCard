@@ -5,6 +5,7 @@ import { CommentType } from "./types/commentType";
 import { PendingSubmission } from "./types/pendingSubmission";
 import { HomeState } from "./types/homeState";
 import { User } from "./types/user";
+import { CardLanguage } from "./types/cardLanguage";
 import { Language, TRANSLATIONS } from "./constants/translations";
 import { getInitialLanguage, LanguageContext, persistLanguage } from "./context/LanguageContext";
 import RecognitionStepper from "./components/features/recognition/Stepper";
@@ -46,6 +47,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
       isLoadingUsers: true,
       selectedUserIds: [],
       selectedTypes: [],
+      selectedCardLanguage: "en",
       comment: "",
       searchQuery: "",
       selectedBranch: "",
@@ -199,25 +201,22 @@ export default class Home extends Component<Record<string, never>, PageState> {
     this.sendingSubmissionIds.add(submission.id);
 
     try {
-      await Promise.all(
-        submission.users.map(async (user) => {
-          const response = await fetch("/api/diary", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              diary_emp_id: user.user_id,
-              diary_comment: submission.comment,
-              diary_corevalue: submission.types.join(", "),
-              createdBy: currentUserId,
-            }),
-          });
+      const response = await fetch("/api/diary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          diary_emp_ids: submission.users.map((user) => user.user_id),
+          diary_comment: submission.comment,
+          diary_corevalue: submission.types.join(", "),
+          cardLanguage: submission.cardLanguage,
+          createdBy: currentUserId,
+        }),
+      });
 
-          const result = await response.json().catch(() => null);
-          if (!response.ok || result?.success === false) {
-            throw new Error(result?.error || "Could not save recognition card.");
-          }
-        })
-      );
+      const result = await response.json().catch(() => null);
+      if (!response.ok || result?.success === false) {
+        throw new Error(result?.error || "Could not save recognition card.");
+      }
 
       const next = this.state.pendingSubmissions.filter((item) => item.id !== submission.id);
       this.persistSubmissions(next);
@@ -285,6 +284,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
       currentStep: 1,
       selectedUserIds: [],
       selectedTypes: [],
+      selectedCardLanguage: "en",
       comment: "",
       searchQuery: "",
       selectedBranch: "",
@@ -327,7 +327,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
     if (currentStep === 2 && !this.validateStep(2)) return;
 
     this.setState((state) => ({
-      currentStep: Math.min(3, state.currentStep + 1),
+      currentStep: Math.min(4, state.currentStep + 1),
     }));
   };
 
@@ -339,7 +339,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
   };
 
   private submitRecognition = () => {
-    const { selectedUserIds, selectedTypes, comment, editingId, pendingSubmissions, currentUserId, lang } = this.state;
+    const { selectedUserIds, selectedTypes, selectedCardLanguage, comment, editingId, pendingSubmissions, currentUserId, lang } = this.state;
     const { t } = this;
 
     if (!currentUserId) {
@@ -385,7 +385,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
     if (editingId) {
       const updated = pendingSubmissions.map((submission) =>
         submission.id === editingId
-          ? { ...submission, users: this.selectedUsers, types: selectedTypes, comment, createdAt: Date.now(), status: "pending" as const }
+          ? { ...submission, users: this.selectedUsers, types: selectedTypes, cardLanguage: selectedCardLanguage, comment, createdAt: Date.now(), status: "pending" as const }
           : submission
       );
       this.persistSubmissions(updated);
@@ -393,6 +393,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
         currentStep: 1,
         selectedUserIds: [],
         selectedTypes: [],
+        selectedCardLanguage: "en",
         comment: "",
         searchQuery: "",
         editingId: null,
@@ -402,12 +403,13 @@ export default class Home extends Component<Record<string, never>, PageState> {
       return;
     }
 
-    const newSubmission = RecognitionEngine.createPendingSubmission(this.selectedUsers, selectedTypes, comment);
+    const newSubmission = RecognitionEngine.createPendingSubmission(this.selectedUsers, selectedTypes, comment, selectedCardLanguage);
     this.persistSubmissions([newSubmission, ...pendingSubmissions]);
     this.setState({
       currentStep: 1,
       selectedUserIds: [],
       selectedTypes: [],
+      selectedCardLanguage: "en",
       comment: "",
       searchQuery: "",
       editingId: null,
@@ -424,6 +426,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
     this.setState({
       selectedUserIds: submission.users.map((user) => user.user_id),
       selectedTypes: submission.types,
+      selectedCardLanguage: submission.cardLanguage,
       comment: submission.comment,
       editingId: submission.id,
       formError: "",
@@ -463,6 +466,60 @@ export default class Home extends Component<Record<string, never>, PageState> {
     persistLanguage(lang);
     this.setState({ lang });
   };
+
+  private handleCardLanguageChange = (selectedCardLanguage: CardLanguage) => {
+    this.setState({ selectedCardLanguage, formError: "", formSuccess: "" });
+  };
+
+  private renderCardLanguageStep() {
+    const { lang, selectedCardLanguage } = this.state;
+    const isThai = lang === "th";
+    const options: { value: CardLanguage; title: string; description: string }[] = [
+      {
+        value: "en",
+        title: "English",
+        description: "Send the recognition card image in English.",
+      },
+      {
+        value: "th",
+        title: "ภาษาไทย",
+        description: "ส่งรูป Recognition Card เป็นภาษาไทย",
+      },
+    ];
+
+    return (
+      <>
+        <h2 className="mb-4 text-2xl font-semibold text-slate-900">{isThai ? "เลือกภาษา Card" : "Choose card language"}</h2>
+        <p className="mb-4 text-base text-slate-600">
+          {isThai ? "เลือกภาษาที่จะแสดงในรูปการ์ดที่ส่งทางอีเมล" : "Select the language that will appear in the email card image."}
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {options.map((option) => {
+            const active = selectedCardLanguage === option.value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => this.handleCardLanguageChange(option.value)}
+                className={`flex min-h-32 items-start justify-between gap-4 rounded-3xl border-[1.5px] p-5 text-left transition ${active
+                  ? "border-amber-400 bg-teal-50/70 shadow-sm ring-2 ring-amber-100"
+                  : "border-amber-300 bg-white text-slate-900 hover:border-amber-400 hover:bg-amber-50/30"
+                  }`}
+              >
+                <span>
+                  <span className="block text-xl font-bold text-slate-950">{option.title}</span>
+                  <span className="mt-2 block text-base leading-7 text-slate-600">{option.description}</span>
+                </span>
+                <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border-[1.5px] text-sm font-bold ${active ? "border-amber-400 bg-teal-600 text-white" : "border-amber-300 bg-white text-slate-300"}`}>
+                  ✓
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </>
+    );
+  }
 
   private renderCurrentStep() {
     const {
@@ -513,18 +570,22 @@ export default class Home extends Component<Record<string, never>, PageState> {
       );
     }
 
-    return (
-      <RecognitionCommentStep
-        users={this.selectedUsers}
-        selectedTypes={selectedTypes}
-        comment={comment}
-        commentLength={this.commentLength}
-        minLength={STAR_COMMENT_MIN_LENGTH}
-        sectionMinLength={STAR_SECTION_MIN_LENGTH}
-        maxLength={STAR_COMMENT_MAX_LENGTH}
-        onCommentChange={this.handleCommentChange}
-      />
-    );
+    if (currentStep === 3) {
+      return (
+        <RecognitionCommentStep
+          users={this.selectedUsers}
+          selectedTypes={selectedTypes}
+          comment={comment}
+          commentLength={this.commentLength}
+          minLength={STAR_COMMENT_MIN_LENGTH}
+          sectionMinLength={STAR_SECTION_MIN_LENGTH}
+          maxLength={STAR_COMMENT_MAX_LENGTH}
+          onCommentChange={this.handleCommentChange}
+        />
+      );
+    }
+
+    return this.renderCardLanguageStep();
   }
 
   render() {
@@ -565,6 +626,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
                   />
                   <FormActions
                     currentStep={currentStep}
+                    totalSteps={4}
                     onPrevStep={this.handlePrevStep}
                     onNextStep={this.handleNextStep}
                     onSubmitRecognition={() => {

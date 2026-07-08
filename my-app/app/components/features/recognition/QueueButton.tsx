@@ -132,6 +132,12 @@ export default function RecognitionQueueButton({
                           )}
                         </div>
 
+                        <div className="mt-3">
+                          <span className="inline-flex rounded-full bg-teal-100 px-3 py-1.5 text-sm font-bold text-teal-800">
+                            {submission.cardLanguage === "th" ? "ภาษาไทย" : "English"}
+                          </span>
+                        </div>
+
                         <div className="mt-3 text-base leading-7 text-slate-700">
                           <span className="font-bold text-slate-800">{t.queueTo}</span>{" "}
                           {submission.users.map((user) => `${user.firstName} ${user.lastName}`).join(", ") || "None"}

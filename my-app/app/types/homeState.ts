@@ -1,6 +1,7 @@
 import { CommentType } from "./commentType";
 import { PendingSubmission } from "./pendingSubmission";
 import { User } from "./user";
+import { CardLanguage } from "./cardLanguage";
 
 export type HomeState = {
   currentStep: number;
@@ -9,6 +10,7 @@ export type HomeState = {
   isLoadingUsers: boolean;
   selectedUserIds: string[];
   selectedTypes: CommentType[];
+  selectedCardLanguage: CardLanguage;
   comment: string;
   searchQuery: string;
   selectedBranch: string;

@@ -6,6 +6,7 @@ import { LanguageContext } from "../../../context/LanguageContext";
 
 type FormActionsProps = {
   currentStep: number;
+  totalSteps?: number;
   onPrevStep: () => void;
   onNextStep: () => void;
   onSubmitRecognition: () => void;
@@ -16,7 +17,7 @@ export default class FormActions extends Component<FormActionsProps> {
   declare context: React.ContextType<typeof LanguageContext>;
 
   render() {
-    const { currentStep, onPrevStep, onNextStep, onSubmitRecognition } = this.props;
+    const { currentStep, totalSteps = 3, onPrevStep, onNextStep, onSubmitRecognition } = this.props;
     const { t } = this.context;
 
     return (
@@ -30,7 +31,7 @@ export default class FormActions extends Component<FormActionsProps> {
         >
           {t.back}
         </Button>
-        {currentStep < 3 ? (
+        {currentStep < totalSteps ? (
           <Button
             type="button"
             onClick={onNextStep}

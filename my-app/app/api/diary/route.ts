@@ -3,8 +3,10 @@ import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { NextResponse } from "next/server";
 import { EmailService } from "@/app/services/email/EmailService";
 import { getRequestCurrentUserId, isSameUserId } from "@/app/lib/currentUser";
+import { CardLanguage } from "@/app/types/cardLanguage";
 
 type EmployeeEmailRow = RowDataPacket & {
+  fs_id: string | number;
   emp_name_en: string | null;
   email: string | null;
 };
@@ -12,48 +14,66 @@ type EmployeeEmailRow = RowDataPacket & {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { diary_emp_id, diary_comment, diary_corevalue } = body;
+    const { diary_emp_id, diary_emp_ids, diary_comment, diary_corevalue } = body;
     const createdBy = await getRequestCurrentUserId(request, body);
+    const cardLanguage: CardLanguage = body.cardLanguage === "th" ? "th" : "en";
+    const recipientIds = Array.from(
+      new Set(
+        (Array.isArray(diary_emp_ids) ? diary_emp_ids : diary_emp_id ? [diary_emp_id] : [])
+          .map((id) => String(id).trim())
+          .filter(Boolean)
+      )
+    );
 
-    if (!diary_emp_id || !diary_comment || !createdBy) {
+    if (recipientIds.length === 0 || !diary_comment || !createdBy) {
       return NextResponse.json(
-        { success: false, error: "diary_emp_id, diary_comment, and current user id are required." },
+        { success: false, error: "diary_emp_id or diary_emp_ids, diary_comment, and current user id are required." },
         { status: 400 }
       );
     }
 
-    if (isSameUserId(diary_emp_id, createdBy)) {
+    if (recipientIds.some((recipientId) => isSameUserId(recipientId, createdBy))) {
       return NextResponse.json(
         { success: false, error: "You cannot recognize yourself." },
         { status: 400 }
       );
     }
 
-    const [result] = await pool.query<ResultSetHeader>(
-      `
-      INSERT INTO tb_diary_list (diary_emp_id, diary_comment, createdBy, createdDate, diary_corevalue)
-      VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?)
-      `,
-      [diary_emp_id, diary_comment, createdBy, diary_corevalue || null]
+    const insertResults = await Promise.all(
+      recipientIds.map(async (recipientId) => {
+        const [result] = await pool.query<ResultSetHeader>(
+          `
+          INSERT INTO tb_diary_list (diary_emp_id, diary_comment, createdBy, createdDate, diary_corevalue)
+          VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?)
+          `,
+          [recipientId, diary_comment, createdBy, diary_corevalue || null]
+        );
+        return result;
+      })
     );
 
     // Look up employee info for the email
-    let recipientName = `Employee #${diary_emp_id}`;
-    let recipientEmail = "";
+    let recipientName = recipientIds.map((recipientId) => `Employee #${recipientId}`).join(", ");
+    let recipientEmails: string[] = [];
     let recognizedByName = String(createdBy);
     try {
       const [empRows] = await pool.query<EmployeeEmailRow[]>(
         `
-        SELECT e.emp_name_en, em.email
+        SELECT e.fs_id, e.emp_name_en, em.email
         FROM tb_employee_list e
         LEFT JOIN tb_emp_email em ON e.fs_id = em.Code
-        WHERE e.fs_id = ?
+        WHERE e.fs_id IN (?)
         `,
-        [diary_emp_id]
+        [recipientIds]
       );
       if (empRows && empRows.length > 0) {
-        recipientName = empRows[0].emp_name_en || recipientName;
-        recipientEmail = empRows[0].email || "";
+        const rowById = new Map(empRows.map((row) => [String(row.fs_id), row]));
+        recipientName = recipientIds
+          .map((recipientId) => rowById.get(recipientId)?.emp_name_en || `Employee #${recipientId}`)
+          .join(", ");
+        recipientEmails = recipientIds
+          .map((recipientId) => rowById.get(recipientId)?.email || "")
+          .filter(Boolean);
       }
     } catch (err) {
       console.error("Failed to query employee info for email: ", err);
@@ -77,17 +97,18 @@ export async function POST(request: Request) {
     }
 
     // Trigger email in the background so it does not block the API response
-    if (recipientEmail || process.env.TEST_EMAIL_TO) {
+    if (recipientEmails.length > 0 || process.env.TEST_EMAIL_TO) {
       const coreValues = diary_corevalue
         ? diary_corevalue.split(",").map((s: string) => s.trim()).filter(Boolean)
         : [];
 
       EmailService.sendComplimentEmail({
-        toEmail: recipientEmail,
+        toEmail: recipientEmails,
         recipientName,
         recognizedByName,
         comment: diary_comment,
         coreValues,
+        cardLanguage,
       }).catch((emailErr) => {
         console.error("Failed to send compliment email:", emailErr);
       });
@@ -96,7 +117,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       message: "Saved recognition card successfully.",
-      insertedId: result.insertId,
+      insertedIds: insertResults.map((result) => result.insertId),
     });
   } catch (error) {
     return NextResponse.json(

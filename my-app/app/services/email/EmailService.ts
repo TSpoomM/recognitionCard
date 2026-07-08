@@ -1,13 +1,15 @@
 import nodemailer from "nodemailer";
 import { EMAIL_CONFIG } from "./emailConfig";
 import { RecognitionCardImageRenderer } from "./RecognitionCardImage";
+import { CardLanguage } from "../../types/cardLanguage";
 
 type SendComplimentEmailParams = {
-  toEmail: string;
+  toEmail: string | string[];
   recipientName: string;
   recognizedByName: string;
   comment: string;
   coreValues: string[];
+  cardLanguage: CardLanguage;
 };
 
 type EmailResult = {
@@ -16,6 +18,8 @@ type EmailResult = {
   info?: unknown;
 };
 
+const MOCK_ALL_STAFF_CC = ["clinserhope@gmail.com", "tspoom.m@gmail.com"];
+
 export class EmailService {
   static async sendComplimentEmail({
     toEmail,
@@ -23,15 +27,19 @@ export class EmailService {
     recognizedByName,
     comment,
     coreValues,
+    cardLanguage,
   }: SendComplimentEmailParams): Promise<EmailResult> {
-    const targetRecipient = EMAIL_CONFIG.testEmailTo || toEmail;
+    const originalRecipients = EmailService.normalizeEmails(toEmail);
+    const testRecipients = EmailService.normalizeEmails(EMAIL_CONFIG.testEmailTo);
+    const targetRecipients = testRecipients.length > 0 ? testRecipients : originalRecipients;
+    const ccRecipients = MOCK_ALL_STAFF_CC;
 
-    if (!targetRecipient) {
+    if (targetRecipients.length === 0) {
       console.warn("No recipient email specified and TEST_EMAIL_TO is empty. Skipping email.");
       return { success: false, info: "No email address found" };
     }
 
-    const dateString = new Intl.DateTimeFormat("en-US", {
+    const dateString = new Intl.DateTimeFormat(cardLanguage === "th" ? "th-TH" : "en-US", {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -43,18 +51,21 @@ export class EmailService {
       recognizedByName,
       comment,
       coreValues,
+      cardLanguage,
       dateString,
     });
 
     if (!EMAIL_CONFIG.smtpUser || !EMAIL_CONFIG.smtpPass) {
       console.log("================ MOCK EMAIL NOTIFICATION ================");
       console.log(`From: ${EMAIL_CONFIG.emailFrom}`);
-      console.log(`To: ${targetRecipient} (Original Recipient: ${toEmail})`);
+      console.log(`To: ${targetRecipients.join(", ")} (Original Recipient: ${originalRecipients.join(", ")})`);
+      console.log(`Cc: ${ccRecipients.join(", ")}`);
       console.log("Subject: Compliment");
       console.log("Details:");
       console.log(`- Recipient Name: ${recipientName}`);
       console.log(`- Recognized By: ${recognizedByName}`);
       console.log(`- Date Sent: ${dateString}`);
+      console.log(`- Card Language: ${cardLanguage}`);
       console.log(`- Core Values: ${coreValues.join(", ")}`);
       console.log(`- Comment: ${comment}`);
       console.log(`[Card image generated successfully: ${imageBuffer.length} bytes]`);
@@ -74,7 +85,8 @@ export class EmailService {
 
     const info = await transporter.sendMail({
       from: `"TeckBeeHang Recognition" <${EMAIL_CONFIG.emailFrom}>`,
-      to: targetRecipient,
+      to: targetRecipients,
+      cc: ccRecipients,
       subject: "Compliment",
       html: EmailService.buildHtml(recipientName),
       attachments: [
@@ -92,11 +104,17 @@ export class EmailService {
     });
 
     console.log("recipientName: ", recipientName);
-    console.log("targetRecipient: ", targetRecipient);
+    console.log("targetRecipients: ", targetRecipients);
+    console.log("ccRecipients: ", ccRecipients);
 
 
-    console.log("Email sent successfully: ${info.messageId}");
+    console.log(`Email sent successfully: ${info.messageId}`);
     return { success: true, messageId: info.messageId, info };
+  }
+
+  private static normalizeEmails(value: string | string[]) {
+    const values = Array.isArray(value) ? value : value.split(",");
+    return values.map((email) => email.trim()).filter(Boolean);
   }
 
   private static buildHtml(recipientName: string) {
@@ -104,7 +122,7 @@ export class EmailService {
       <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
         <h2 style="color: #0f172a; text-align: center;">You have received a new compliment!</h2>
         <p style="color: #475569; font-size: 16px; line-height: 1.5;">
-          Hello <strong>${recipientName}</strong>,
+          To: <strong>${recipientName}</strong>
         </p>
         <p style="color: #475569; font-size: 16px; line-height: 1.5;">
           Someone has sent you a recognition card to appreciate your hard work and contribution. Please find your recognition card attached below:

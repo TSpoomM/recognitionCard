@@ -24,7 +24,7 @@ export default class RecognitionStepper extends Component<RecognitionStepperProp
             <p className="text-lg font-semibold uppercase tracking-[0.18em] text-teal-800">{t.stepperTitle(currentStep, steps.length)}</p>
             <p className="mt-2 text-base leading-6 text-slate-600">{t.stepperDescription}</p>
           </div>
-          <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-1">
+          <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
             {steps.map((label, index) => {
               const step = index + 1;
               const active = currentStep === step;
