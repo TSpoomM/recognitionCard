@@ -747,7 +747,12 @@ export class RecognitionCardImageRenderer {
 
   private static renderCoreValues(coreValues: string[]) {
     const selected = new Set(coreValues.map((v) => v.trim().toUpperCase()));
-    const mascotUri = getImageDataUri("mascot1.png", "image/png");
+    const mascotUri1 = getImageDataUri("mascot1.png", "image/png");
+    const mascotUri2 = getImageDataUri("mascot2.png", "image/png");
+    const mascotUri3 = getImageDataUri("mascot3.png", "image/png");
+    // const gangMascot = getImageDataUri("theMascotGang.png", "image/png")
+    // const gangMascot = getImageDataUri("gangMascot.png", "image/png")
+    const gangMascot = getImageDataUri("canvaMascot.png", "image/png")
 
     return (
       <div style={{ display: "flex", flexDirection: "column", width: "380px", flexShrink: 0, paddingLeft: "28px" }}>
@@ -833,11 +838,20 @@ export class RecognitionCardImageRenderer {
           );
         })}
 
-        {mascotUri && (
+        {mascotUri1 && (
           <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "5px", width: "100%" }}>
-            <img src={mascotUri} style={{ width: "200px", height: "200px", objectFit: "contain", borderRadius: "10px" }} />
+            {/* <img src={mascotUri2} style={{ width: "200px", height: "200px", objectFit: "contain", borderRadius: "10px" }} /> */}
+            {/* <img src={mascotUri1} style={{ width: "205px", height: "205px", objectFit: "contain", borderRadius: "10px" }} />
+            <img src={mascotUri3} style={{ width: "205px", height: "205px", objectFit: "contain", borderRadius: "10px" }} /> */}
+            {/* <img src={gangMascot} style={{ width: "300px", height: "200px", objectFit: "contain", borderRadius: "10px" }} /> */}
+            <img src={gangMascot} style={{ width: "360px", height: "180px", objectFit: "contain", borderRadius: "10px" }} />
           </div>
         )}
+        {/* <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", paddingLeft: "16px" }}>
+          <span style={{ fontFamily: "GreatVibes", fontSize: "40px", color: PALETTE.green2, fontWeight: 500 }}>
+            Thank you!
+          </span>
+        </div> */}
       </div>
     );
   }
