@@ -1,19 +1,20 @@
 'use client';
 
-import { Component } from "react";
+import { Component, ReactNode } from "react";
 import { LanguageContext, getInitialLanguage } from "../context/LanguageContext";
 import { TRANSLATIONS, Language } from "../constants/translations";
 import { buildCurrentUserHref, getClientCurrentUserId } from "../lib/currentUser";
 import { reportAccessClient } from "../lib/reportAccessClient";
 import { COMMENT_TYPE_META, COMMENT_TYPES } from "../types/commentType";
 import Navbar from "../components/ui/Navbar";
-import { Users, Heart, MessageSquare, Clock, History, Star, Lightbulb, Sparkles, CheckCircle, ArrowRight, BarChart3, MousePointerClick, Send, Filter, Download, Search } from "lucide-react";
+import { Users, Heart, MessageSquare, Languages, Clock, History, Star, Lightbulb, Sparkles, CheckCircle, ArrowRight, BarChart3, MousePointerClick, Send, Filter, Download, Search, Pencil, Trash2, X, CalendarDays, FileText } from "lucide-react";
 
 type GuideState = {
   lang: Language;
   currentUserId: string;
   isAdmin: boolean;
   activeGuideSection: string;
+  demoCardLanguage: Language;
 };
 
 export default class GuidePage extends Component<Record<string, never>, GuideState> {
@@ -27,6 +28,7 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
       currentUserId: "",
       isAdmin: false,
       activeGuideSection: "recognition-card",
+      demoCardLanguage: "en",
     };
   }
 
@@ -79,8 +81,12 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
     document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  private handleDemoCardLanguage = (demoCardLanguage: Language) => {
+    this.setState({ demoCardLanguage });
+  };
+
   render() {
-    const { lang, currentUserId, isAdmin, activeGuideSection } = this.state;
+    const { lang, currentUserId, isAdmin, activeGuideSection, demoCardLanguage } = this.state;
     const t = TRANSLATIONS[lang];
 
     const steps = [
@@ -114,41 +120,53 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
         iconBg: "bg-amber-100",
         iconColor: "text-amber-600",
       },
+      {
+        icon: <Languages className="h-8 w-8" />,
+        title: t.guideStep4Title,
+        desc: t.guideStep4Desc,
+        color: "from-sky-400 to-cyan-500",
+        bgColor: "bg-sky-50",
+        borderColor: "border-sky-200",
+        iconBg: "bg-sky-100",
+        iconColor: "text-sky-600",
+      },
     ];
 
-    const extraSteps = [
-      {
-        icon: <Clock className="h-8 w-8" />,
-        title: t.guideQueueTitle,
-        desc: t.guideQueueDesc,
-        color: "from-blue-400 to-indigo-500",
-        bgColor: "bg-blue-50",
-        borderColor: "border-blue-200",
-        iconBg: "bg-blue-100",
-        iconColor: "text-blue-600",
-      },
-      {
-        icon: <History className="h-8 w-8" />,
-        title: t.guideHistoryTitle,
-        desc: t.guideHistoryDesc,
-        color: "from-purple-400 to-violet-500",
-        bgColor: "bg-purple-50",
-        borderColor: "border-purple-200",
-        iconBg: "bg-purple-100",
-        iconColor: "text-purple-600",
-      },
-      {
-        icon: <BarChart3 className="h-8 w-8" />,
-        title: t.guideReportTitle,
-        desc: t.guideReportDesc,
-        color: "from-cyan-400 to-sky-500",
-        bgColor: "bg-cyan-50",
-        borderColor: "border-cyan-200",
-        iconBg: "bg-cyan-100",
-        iconColor: "text-cyan-600",
-        adminOnly: true,
-      },
-    ].filter((step) => !step.adminOnly || isAdmin);
+    const queueStep = {
+      icon: <Clock className="h-8 w-8" />,
+      title: t.guideQueueTitle,
+      desc: t.guideQueueDesc,
+      borderColor: "border-blue-200",
+      iconBg: "bg-blue-100",
+      iconColor: "text-blue-600",
+    };
+    const historyStep = {
+      icon: <History className="h-8 w-8" />,
+      title: t.guideHistoryTitle,
+      desc: t.guideHistoryDesc,
+      borderColor: "border-purple-200",
+      iconBg: "bg-purple-100",
+      iconColor: "text-purple-600",
+    };
+    const reportStep = {
+      icon: <BarChart3 className="h-8 w-8" />,
+      title: t.guideReportTitle,
+      desc: t.guideReportDesc,
+      borderColor: "border-cyan-200",
+      iconBg: "bg-cyan-100",
+      iconColor: "text-cyan-600",
+    };
+    const renderExtraStep = (step: typeof queueStep, className = "") => (
+      <div
+        className={`app-surface rounded-xl p-6 sm:p-8 border-l-4 ${step.borderColor} hover:shadow-lg transition-all duration-300 hover:-translate-y-1 ${className}`}
+      >
+        <div className={`inline-flex items-center justify-center w-14 h-14 rounded-xl ${step.iconBg} ${step.iconColor} mb-5`}>
+          {step.icon}
+        </div>
+        <h3 className="text-xl font-bold text-slate-900 mb-2">{step.title}</h3>
+        <p className="text-slate-600 leading-7 text-base">{step.desc}</p>
+      </div>
+    );
 
     const starItems = [
       { label: "S", title: t.guideStarSituation, color: "text-teal-600", bg: "bg-teal-100" },
@@ -172,6 +190,26 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
       { icon: <CheckCircle className="h-5 w-5" />, text: t.guideTip4 },
     ];
 
+    const demoButton = (label: string, className: string, icon?: ReactNode) => (
+      <button
+        type="button"
+        className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-xl px-4 py-2 text-base font-semibold transition hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] ${className}`}
+      >
+        {icon}
+        {label}
+      </button>
+    );
+    const demoIconButton = (label: string, className: string, icon: ReactNode) => (
+      <button
+        type="button"
+        aria-label={label}
+        title={label}
+        className={`inline-flex h-11 w-11 items-center justify-center rounded-full transition hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.96] ${className}`}
+      >
+        {icon}
+      </button>
+    );
+
     const walkthroughSections = [
       {
         icon: <MousePointerClick className="h-6 w-6" />,
@@ -180,6 +218,29 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
         iconBg: "bg-teal-100",
         iconColor: "text-teal-700",
         borderColor: "border-teal-200",
+        demo: (
+          <div className="flex flex-wrap items-center gap-3">
+            {demoButton(t.back, "border-[1.5px] border-amber-300 bg-white text-slate-800 hover:border-amber-400 hover:bg-amber-50")}
+            {demoButton(t.continue, "bg-teal-800 text-white shadow-sm shadow-teal-900/25 hover:bg-teal-900", <ArrowRight className="h-4 w-4" />)}
+            {demoButton(t.submitRecognition, "bg-teal-800 text-white shadow-sm shadow-teal-900/25 hover:bg-teal-900", <Send className="h-4 w-4" />)}
+            <span className="inline-flex overflow-hidden rounded-full border-[1.5px] border-amber-300 bg-teal-50 p-1">
+              <button
+                type="button"
+                onClick={() => this.handleDemoCardLanguage("en")}
+                className={`rounded-full px-4 py-2 text-sm font-bold transition active:scale-[0.98] ${demoCardLanguage === "en" ? "bg-teal-800 text-white" : "text-slate-500 hover:bg-white"}`}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                onClick={() => this.handleDemoCardLanguage("th")}
+                className={`rounded-full px-4 py-2 text-sm font-bold transition active:scale-[0.98] ${demoCardLanguage === "th" ? "bg-teal-800 text-white" : "text-slate-500 hover:bg-white"}`}
+              >
+                TH
+              </button>
+            </span>
+          </div>
+        ),
       },
       {
         icon: <Send className="h-6 w-6" />,
@@ -188,6 +249,15 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
         iconBg: "bg-blue-100",
         iconColor: "text-blue-700",
         borderColor: "border-blue-200",
+        demo: (
+          <div className="flex flex-wrap items-center gap-3">
+            {demoButton(t.queue, "rounded-full bg-teal-800 px-5 text-white shadow-lg shadow-teal-900/25 hover:bg-teal-900", <Send className="h-4 w-4" />)}
+            {demoButton(t.edit, "border-[1.5px] border-amber-300 bg-white text-slate-700 hover:border-amber-400 hover:bg-amber-50", <Pencil className="h-4 w-4" />)}
+            {demoButton(t.delete, "border border-rose-200 bg-white text-rose-600 hover:border-rose-300 hover:text-rose-700", <Trash2 className="h-4 w-4" />)}
+            {demoButton(t.confirmNow, "bg-teal-800 text-white hover:bg-teal-900", <Send className="h-4 w-4" />)}
+            {demoIconButton("Close", "border-[1.5px] border-amber-300 bg-white text-slate-500 hover:border-amber-400 hover:text-teal-900", <X className="h-5 w-5" />)}
+          </div>
+        ),
       },
       {
         icon: <Search className="h-6 w-6" />,
@@ -196,6 +266,16 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
         iconBg: "bg-purple-100",
         iconColor: "text-purple-700",
         borderColor: "border-purple-200",
+        demo: (
+          <div className="flex flex-wrap items-center gap-3">
+            {demoButton(t.historyBackButton, "border-[1.5px] border-amber-300 bg-white text-slate-800 hover:border-amber-400 hover:bg-amber-50")}
+            {demoButton(t.historyAllYears, "border-[1.5px] border-amber-300 bg-white text-slate-800 hover:border-amber-400 hover:bg-amber-50", <CalendarDays className="h-4 w-4" />)}
+            <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1.5 text-sm font-bold text-emerald-800">
+              <CheckCircle className="h-4 w-4" />
+              {t.queueConfirmed}
+            </span>
+          </div>
+        ),
       },
       {
         icon: <Filter className="h-6 w-6" />,
@@ -205,6 +285,14 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
         iconColor: "text-cyan-700",
         borderColor: "border-cyan-200",
         adminOnly: true,
+        demo: (
+          <div className="flex flex-wrap items-center gap-3">
+            {demoButton(t.reportBackButton, "border-[1.5px] border-amber-300 bg-white text-slate-800 hover:border-amber-400 hover:bg-amber-50")}
+            {demoButton("HQ", "rounded-full border-[1.5px] border-amber-300 bg-teal-800 text-white shadow-sm shadow-teal-900/15 hover:bg-teal-900")}
+            {demoButton(t.reportClearFilters, "border-[1.5px] border-amber-300 bg-white text-slate-700 hover:border-amber-400 hover:bg-amber-50", <X className="h-4 w-4" />)}
+            {demoButton(t.reportFilterPeople, "border-[1.5px] border-amber-300 bg-white text-slate-700 hover:border-amber-400 hover:bg-amber-50", <Search className="h-4 w-4" />)}
+          </div>
+        ),
       },
       {
         icon: <Download className="h-6 w-6" />,
@@ -214,6 +302,19 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
         iconColor: "text-amber-700",
         borderColor: "border-amber-200",
         adminOnly: true,
+        demo: (
+          <div className="flex flex-wrap items-center gap-3">
+            {demoButton(t.reportExportCsv, "bg-teal-800 text-white shadow-sm shadow-teal-900/25 hover:bg-teal-900", <Download className="h-4 w-4" />)}
+            {demoButton(t.reportExportPdf, "bg-teal-800 text-white shadow-sm shadow-teal-900/25 hover:bg-teal-900", <FileText className="h-4 w-4" />)}
+            <button
+              type="button"
+              className="inline-flex min-h-10 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-slate-300 px-4 py-2 text-base font-semibold text-slate-600"
+            >
+              <Download className="h-4 w-4" />
+              {t.reportExportCsv}
+            </button>
+          </div>
+        ),
       },
     ].filter((section) => !section.adminOnly || isAdmin);
 
@@ -311,178 +412,172 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
               <main className="min-w-0">
                 {/* What is Recognition Card */}
                 <div id="recognition-card" className="app-surface scroll-mt-36 rounded-2xl p-8 sm:p-10 mb-10">
-              <div className="flex items-start gap-5">
-                <div className="hidden sm:flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-teal-400 to-emerald-500 text-white shadow-md shrink-0">
-                  <Star className="h-7 w-7" />
-                </div>
-                <div>
-                  <h2 className="text-3xl font-bold text-slate-900 mb-3">{t.guideIntroTitle}</h2>
-                  <p className="text-slate-600 leading-8 text-xl">{t.guideIntroDesc}</p>
-                </div>
-              </div>
+                  <div className="flex items-start gap-5">
+                    <div className="hidden sm:flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-teal-400 to-emerald-500 text-white shadow-md shrink-0">
+                      <Star className="h-7 w-7" />
+                    </div>
+                    <div>
+                      <h2 className="text-3xl font-bold text-slate-900 mb-3">{t.guideIntroTitle}</h2>
+                      <p className="text-slate-600 leading-8 text-xl">{t.guideIntroDesc}</p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* What is Core Value */}
                 <div id="core-value" className="app-surface scroll-mt-36 rounded-2xl p-8 sm:p-10 mb-10">
-              <div className="mb-8 text-center">
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-rose-400 to-pink-500 text-white shadow-md mb-4">
-                  <Heart className="h-7 w-7" />
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">{t.guideCoreValueTitle}</h2>
-                <p className="mx-auto max-w-4xl text-xl leading-8 text-slate-600">{t.guideCoreValueDesc}</p>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {coreValueItems.map((item) => (
-                  <div key={item.type} className="rounded-xl border border-amber-100 bg-white/65 p-5 shadow-sm transition hover:shadow-md">
-                    <span className={`inline-flex rounded-full px-3 py-1.5 text-base font-bold ${item.tint}`}>
-                      {item.label}
-                    </span>
-                    <p className="mt-3 text-lg leading-8 text-slate-700">{item.description}</p>
+                  <div className="mb-8 text-center">
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-rose-400 to-pink-500 text-white shadow-md mb-4">
+                      <Heart className="h-7 w-7" />
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">{t.guideCoreValueTitle}</h2>
+                    <p className="mx-auto max-w-4xl text-xl leading-8 text-slate-600">{t.guideCoreValueDesc}</p>
                   </div>
-                ))}
-              </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {coreValueItems.map((item) => (
+                      <div key={item.type} className="rounded-xl border border-amber-100 bg-white/65 p-5 shadow-sm transition hover:shadow-md">
+                        <span className={`inline-flex rounded-full px-3 py-1.5 text-base font-bold ${item.tint}`}>
+                          {item.label}
+                        </span>
+                        <p className="mt-3 text-lg leading-8 text-slate-700">{item.description}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* STAR Method Explanation */}
                 <div id="star-method" className="app-surface scroll-mt-36 rounded-2xl p-8 sm:p-10 mb-10">
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-md mb-4">
-                  <Star className="h-7 w-7" />
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">{t.guideStarTitle}</h2>
-                <div className="w-20 h-1 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full mx-auto" />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                {starItems.map((item, i) => (
-                  <div key={i} className="flex items-start gap-4 p-4 rounded-xl bg-white/60 border border-amber-100 hover:shadow-md transition-shadow">
-                    <span className={`inline-flex items-center justify-center w-10 h-10 rounded-lg ${item.bg} ${item.color} text-lg font-extrabold shrink-0`}>
-                      {item.label}
-                    </span>
-                    <p className="text-lg text-slate-700 leading-8 pt-1">{item.title}</p>
+                  <div className="text-center mb-8">
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-md mb-4">
+                      <Star className="h-7 w-7" />
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">{t.guideStarTitle}</h2>
+                    <div className="w-20 h-1 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full mx-auto" />
                   </div>
-                ))}
-              </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {starItems.map((item, i) => (
+                      <div key={i} className="flex items-start gap-4 p-4 rounded-xl bg-white/60 border border-amber-100 hover:shadow-md transition-shadow">
+                        <span className={`inline-flex items-center justify-center w-10 h-10 rounded-lg ${item.bg} ${item.color} text-lg font-extrabold shrink-0`}>
+                          {item.label}
+                        </span>
+                        <p className="text-lg text-slate-700 leading-8 pt-1">{item.title}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* How To Section */}
                 <div id="how-to" className="scroll-mt-36 mb-10">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">{t.guideHowToTitle}</h2>
-                <div className="w-20 h-1 bg-gradient-to-r from-teal-400 to-emerald-500 rounded-full mx-auto" />
-              </div>
-
-              <div className="grid gap-6 md:grid-cols-3">
-                {steps.map((step, i) => (
-                  <div
-                    key={i}
-                    className={`app-surface rounded-xl p-6 sm:p-8 border-l-4 ${step.borderColor} hover:shadow-lg transition-all duration-300 hover:-translate-y-1`}
-                  >
-                    <div className={`inline-flex items-center justify-center w-14 h-14 rounded-xl ${step.iconBg} ${step.iconColor} mb-5`}>
-                      {step.icon}
-                    </div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br ${step.color} text-white text-sm font-bold`}>
-                        {i + 1}
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">{step.title}</h3>
-                    <p className="text-slate-600 leading-7 text-base">{step.desc}</p>
+                  <div className="text-center mb-8">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">{t.guideHowToTitle}</h2>
+                    <div className="w-20 h-1 bg-gradient-to-r from-teal-400 to-emerald-500 rounded-full mx-auto" />
                   </div>
-                ))}
-              </div>
+
+                  <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-2">
+                    {steps.map((step, i) => (
+                      <div
+                        key={i}
+                        className={`app-surface rounded-xl p-6 sm:p-8 border-l-4 ${step.borderColor} hover:shadow-lg transition-all duration-300 hover:-translate-y-1`}
+                      >
+                        <div className={`inline-flex items-center justify-center w-14 h-14 rounded-xl ${step.iconBg} ${step.iconColor} mb-5`}>
+                          {step.icon}
+                        </div>
+                        <h3 className="mb-2 flex items-center gap-2 text-xl font-bold text-slate-900">
+                          <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br ${step.color} text-white text-sm font-bold`}>
+                            {i + 1}
+                          </span>
+                          {step.title}
+                        </h3>
+                        <p className="text-slate-600 leading-7 text-base">{step.desc}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Extra Steps */}
-                <div className={`grid gap-6 mb-10 ${isAdmin ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
-              {extraSteps.map((step, i) => (
-                <div
-                  key={i}
-                  className={`app-surface rounded-xl p-6 sm:p-8 border-l-4 ${step.borderColor} hover:shadow-lg transition-all duration-300 hover:-translate-y-1`}
-                >
-                  <div className={`inline-flex items-center justify-center w-14 h-14 rounded-xl ${step.iconBg} ${step.iconColor} mb-5`}>
-                    {step.icon}
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">{step.title}</h3>
-                  <p className="text-slate-600 leading-7 text-base">{step.desc}</p>
-                </div>
-              ))}
+                <div className="grid gap-6 mb-10 md:grid-cols-2">
+                  {renderExtraStep(queueStep)}
+                  {renderExtraStep(historyStep, "md:self-start")}
+                  {isAdmin ? renderExtraStep(reportStep, "md:col-span-2") : null}
                 </div>
 
                 {/* Detailed Walkthrough */}
                 <div id="where-to-click" className="app-surface scroll-mt-36 rounded-2xl p-8 sm:p-10 mb-10">
-              <div className="mb-8 text-center">
-                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">{t.guideWalkthroughTitle}</h2>
-                <p className="mx-auto max-w-4xl text-xl leading-8 text-slate-600">{t.guideWalkthroughSubtitle}</p>
-              </div>
+                  <div className="mb-8 text-center">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">{t.guideWalkthroughTitle}</h2>
+                    <p className="mx-auto max-w-4xl text-xl leading-8 text-slate-600">{t.guideWalkthroughSubtitle}</p>
+                  </div>
 
-              <div className="mx-auto grid max-w-4xl gap-6">
-                {walkthroughSections.map((section) => (
-                  <section
-                    key={section.title}
-                    className={`rounded-xl border-l-4 ${section.borderColor} bg-white/65 p-6 shadow-sm transition hover:shadow-md sm:p-7`}
-                  >
-                    <div className="mb-4 flex items-center gap-3">
-                      <span className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${section.iconBg} ${section.iconColor}`}>
-                        {section.icon}
-                      </span>
-                      <h3 className="text-2xl font-bold text-slate-900">{section.title}</h3>
-                    </div>
-                    <div className="space-y-4">
-                      {section.items.map((item, index) => (
-                        <div key={`${section.title}-${index}`} className="flex gap-3">
-                          <span className="mt-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white">
-                            {index + 1}
+                  <div className="mx-auto grid max-w-4xl gap-6">
+                    {walkthroughSections.map((section) => (
+                      <section
+                        key={section.title}
+                        className={`rounded-xl border-l-4 ${section.borderColor} bg-white/65 p-6 shadow-sm transition hover:shadow-md sm:p-7`}
+                      >
+                        <div className="mb-4 flex items-center gap-3">
+                          <span className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${section.iconBg} ${section.iconColor}`}>
+                            {section.icon}
                           </span>
-                          <p className="text-lg leading-8 text-slate-700">{item}</p>
+                          <h3 className="text-2xl font-bold text-slate-900">{section.title}</h3>
                         </div>
-                      ))}
-                    </div>
-                  </section>
-                ))}
-              </div>
+                        <div className="space-y-4">
+                          {section.items.map((item, index) => (
+                            <div key={`${section.title}-${index}`} className="flex gap-3">
+                              <span className="mt-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white">
+                                {index + 1}
+                              </span>
+                              <p className="text-lg leading-8 text-slate-700">{item}</p>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="mt-5 rounded-2xl border border-amber-100 bg-amber-50/35 p-4">
+                          {section.demo}
+                        </div>
+                      </section>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Tips Section */}
                 <div className="app-surface rounded-2xl p-8 sm:p-10 mb-10">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-purple-400 to-violet-500 text-white shadow-md">
-                  <Lightbulb className="h-6 w-6" />
-                </div>
-                <h2 className="text-2xl font-bold text-slate-900">{t.guideTipTitle}</h2>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                {tips.map((tip, i) => (
-                  <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-white/60 border border-purple-100 hover:shadow-md transition-shadow">
-                    <span className="text-purple-500 mt-0.5 shrink-0">{tip.icon}</span>
-                    <p className="text-lg text-slate-700 leading-8">{tip.text}</p>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-purple-400 to-violet-500 text-white shadow-md">
+                      <Lightbulb className="h-6 w-6" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-slate-900">{t.guideTipTitle}</h2>
                   </div>
-                ))}
-              </div>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {tips.map((tip, i) => (
+                      <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-white/60 border border-purple-100 hover:shadow-md transition-shadow">
+                        <span className="text-purple-500 mt-0.5 shrink-0">{tip.icon}</span>
+                        <p className="text-lg text-slate-700 leading-8">{tip.text}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* CTA Section */}
                 <div className="app-surface rounded-2xl p-8 sm:p-12 text-center relative overflow-hidden">
-              <div className="absolute -top-20 -right-20 w-60 h-60 bg-teal-200/20 rounded-full blur-3xl" />
-              <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-amber-200/20 rounded-full blur-3xl" />
+                  <div className="absolute -top-20 -right-20 w-60 h-60 bg-teal-200/20 rounded-full blur-3xl" />
+                  <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-amber-200/20 rounded-full blur-3xl" />
 
-              <div className="relative">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-400 to-emerald-500 text-white shadow-lg mb-6">
-                  <Sparkles className="h-8 w-8" />
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
-                  {t.guideGetStarted}
-                </h2>
-                <a
-                  href={buildCurrentUserHref("/", currentUserId)}
-                  className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-bold text-lg shadow-lg hover:from-teal-600 hover:to-emerald-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5"
-                >
-                  {t.guideGetStartedBtn}
-                  <ArrowRight className="h-5 w-5" />
-                </a>
-              </div>
+                  <div className="relative">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-400 to-emerald-500 text-white shadow-lg mb-6">
+                      <Sparkles className="h-8 w-8" />
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
+                      {t.guideGetStarted}
+                    </h2>
+                    <a
+                      href={buildCurrentUserHref("/", currentUserId)}
+                      className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-bold text-lg shadow-lg hover:from-teal-600 hover:to-emerald-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5"
+                    >
+                      {t.guideGetStartedBtn}
+                      <ArrowRight className="h-5 w-5" />
+                    </a>
+                  </div>
                 </div>
               </main>
             </div>
