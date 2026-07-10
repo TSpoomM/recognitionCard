@@ -124,9 +124,6 @@ export class EmailService {
         <p style="color: #475569; font-size: 16px; line-height: 1.5;">
           To: <strong>${recipientName}</strong>
         </p>
-        <p style="color: #475569; font-size: 16px; line-height: 1.5;">
-          Someone has sent you a recognition card to appreciate your hard work and contribution. Please find your recognition card attached below:
-        </p>
         <div style="text-align: center; margin: 30px 0;">
           <img src="cid:recognitionCard" alt="Recognition Card" width="660" style="width: 660px; max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);" />
         </div>
@@ -137,3 +134,23 @@ export class EmailService {
     `;
   }
 }
+//   private static buildHtml(recipientName: string) {
+//     return `
+//       <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+//         <h2 style="color: #0f172a; text-align: center;">You have received a new compliment!</h2>
+//         <p style="color: #475569; font-size: 16px; line-height: 1.5;">
+//           To: <strong>${recipientName}</strong>
+//         </p>
+//         <p style="color: #475569; font-size: 16px; line-height: 1.5;">
+//           Someone has sent you a recognition card to appreciate your hard work and contribution. Please find your recognition card attached below:
+//         </p>
+//         <div style="text-align: center; margin: 30px 0;">
+//           <img src="cid:recognitionCard" alt="Recognition Card" width="660" style="width: 660px; max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);" />
+//         </div>
+//         <p style="color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 30px; text-align: center;">
+//           This is an automated email from TeckBeeHang Recognition System.
+//         </p>
+//       </div>
+//     `;
+//   }
+// }

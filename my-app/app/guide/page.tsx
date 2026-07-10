@@ -253,7 +253,7 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
           <div className="flex flex-wrap items-center gap-3">
             {demoButton(t.queue, "rounded-full bg-teal-800 px-5 text-white shadow-lg shadow-teal-900/25 hover:bg-teal-900", <Send className="h-4 w-4" />)}
             {demoButton(t.edit, "border-[1.5px] border-amber-300 bg-white text-slate-700 hover:border-amber-400 hover:bg-amber-50", <Pencil className="h-4 w-4" />)}
-            {demoButton(t.delete, "border border-rose-200 bg-white text-rose-600 hover:border-rose-300 hover:text-rose-700", <Trash2 className="h-4 w-4" />)}
+            {demoButton(t.cancel, "border border-rose-200 bg-white text-rose-600 hover:border-rose-300 hover:text-rose-700", <Trash2 className="h-4 w-4" />)}
             {demoButton(t.confirmNow, "bg-teal-800 text-white hover:bg-teal-900", <Send className="h-4 w-4" />)}
             {demoIconButton("Close", "border-[1.5px] border-amber-300 bg-white text-slate-500 hover:border-amber-400 hover:text-teal-900", <X className="h-5 w-5" />)}
           </div>
