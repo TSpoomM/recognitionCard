@@ -33,6 +33,12 @@ export default function RecognitionQueueButton({
   const pendingCount = useMemo(() => submissions.filter((item) => item.status === "pending").length, [submissions]);
 
   useEffect(() => {
+    if (pendingCount <= 0) return;
+    const timer = window.setTimeout(() => setOpen(true), 0);
+    return () => window.clearTimeout(timer);
+  }, [pendingCount]);
+
+  useEffect(() => {
     if (!open) return;
 
     const intervalId = window.setInterval(() => {
@@ -112,7 +118,7 @@ export default function RecognitionQueueButton({
                               if (!meta) return null;
                               return (
                                 <span key={type} className={`rounded-full px-3 py-1.5 text-sm font-bold ${meta.tint}`}>
-                                  {meta.emoji} {meta.en}
+                                  {meta.emoji} {submission.cardLanguage === "th" ? meta.th : meta.en}
                                 </span>
                               );
                             })}
@@ -155,7 +161,7 @@ export default function RecognitionQueueButton({
                             if (!meta) return null;
                             return (
                               <span key={type} className={`rounded-full px-3 py-1.5 text-sm font-bold ${meta.tint}`}>
-                                {meta.emoji} {meta.en}
+                                {meta.emoji} {submission.cardLanguage === "th" ? meta.th : meta.en}
                               </span>
                             );
                           })}

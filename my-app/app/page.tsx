@@ -40,14 +40,14 @@ export default class Home extends Component<Record<string, never>, PageState> {
     super(props);
 
     this.state = {
-      lang: 'en',
+      lang: 'th',
       currentStep: 1,
       currentUserId: "",
       users: [],
       isLoadingUsers: true,
       selectedUserIds: [],
       selectedTypes: [],
-      selectedCardLanguage: "en",
+      selectedCardLanguage: "th",
       comment: "",
       searchQuery: "",
       selectedBranch: "",
@@ -176,7 +176,14 @@ export default class Home extends Component<Record<string, never>, PageState> {
         throw new Error(result.error || "Could not load employee data.");
       }
 
-      this.setState({ users: result.data as User[], isLoadingUsers: false, formError: "" });
+      const rawDraft = window.sessionStorage.getItem("recognition-forward-draft");
+      const draft = rawDraft ? JSON.parse(rawDraft) as { comment: string; coreValues: CommentType[]; cardLanguage: CardLanguage } : null;
+      if (draft) window.sessionStorage.removeItem("recognition-forward-draft");
+      if (draft) {
+        this.setState({ users: result.data as User[], isLoadingUsers: false, formError: "", currentStep: 1, selectedUserIds: [], selectedTypes: draft.coreValues, comment: draft.comment, selectedCardLanguage: draft.cardLanguage });
+      } else {
+        this.setState({ users: result.data as User[], isLoadingUsers: false, formError: "" });
+      }
     } catch (error) {
       this.setState({
         users: [],
@@ -284,7 +291,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
       currentStep: 1,
       selectedUserIds: [],
       selectedTypes: [],
-      selectedCardLanguage: "en",
+      selectedCardLanguage: "th",
       comment: "",
       searchQuery: "",
       selectedBranch: "",
@@ -476,20 +483,20 @@ export default class Home extends Component<Record<string, never>, PageState> {
     const isThai = lang === "th";
     const options: { value: CardLanguage; title: string; description: string }[] = [
       {
-        value: "en",
-        title: "English",
-        description: "Send the recognition card image in English.",
-      },
-      {
         value: "th",
         title: "ภาษาไทย",
-        description: "ส่งรูป Recognition Card เป็นภาษาไทย",
+        description: "ส่งรูปบัตรส่งต่อคุณค่าเป็นภาษาไทย",
+      },
+      {
+        value: "en",
+        title: isThai ? "ภาษาอังกฤษ" : "English",
+        description: isThai ? "ส่งรูปบัตรส่งต่อคุณค่าเป็นภาษาอังกฤษ" : "Send the recognition card image in English.",
       },
     ];
 
     return (
       <>
-        <h2 className="mb-4 text-2xl font-semibold text-slate-900">{isThai ? "เลือกภาษา Card" : "Choose card language"}</h2>
+        <h2 className="mb-4 text-2xl font-semibold text-slate-900">{isThai ? "เลือกภาษาของบัตร" : "Choose card language"}</h2>
         <p className="mb-4 text-base text-slate-600">
           {isThai ? "เลือกภาษาที่จะแสดงในรูปการ์ดที่ส่งทางอีเมล" : "Select the language that will appear in the email card image."}
         </p>

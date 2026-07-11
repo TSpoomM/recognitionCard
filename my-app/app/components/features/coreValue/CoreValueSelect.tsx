@@ -2,6 +2,7 @@
 
 import { Component } from "react";
 import { CommentType, COMMENT_TYPES, COMMENT_TYPE_META } from "../../../types/commentType";
+import { LanguageContext } from "../../../context/LanguageContext";
 
 type CoreValueSelectProps = {
   selectedTypes: CommentType[];
@@ -9,6 +10,8 @@ type CoreValueSelectProps = {
 };
 
 export default class CoreValueSelect extends Component<CoreValueSelectProps> {
+  static contextType = LanguageContext;
+  declare context: React.ContextType<typeof LanguageContext>;
   render() {
     const { selectedTypes, onToggleType } = this.props;
 
@@ -31,8 +34,10 @@ export default class CoreValueSelect extends Component<CoreValueSelectProps> {
                 <span className="text-xl">{meta.emoji}</span>
               </div>
               <div className="min-w-0 flex-1">
+                {/* <p className="text-lg font-semibold text-slate-900">{this.context.lang === "th" ? meta.th : meta.en}</p> */}
                 <p className="text-lg font-semibold text-slate-900">{meta.en}</p>
                 <p className="mt-1 text-base text-slate-500">{meta.th}</p>
+                {/* {this.context.lang === "en" && <p className="mt-1 text-base text-slate-500">{meta.th}</p>} */}
               </div>
               <div className={`grid h-6 w-6 shrink-0 place-items-center rounded-full border-[1.5px] ${active ? "border-amber-400 bg-teal-600 text-white" : "border-amber-300 bg-white text-slate-300"}`}>
                 ✓

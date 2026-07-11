@@ -8,7 +8,7 @@ export default function LanguageSwitcher() {
 
   return (
     <div className="flex items-center gap-1.5 rounded-full border-[1.5px] border-amber-300 bg-teal-50 p-1.5">
-      {(['en', 'th'] as Language[]).map((code) => (
+      {(['th', 'en'] as Language[]).map((code) => (
         <button
           key={code}
           type="button"

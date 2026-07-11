@@ -12,6 +12,8 @@ type HistoryRow = RowDataPacket & {
   recipient_name: string | null;
   recipient_email: string | null;
   recipient_position: string | null;
+  recipient_branch: string | null;
+  sender_name: string | null;
 };
 
 function splitName(fullName: string) {
@@ -44,11 +46,15 @@ export async function GET(request: Request) {
         e.emp_name_en AS recipient_name,
         em.email AS recipient_email,
         em.position AS recipient_position
+        ,e.location_emp AS recipient_branch
+        ,sender.emp_name_en AS sender_name
       FROM tb_diary_list d
       LEFT JOIN tb_employee_list e
         ON d.diary_emp_id = e.fs_id
       LEFT JOIN tb_emp_email em
         ON d.diary_emp_id = em.Code
+      LEFT JOIN tb_employee_list sender
+        ON d.createdBy = sender.fs_id
       WHERE d.createdBy = ? AND YEAR(d.createdDate) >= YEAR(CURRENT_DATE) - 2
       ORDER BY d.createdDate DESC, d.diary_list DESC
       `,
@@ -69,7 +75,9 @@ export async function GET(request: Request) {
           lastName,
           email: row.recipient_email || "",
           role: row.recipient_position || undefined,
+          branch: row.recipient_branch?.trim() || undefined,
         },
+        senderName: row.sender_name?.trim() || String(currentUserId),
         comment: row.diary_comment || "",
         coreValues: row.diary_corevalue
           ? row.diary_corevalue.split(",").map((value) => value.trim()).filter(Boolean)

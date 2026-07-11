@@ -189,7 +189,7 @@ export const TRANSLATIONS = {
 
   th: {
     // Header
-    headerLabel: 'Recognition Card',
+    headerLabel: 'บัตรส่งต่อคุณค่า',
     headerReport: 'รายงาน',
     headerHistory: 'ประวัติ',
     headerHome: 'หน้าหลัก',
@@ -197,8 +197,8 @@ export const TRANSLATIONS = {
 
     // Stepper
     stepperTitle: (current: number, total: number) => `ขั้นตอนที่ ${current} จาก ${total}`,
-    stepperDescription: 'ทำแต่ละขั้นตอนให้ครบเพื่อส่ง Recognition Card',
-    stepLabels: ['เลือกผู้รับ', 'เลือก Core Values', 'เขียน STAR', 'เลือกภาษา Card'],
+    stepperDescription: 'ทำแต่ละขั้นตอนให้ครบเพื่อส่งบัตรส่งต่อคุณค่า',
+    stepLabels: ['เลือกผู้รับ', 'เลือกค่านิยม', 'เขียนข้อความชื่นชม', 'เลือกภาษาของบัตร'],
 
     // Step 1 – User Selection
     step1Title: 'เลือกผู้รับ',
@@ -207,12 +207,12 @@ export const TRANSLATIONS = {
     step1SearchPlaceholder: 'ค้นหาด้วยชื่อ, ทีม, ตำแหน่ง...',
 
     // Step 2 – Core Values
-    step2Title: 'เลือกประเภท',
-    step2Description: 'เลือก Core Values ที่เหมาะสมอย่างน้อยหนึ่งข้อ',
+    step2Title: 'เลือกค่านิยม',
+    step2Description: 'เลือกค่านิยมที่เหมาะสมอย่างน้อยหนึ่งข้อ',
 
     // Step 3 – STAR Comment
     step3Title: 'เขียนข้อความ',
-    step3Description: 'ใช้กล่อง STAR ทั้งสี่เพื่อจัดโครงสร้างข้อความ',
+    step3Description: 'ใช้ช่องทั้งสี่ส่วนเพื่อจัดโครงสร้างข้อความชื่นชม',
     step3To: 'ถึง',
     step3For: 'สำหรับ',
     step3Situation: 'สถานการณ์',
@@ -228,7 +228,7 @@ export const TRANSLATIONS = {
     // Form Actions
     back: 'ย้อนกลับ',
     continue: 'ถัดไป',
-    submitRecognition: 'ส่ง Recognition',
+    submitRecognition: 'ส่งบัตรส่งต่อคุณค่า',
 
     // Queue Button
     queue: 'รายการ',
@@ -243,38 +243,38 @@ export const TRANSLATIONS = {
     confirmNow: 'ยืนยันทันที',
 
     // Validation / error messages
-    errorNoUserId: 'ไม่พบ User ID กรุณาเปิดหน้านี้จากระบบล็อกอิน',
+    errorNoUserId: 'ไม่พบรหัสผู้ใช้งาน กรุณาเปิดหน้านี้จากระบบเข้าสู่ระบบ',
     errorSelectUser: 'กรุณาเลือกผู้รับอย่างน้อยหนึ่งคน',
-    errorSelfRecognize: 'ไม่สามารถส่ง Recognition ให้ตัวเองได้',
-    errorSelectCoreValue: 'กรุณาเลือก Core Value อย่างน้อยหนึ่งข้อ',
+    errorSelfRecognize: 'ไม่สามารถส่งบัตรส่งต่อคุณค่าให้ตัวเองได้',
+    errorSelectCoreValue: 'กรุณาเลือกค่านิยมอย่างน้อยหนึ่งข้อ',
     errorCommentTooShort: (length: number) => `กรุณาเขียนอย่างน้อย 70 ตัวอักษร (ปัจจุบัน ${length} ตัว)`,
-    errorCommentTooLong: (length: number) => `กรุณาเขียน STAR comment ไม่เกิน 500 ตัวอักษร (ปัจจุบัน ${length} ตัว)`,
-    successQueued: 'เพิ่ม Recognition Card เข้ารายการรอส่งเรียบร้อยแล้ว',
-    successUpdated: 'อัปเดต Recognition Card เรียบร้อยแล้ว',
-    successSaved: 'บันทึก Recognition Card ลงฐานข้อมูลเรียบร้อยแล้ว',
+    errorCommentTooLong: (length: number) => `กรุณาเขียนข้อความชื่นชมไม่เกิน 500 ตัวอักษร (ปัจจุบัน ${length} ตัว)`,
+    successQueued: 'เพิ่มบัตรส่งต่อคุณค่าเข้ารายการรอส่งเรียบร้อยแล้ว',
+    successUpdated: 'อัปเดตบัตรส่งต่อคุณค่าเรียบร้อยแล้ว',
+    successSaved: 'บันทึกบัตรส่งต่อคุณค่าลงฐานข้อมูลเรียบร้อยแล้ว',
     errorLoadUsers: (msg: string) => `ไม่สามารถโหลดข้อมูลพนักงาน: ${msg}`,
-    errorSaveCard: (msg: string) => `ไม่สามารถบันทึก Recognition Card: ${msg}`,
+    errorSaveCard: (msg: string) => `ไม่สามารถบันทึกบัตรส่งต่อคุณค่า: ${msg}`,
     errorNoUser: 'กรุณาเลือกผู้รับอย่างน้อยหนึ่งคน',
 
     // History Page
     historyTitle: 'ประวัติ',
-    historySubtitle: 'Recognition ที่คุณส่งจะแสดงที่นี่',
-    historyRecognitionsSent: (count: number) => `ส่ง Recognition ${count} รายการ`,
+    historySubtitle: 'บัตรส่งต่อคุณค่าที่คุณส่งจะแสดงที่นี่',
+    historyRecognitionsSent: (count: number) => `ส่งบัตรส่งต่อคุณค่า ${count} รายการ`,
     historyFilters: 'ตัวกรอง',
-    historyChooseYear: 'เลือกปีเพื่อดูการส่ง Recognition',
+    historyChooseYear: 'เลือกปีเพื่อดูบัตรส่งต่อคุณค่าที่ส่งแล้ว',
     historyYear: 'ปี',
     historyAllYears: 'ทุกปี',
     historyBackButton: 'ย้อนกลับ',
     historyLoading: 'กำลังโหลดประวัติ...',
-    historyNoRecognitions: 'ไม่พบ Recognition',
+    historyNoRecognitions: 'ไม่พบบัตรส่งต่อคุณค่า',
 
     // Report Page
-    reportTitle: 'รายงาน Recognition',
+    reportTitle: 'รายงานบัตรส่งต่อคุณค่า',
     reportSubtitle: 'กรองตามคน สาขา หรือปี จากนั้นส่งออก PDF หรือ CSV',
     reportBackButton: 'ย้อนกลับ',
     reportCheckingAccess: 'กำลังตรวจสอบสิทธิ์เข้าถึงรายงาน...',
     reportAccessDenied: 'ปฏิเสธการเข้าถึง',
-    reportOnlyAdmin: 'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถเข้าถึงรายงาน Recognition ได้',
+    reportOnlyAdmin: 'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถเข้าถึงรายงานบัตรส่งต่อคุณค่าได้',
     reportExportCsv: 'ส่งออก CSV',
     reportExportPdf: 'ส่งออก PDF',
     reportFilters: 'ตัวกรอง',
@@ -283,17 +283,17 @@ export const TRANSLATIONS = {
     reportFilterYear: 'กรองตามปี',
     reportClearFilters: 'ล้างตัวกรอง',
     reportNoFilters: 'ไม่มีการใช้ตัวกรอง',
-    reportRecognitionCard: 'Recognition Card',
+    reportRecognitionCard: 'บัตรส่งต่อคุณค่า',
 
     // Guide Page
     guideBackButton: 'ย้อนกลับ',
     guideTitle: 'คู่มือการใช้งาน',
-    guideSubtitle: 'เรียนรู้วิธีการใช้ระบบ Recognition Card ทีละขั้นตอน',
+    guideSubtitle: 'เรียนรู้วิธีการใช้ระบบบัตรส่งต่อคุณค่าทีละขั้นตอน',
     guideStatusLabel: 'ตอนนี้อ่านถึง',
-    guideIntroTitle: 'Recognition Card คืออะไร?',
-    guideIntroDesc: 'Recognition Card คือแพลตฟอร์มที่ช่วยให้คุณชื่นชมและยกย่องเพื่อนร่วมทีมผ่านการให้ข้อเสนอแนะแบบ STAR ที่มีโครงสร้าง ส่งเสริมวัฒนธรรมองค์กรเชิงบวกด้วยการเฉลิมฉลองความสำเร็จทั้งเล็กและใหญ่',
-    guideCoreValueTitle: 'Core Value คืออะไร?',
-    guideCoreValueDesc: 'Core Value คือพฤติกรรมหรือคุณค่าที่ต้องการชื่นชม ให้เลือกข้อที่ตรงกับสิ่งที่คนนั้นทำมากที่สุด เพื่อให้ Recognition ชัดเจนและเชื่อมกับวัฒนธรรมขององค์กร',
+    guideIntroTitle: 'บัตรส่งต่อคุณค่าคืออะไร?',
+    guideIntroDesc: 'บัตรส่งต่อคุณค่าคือระบบที่ช่วยให้คุณชื่นชมเพื่อนร่วมทีมผ่านข้อความที่มีโครงสร้าง และส่งเสริมวัฒนธรรมองค์กรเชิงบวกด้วยการยินดีกับความสำเร็จทั้งเล็กและใหญ่',
+    guideCoreValueTitle: 'ค่านิยมคืออะไร?',
+    guideCoreValueDesc: 'ค่านิยมคือพฤติกรรมหรือคุณค่าที่ต้องการชื่นชม ให้เลือกข้อที่ตรงกับสิ่งที่คนนั้นทำมากที่สุด เพื่อให้คำชื่นชมชัดเจนและเชื่อมโยงกับวัฒนธรรมขององค์กร',
     guideCoreValueDescriptions: {
       RESPECT: 'แสดงความใส่ใจ รับฟังผู้อื่น และปฏิบัติต่อเพื่อนร่วมทีมอย่างให้เกียรติและเป็นธรรม',
       LEADERSHIP: 'รับผิดชอบงาน สนับสนุนผู้อื่น และช่วยพาทีมไปในทิศทางที่ดี',
@@ -306,7 +306,7 @@ export const TRANSLATIONS = {
     guideWalkthroughHomeTitle: 'ส่งการ์ดจากหน้า Home',
     guideWalkthroughHomeItems: [
       'กด Home ที่เมนูด้านบน หรือกดปุ่มสีเขียว Go to Home ที่ด้านล่างของคู่มือนี้',
-      'ขั้นตอนที่ 1 จะมีช่อง Branch / Location และช่องค้นหา ถ้าต้องการเลือกสาขาให้กดช่องสาขา หรือพิมพ์ชื่อคนในช่องค้นหา',
+      'ขั้นตอนที่ 1 จะมีช่องสาขาและช่องค้นหา ถ้าต้องการเลือกสาขาให้กดช่องสาขา หรือพิมพ์ชื่อคนในช่องค้นหา',
       'กดที่การ์ดชื่อเพื่อนร่วมทีมเพื่อเลือก คนที่เลือกแล้วจะแสดงเป็นป้ายชื่อสีเขียวเหนือรายการ ถ้าต้องการเอาออกให้กด x บนป้ายชื่อนั้น',
       'กดปุ่ม Continue สีเขียวที่มุมขวาล่างของฟอร์ม ถ้ามีข้อความเตือนสีแดง ให้ทำตามข้อความนั้นก่อน แล้วกด Continue อีกครั้ง',
       'ขั้นตอนที่ 2 ให้กดเลือกการ์ด Core Value ได้ 1 ข้อหรือมากกว่า จากนั้นกด Continue',
@@ -342,21 +342,21 @@ export const TRANSLATIONS = {
       'เมื่อข้อมูลที่กรองถูกต้องแล้ว ให้กด Export CSV เพื่อเอาไปเปิดใน spreadsheet หรือกด Export PDF เพื่อทำรายงานแบบพิมพ์ได้',
       'ถ้าปุ่ม export กดไม่ได้ แปลว่ายังไม่มีข้อมูลในผลลัพธ์ให้ export',
     ],
-    guideHowToTitle: 'วิธีส่ง Recognition Card',
+    guideHowToTitle: 'วิธีส่งบัตรส่งต่อคุณค่า',
     guideStep1Title: 'ขั้นตอนที่ 1: เลือกผู้รับ',
     guideStep1Desc: 'ค้นหาและเลือกเพื่อนร่วมทีมที่คุณต้องการชื่นชม คุณสามารถกรองตามชื่อ ทีม หรือตำแหน่งเพื่อค้นหาบุคคลที่ต้องการได้อย่างรวดเร็ว',
-    guideStep2Title: 'ขั้นตอนที่ 2: เลือก Core Values',
+    guideStep2Title: 'ขั้นตอนที่ 2: เลือกค่านิยม',
     guideStep2Desc: 'เลือกค่านิยมหลักที่ตรงกับพฤติกรรมหรือความสำเร็จที่คุณต้องการยกย่อง ซึ่งช่วยให้การชื่นชมสอดคล้องกับค่านิยมขององค์กร',
     guideStep3Title: 'ขั้นตอนที่ 3: เขียนข้อความแบบ STAR',
     guideStep3Desc: 'จัดโครงสร้างข้อความของคุณด้วยวิธี STAR — สถานการณ์ งาน การกระทำ ผลลัพธ์ เพื่อให้การชื่นชมของคุณชัดเจน มีความหมาย และมีประสิทธิภาพ',
-    guideStep4Title: 'ขั้นตอนที่ 4: เลือกภาษา Card',
-    guideStep4Desc: 'เลือกว่ารูปการ์ดในอีเมลจะใช้ภาษาอังกฤษหรือภาษาไทย ระบบจะเปลี่ยน label, คำถาม STAR, ชื่อ Core Value และคำอธิบายในรูปตามภาษาที่เลือก',
+    guideStep4Title: 'ขั้นตอนที่ 4: เลือกภาษาของบัตร',
+    guideStep4Desc: 'เลือกว่ารูปบัตรในอีเมลจะใช้ภาษาอังกฤษหรือภาษาไทย ระบบจะเปลี่ยนข้อความ คำถาม ชื่อค่านิยม และคำอธิบายในรูปตามภาษาที่เลือก',
     guideQueueTitle: 'รายการรอส่ง',
     guideQueueDesc: 'หลังจากส่ง การ์ดของคุณจะอยู่ในรายการรอส่ง ซึ่งคุณสามารถแก้ไข ลบ หรือยืนยันได้ภายใน 2 นาทีก่อนที่จะถูกส่งอัตโนมัติ',
     guideHistoryTitle: 'ดูประวัติ',
-    guideHistoryDesc: 'การ์ด Recognition ทั้งหมดที่คุณส่งจะถูกบันทึกไว้ในหน้าประวัติ คุณสามารถเลือกปีจาก 5 ปีล่าสุดเพื่อทบทวนการชื่นชมในอดีต',
-    guideReportTitle: 'รายงานสำหรับ Admin',
-    guideReportDesc: 'Admin สามารถเข้าหน้า Report เพื่อกรอง Recognition ตามสาขาและคนได้ โดยเลือกได้มากกว่า 1 สาขาและมากกว่า 1 คน ข้อมูลที่กรองจะแสดงสรุปคร่าวๆ ใน dashboard ด้านบน และแสดงรายละเอียดในตารางด้านล่าง จากนั้นสามารถ export เป็น PDF หรือ CSV ได้',
+    guideHistoryDesc: 'บัตรส่งต่อคุณค่าทั้งหมดที่คุณส่งจะถูกบันทึกไว้ในหน้าประวัติ คุณสามารถเลือกปีเพื่อทบทวนการชื่นชมในอดีต',
+    guideReportTitle: 'รายงานสำหรับผู้ดูแลระบบ',
+    guideReportDesc: 'ผู้ดูแลระบบสามารถเข้าหน้ารายงานเพื่อกรองบัตรส่งต่อคุณค่าตามสาขา ค่านิยม ปี และผู้รับได้ ข้อมูลที่กรองจะแสดงสรุปด้านบนและรายละเอียดในตารางด้านล่าง จากนั้นสามารถส่งออกเป็น PDF หรือ CSV ได้',
     guideStarTitle: 'วิธี STAR คืออะไร?',
     guideStarSituation: 'สถานการณ์: อธิบายบริบทหรือความท้าทายที่บุคคลนั้นเผชิญ',
     guideStarTask: 'งาน: อธิบายเป้าหมายหรือหน้าที่ความรับผิดชอบที่พวกเขามี',

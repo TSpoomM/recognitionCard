@@ -1,10 +1,11 @@
 'use client';
 import { Component } from "react";
-import { CalendarDays, FileText, Filter, MapPin, Search, Users } from "lucide-react";
+import { CalendarDays, ChevronRight, FileText, Filter, MapPin, Search, Users } from "lucide-react";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Navbar from "../components/ui/Navbar";
 import Select from "../components/ui/Select";
+import Modal from "../components/ui/Modal";
 import { getClientCurrentUserId } from "../lib/currentUser";
 import { reportAccessClient } from "../lib/reportAccessClient";
 import { downloadReportCsv, downloadReportPdf } from "../lib/reportExport";
@@ -22,9 +23,11 @@ type ReportPageState = {
   data: ReportData | null;
   selectedPeople: string[];
   selectedBranches: string[];
-  selectedYear: string;
+  selectedYears: string[];
+  selectedCoreValues: string[];
   query: string;
   expandedRowIds: string[];
+  filterModal: "branch" | "coreValue" | "year" | "people" | null;
 };
 type GroupedReportRow = Omit<ReportRow, "coreValue" | "coreValueLabel"> & {
   coreValues: string[];
@@ -63,7 +66,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
   constructor(props: Record<string, never>) {
     super(props);
     this.state = {
-      lang: 'en',
+      lang: 'th',
       currentUserId: "",
       isAdmin: false,
       isLoadingAccess: true,
@@ -72,9 +75,11 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
       data: null,
       selectedPeople: [],
       selectedBranches: [],
-      selectedYear: "",
+      selectedYears: [],
+      selectedCoreValues: [],
       query: "",
       expandedRowIds: [],
+      filterModal: null,
     };
   }
 
@@ -105,12 +110,12 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
     });
   }
   private get filteredRows(): ReportRow[] {
-    const { data, selectedBranches, selectedPeople, selectedYear } = this.state;
+    const { data, selectedBranches, selectedPeople, selectedYears } = this.state;
     if (!data) return [];
     return data.rows.filter((row) => {
       if (selectedPeople.length > 0 && !selectedPeople.includes(row.personId)) return false;
       if (selectedBranches.length > 0 && !selectedBranches.includes(row.branch)) return false;
-      if (selectedYear && row.year !== Number(selectedYear)) return false;
+      if (selectedYears.length > 0 && !selectedYears.includes(String(row.year))) return false;
       return true;
     });
   }
@@ -120,33 +125,37 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
 
     for (const row of this.filteredRows) {
       const groupKey = row.id.split("-").slice(0, 2).join("-");
-      const coreValueCode = normalizeCoreValueCode(row.coreValue || "");
-      const displayLabel = getCoreValueDisplayLabel(row.coreValue || "");
+      const rawCoreValues = (row.coreValue || "").split(/[,;|]/).map((value) => value.trim()).filter(Boolean);
+      const coreValueCodes = rawCoreValues.map(normalizeCoreValueCode).filter(Boolean);
+      const displayLabels = rawCoreValues.map(getCoreValueDisplayLabel).filter(Boolean);
       const existing = grouped.get(groupKey);
 
       if (!existing) {
         grouped.set(groupKey, {
           ...row,
           id: groupKey,
-          coreValues: coreValueCode ? [coreValueCode] : [],
-          coreValueLabels: coreValueCode ? [displayLabel] : [],
+          coreValues: coreValueCodes,
+          coreValueLabels: displayLabels,
         });
         continue;
       }
 
-      if (coreValueCode && !existing.coreValues.includes(coreValueCode)) {
-        existing.coreValues.push(coreValueCode);
-      }
-      if (coreValueCode && displayLabel && !existing.coreValueLabels.includes(displayLabel)) {
-        existing.coreValueLabels.push(displayLabel);
-      }
+      coreValueCodes.forEach((code) => { if (!existing.coreValues.includes(code)) existing.coreValues.push(code); });
+      displayLabels.forEach((label) => { if (!existing.coreValueLabels.includes(label)) existing.coreValueLabels.push(label); });
     }
 
-    return Array.from(grouped.values()).map((row) => ({
+    const groupedRows = Array.from(grouped.values()).map((row) => ({
       ...row,
       coreValues: sortReportCoreValues(row.coreValues),
       coreValueLabels: row.coreValueLabels,
     }));
+
+    const { selectedCoreValues } = this.state;
+    if (selectedCoreValues.length === 0) return groupedRows;
+
+    return groupedRows.filter((row) =>
+      selectedCoreValues.some((selectedValue) => row.coreValues.includes(selectedValue))
+    );
   }
   private async loadAccess() {
     const currentUserId = getClientCurrentUserId();
@@ -223,12 +232,20 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
         : [...state.selectedBranches, branch],
     }));
   };
+  private toggleCoreValue = (value: string) => {
+    this.setState((state) => ({
+      selectedCoreValues: state.selectedCoreValues.includes(value)
+        ? state.selectedCoreValues.filter((item) => item !== value)
+        : [...state.selectedCoreValues, value],
+    }));
+  };
   private clearFilters = () => {
     this.setState({
       selectedPeople: [],
       selectedBranches: [],
       query: "",
-      selectedYear: "",
+      selectedYears: [],
+      selectedCoreValues: [],
     });
   };
   private toggleRowExpanded = (rowId: string) => {
@@ -266,7 +283,8 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
       query,
       selectedBranches,
       selectedPeople,
-      selectedYear,
+      selectedYears,
+      selectedCoreValues,
       expandedRowIds,
     } = this.state;
     const rows = this.filteredRows;
@@ -278,8 +296,10 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
     }));
     const employees = this.filteredEmployees;
     const totalRows = data?.rows.length ?? 0;
-    const activeFilterCount = selectedBranches.length + selectedPeople.length + (selectedYear ? 1 : 0);
-    const visibleRecipientCount = displayRows.length;
+    const activeFilterCount = selectedBranches.length + selectedCoreValues.length + selectedPeople.length + selectedYears.length;
+    const visibleRecipientCount = new Set(
+      displayRows.map((row) => row.personId).filter(Boolean)
+    ).size;
     const visibleBranchCount = new Set(displayRows.map((row) => row.branch).filter(Boolean)).size;
     const reportLabels = this.state.lang === "th"
       ? {
@@ -365,9 +385,9 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
               <div className="grid gap-3 px-6 py-5 sm:grid-cols-2 sm:px-8 xl:grid-cols-4">
                 {[
                   { label: reportLabels.results, value: displayRows.length.toLocaleString(), helper: `${totalRows.toLocaleString()} ${reportLabels.allRows}`, icon: FileText },
-                  { label: reportLabels.recipients, value: visibleRecipientCount.toLocaleString(), helper: `${employees.length.toLocaleString()} ${reportLabels.recipients}`, icon: Users },
+                  { label: reportLabels.recipients, value: visibleRecipientCount.toLocaleString(), helper: `${(data?.employees.length ?? 0).toLocaleString()} ${reportLabels.recipients}`, icon: Users },
                   { label: reportLabels.branches, value: visibleBranchCount.toLocaleString(), helper: `${data?.branches.length ?? 0} ${reportLabels.branches}`, icon: MapPin },
-                  { label: reportLabels.year, value: selectedYear || reportLabels.allYears, helper: `${activeFilterCount} ${reportLabels.activeFilters}`, icon: CalendarDays },
+                  { label: reportLabels.year, value: selectedYears.length ? selectedYears.join(", ") : reportLabels.allYears, helper: `${activeFilterCount} ${reportLabels.activeFilters}`, icon: CalendarDays },
                 ].map((item) => {
                   const Icon = item.icon;
                   return (
@@ -419,7 +439,24 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                       </button>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="space-y-3">
+                      {[
+                        { key: "branch" as const, label: this.t.reportFilterBranch, count: selectedBranches.length },
+                        { key: "coreValue" as const, label: this.state.lang === "th" ? "กรองตามค่านิยม" : "Core Value", count: selectedCoreValues.length },
+                        { key: "year" as const, label: this.t.reportFilterYear, count: selectedYears.length },
+                        { key: "people" as const, label: this.t.reportFilterPeople, count: selectedPeople.length },
+                      ].map((filter) => (
+                        <button key={filter.key} type="button" onClick={() => this.setState({ filterModal: filter.key })} className="flex w-full items-center justify-between rounded-2xl border-[1.5px] border-amber-300 bg-white px-4 py-4 text-left transition hover:border-amber-400 hover:bg-amber-50">
+                          <span className="text-lg font-semibold text-slate-800">{filter.label}</span>
+                          <span className="flex items-center gap-2">
+                            {filter.count > 0 && <span className="grid h-7 min-w-7 place-items-center rounded-full bg-teal-800 px-2 text-sm font-bold text-white">{filter.count}</span>}
+                            <ChevronRight className="h-5 w-5 text-slate-400" />
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="hidden">
                       <div>
                         <p className="mb-3 text-lg font-semibold uppercase tracking-wide text-slate-500">
                           {this.t.reportFilterBranch}
@@ -452,10 +489,22 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                       </div>
 
                       <div>
+                        <p className="mb-3 text-lg font-semibold uppercase tracking-wide text-slate-500">Core Value</p>
+                        <div className="flex flex-wrap gap-2">
+                          {COMMENT_TYPES.map((value) => {
+                            const active = this.state.selectedCoreValues.includes(value);
+                            return <button key={value} type="button" onClick={() => this.toggleCoreValue(value)} className={`rounded-full border px-3 py-2 text-sm font-semibold ${active ? "border-teal-800 bg-teal-800 text-white" : "border-amber-300 bg-white text-slate-700"}`}>{COMMENT_TYPE_META[value].emoji} {this.state.lang === "th" ? COMMENT_TYPE_META[value].th : COMMENT_TYPE_META[value].en}</button>;
+                          })}
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="mb-3 text-lg font-semibold uppercase tracking-wide text-slate-500">
+                          {this.t.reportFilterYear}
+                        </p>
                         <Select
-                          label={this.t.reportFilterYear}
-                          value={selectedYear}
-                          onChange={(e) => this.setState({ selectedYear: e.target.value })}
+                          value={selectedYears[0] || ""}
+                          onChange={() => undefined}
                           options={[
                             { value: "", label: this.t.historyAllYears },
                             ...(data?.years || []).map((year) => ({ value: String(year), label: String(year) })),
@@ -464,7 +513,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                       </div>
 
                       <div>
-                        <p className="mb-3 text-base font-semibold uppercase tracking-wide text-slate-500">
+                        <p className="mb-3 text-lg font-semibold uppercase tracking-wide text-slate-500">
                           {this.t.reportFilterPeople}
                         </p>
                         <div className="relative mb-3">
@@ -507,6 +556,34 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                         </div>
                       </div>
                     </div>
+
+                    <Modal open={this.state.filterModal === "branch"} onClose={() => this.setState({ filterModal: null })} title={this.t.reportFilterBranch}>
+                      <div className="mb-4 flex items-center justify-between rounded-2xl bg-teal-50 px-4 py-3">
+                        <p className="font-semibold text-teal-950">{this.state.lang === "th" ? `เลือกแล้ว ${selectedBranches.length} สาขา` : `${selectedBranches.length} branches selected`}</p>
+                        <button type="button" onClick={() => this.setState({ selectedBranches: [] })} disabled={!selectedBranches.length} className="text-sm font-bold text-rose-600 disabled:opacity-40">{this.state.lang === "th" ? "ล้างทั้งหมด" : "Clear all"}</button>
+                      </div>
+                      <div className="grid max-h-[55vh] gap-2 overflow-y-auto pr-2 [scrollbar-gutter:stable] sm:grid-cols-2">
+                        {(data?.branches || []).map((branch) => { const active = selectedBranches.includes(branch); return <button key={branch} type="button" onClick={() => this.toggleBranch(branch)} className={`flex min-h-12 items-center justify-between rounded-2xl border-[1.5px] px-4 py-3 text-left font-semibold transition ${active ? "border-teal-800 bg-teal-800 text-white shadow-sm" : "border-amber-300 bg-white text-slate-700 hover:border-amber-400 hover:bg-amber-50"}`}><span className="truncate">{branch}</span><span className={`ml-3 grid h-5 w-5 shrink-0 place-items-center rounded-full border text-xs ${active ? "border-amber-300 bg-amber-300 text-teal-950" : "border-slate-300 text-transparent"}`}>✓</span></button>; })}
+                      </div>
+                    </Modal>
+                    <Modal open={this.state.filterModal === "coreValue"} onClose={() => this.setState({ filterModal: null })} title={this.state.lang === "th" ? "กรองตามค่านิยม" : "Core Value"}>
+                      <div className="mb-4 flex items-center justify-between rounded-2xl bg-teal-50 px-4 py-3"><p className="font-semibold text-teal-950">{this.state.lang === "th" ? `เลือกแล้ว ${selectedCoreValues.length} ค่านิยม` : `${selectedCoreValues.length} values selected`}</p><button type="button" onClick={() => this.setState({ selectedCoreValues: [] })} disabled={!selectedCoreValues.length} className="text-sm font-bold text-rose-600 disabled:opacity-40">{this.state.lang === "th" ? "ล้างทั้งหมด" : "Clear all"}</button></div>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {COMMENT_TYPES.map((value) => { const active = selectedCoreValues.includes(value); const meta = COMMENT_TYPE_META[value]; return <button key={value} type="button" onClick={() => this.toggleCoreValue(value)} className={`flex min-h-16 items-center gap-3 rounded-2xl border-[1.5px] px-4 py-3 text-left transition ${active ? "border-teal-800 bg-teal-800 text-white shadow-sm" : "border-amber-300 bg-white text-slate-700 hover:border-amber-400 hover:bg-amber-50"}`}><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/80 text-xl">{meta.emoji}</span><span className="flex-1 font-semibold">{this.state.lang === "th" ? meta.th : meta.en}</span><span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border text-xs ${active ? "border-amber-300 bg-amber-300 text-teal-950" : "border-slate-300 text-transparent"}`}>✓</span></button>; })}
+                      </div>
+                    </Modal>
+                    <Modal open={this.state.filterModal === "year"} onClose={() => this.setState({ filterModal: null })} title={this.t.reportFilterYear}>
+                      <div className="mb-4 flex items-center justify-between rounded-2xl bg-teal-50 px-4 py-3"><p className="font-semibold text-teal-950">{this.state.lang === "th" ? `เลือกแล้ว ${selectedYears.length} ปี` : `${selectedYears.length} years selected`}</p><button type="button" onClick={() => this.setState({ selectedYears: [] })} disabled={!selectedYears.length} className="text-sm font-bold text-rose-600 disabled:opacity-40">{this.state.lang === "th" ? "ล้างทั้งหมด" : "Clear all"}</button></div>
+                      <div className="grid max-h-[55vh] gap-2 overflow-y-auto pr-2 [scrollbar-gutter:stable] sm:grid-cols-2">{(data?.years || []).map((year) => { const value = String(year); const active = selectedYears.includes(value); return <button type="button" key={year} onClick={() => this.setState((state) => ({ selectedYears: active ? state.selectedYears.filter((item) => item !== value) : [...state.selectedYears, value] }))} className={`flex min-h-14 items-center justify-between rounded-2xl border-[1.5px] px-4 py-3 font-semibold transition ${active ? "border-teal-800 bg-teal-800 text-white" : "border-amber-300 bg-white text-slate-700 hover:bg-amber-50"}`}><span className="text-lg">{year}</span><span className={`grid h-5 w-5 place-items-center rounded-full border text-xs ${active ? "border-amber-300 bg-amber-300 text-teal-950" : "border-slate-300 text-transparent"}`}>✓</span></button>; })}</div>
+                    </Modal>
+                    <Modal open={this.state.filterModal === "people"} onClose={() => this.setState({ filterModal: null })} title={this.t.reportFilterPeople}>
+                      <div className="mb-4 flex items-center justify-between rounded-2xl bg-teal-50 px-4 py-3"><p className="font-semibold text-teal-950">{this.state.lang === "th" ? `เลือกแล้ว ${selectedPeople.length} คน` : `${selectedPeople.length} people selected`}</p><button type="button" onClick={() => this.setState({ selectedPeople: [], query: "" })} disabled={!selectedPeople.length && !query} className="text-sm font-bold text-rose-600 disabled:opacity-40">{this.state.lang === "th" ? "ล้างทั้งหมด" : "Clear all"}</button></div>
+                      <div className="relative mb-4"><Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-teal-700" /><input type="text" placeholder={reportLabels.searchPeople} value={query} onChange={(e) => this.setState({ query: e.target.value })} className="app-input h-[3.25rem] w-full rounded-2xl border-amber-300 py-3 pl-12 pr-4 text-base" /></div>
+                      <div className="max-h-[48vh] space-y-2 overflow-y-auto pr-2 [scrollbar-gutter:stable]">
+                        {employees.map((employee) => { const active = selectedPeople.includes(employee.user_id); return <button type="button" key={employee.user_id} onClick={() => this.togglePerson(employee.user_id)} className={`flex w-full items-center gap-3 rounded-2xl border-[1.5px] px-4 py-3 text-left transition ${active ? "border-teal-800 bg-teal-800 text-white" : "border-amber-200 bg-white hover:border-amber-400 hover:bg-amber-50"}`}><span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl font-bold ${active ? "bg-white/15 text-white" : "bg-teal-50 text-teal-800"}`}>{employee.name.slice(0, 1).toUpperCase()}</span><span className="min-w-0 flex-1"><span className="block truncate font-semibold">{employee.name}</span><span className={`block truncate text-sm ${active ? "text-teal-100" : "text-slate-500"}`}>{employee.branch}</span></span><span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border text-xs ${active ? "border-amber-300 bg-amber-300 text-teal-950" : "border-slate-300 text-transparent"}`}>✓</span></button>; })}
+                        {employees.length === 0 && <div className="rounded-2xl border border-dashed border-amber-300 py-10 text-center text-slate-500">{this.state.lang === "th" ? "ไม่พบรายชื่อที่ค้นหา" : "No people found"}</div>}
+                      </div>
+                    </Modal>
                   </aside>
 
                   <section className="app-panel min-w-0 overflow-hidden rounded-3xl">
@@ -547,11 +624,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                             +{selectedPeople.length - 3} more
                           </span>
                         )}
-                        {selectedYear && (
-                          <span className="app-chip rounded-full px-3 py-1 text-xs font-semibold">
-                            {selectedYear}
-                          </span>
-                        )}
+                        {selectedYears.map((year) => <span key={year} className="app-chip rounded-full px-3 py-1 text-xs font-semibold">{year}</span>)}
                       </div>
                     </div>
                     {displayRows.length === 0 ? (
@@ -571,12 +644,12 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                           </colgroup>
                           <thead className="sticky top-0 z-10 border-b-[1.5px] border-amber-300 bg-teal-50/95 text-left text-sm font-semibold uppercase tracking-wide text-slate-500 backdrop-blur">
                             <tr>
-                              <th className="whitespace-nowrap px-4 py-3">Recipients</th>
-                              <th className="whitespace-nowrap px-4 py-3">Branch</th>
-                              <th className="whitespace-nowrap px-4 py-3">Core Value</th>
-                              <th className="whitespace-nowrap px-4 py-3">Comment</th>
-                              <th className="whitespace-nowrap px-4 py-3">Given By</th>
-                              <th className="whitespace-nowrap px-4 py-3">Date</th>
+                              <th className="whitespace-nowrap px-4 py-3">{this.state.lang === "th" ? "ผู้รับ" : "Recipients"}</th>
+                              <th className="whitespace-nowrap px-4 py-3">{this.state.lang === "th" ? "สาขา" : "Branch"}</th>
+                              <th className="whitespace-nowrap px-4 py-3">{this.state.lang === "th" ? "ค่านิยม" : "Core Value"}</th>
+                              <th className="whitespace-nowrap px-4 py-3">{this.state.lang === "th" ? "ข้อความชื่นชม" : "Comment"}</th>
+                              <th className="whitespace-nowrap px-4 py-3">{this.state.lang === "th" ? "ผู้ส่ง" : "Given By"}</th>
+                              <th className="whitespace-nowrap px-4 py-3">{this.state.lang === "th" ? "วันที่" : "Date"}</th>
                             </tr>
                           </thead>
                           <tbody>

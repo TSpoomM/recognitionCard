@@ -6,7 +6,9 @@ export type HistoryItem = {
     lastName: string;
     email: string;
     role?: string;
+    branch?: string;
   };
+  senderName: string;
   comment: string;
   coreValues: string[];
   createdDate: string | null;

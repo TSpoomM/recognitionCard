@@ -33,7 +33,7 @@ export default class RecognitionUserStep extends Component<RecognitionUserStepPr
 
   render() {
     const { filteredUsers, selectedUsers, selectedUserIds, searchQuery, selectedBranch, availableBranches, onToggleUser } = this.props;
-    const { t } = this.context;
+    const { t, lang } = this.context;
 
     return (
       <>
@@ -45,11 +45,11 @@ export default class RecognitionUserStep extends Component<RecognitionUserStepPr
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="sm:w-48">
             <Select
-              label="Branch / Location"
+              label={lang === "th" ? "สาขา" : "Branch / Location"}
               value={selectedBranch}
               onChange={this.handleBranchChange}
               options={[
-                { value: "", label: "All branches" },
+                { value: "", label: lang === "th" ? "ทุกสาขา" : "All branches" },
                 ...availableBranches.map((branch) => ({ value: branch, label: branch })),
               ]}
             />

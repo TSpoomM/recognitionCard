@@ -6,6 +6,7 @@ import { reportAccessClient } from "../../lib/reportAccessClient";
 import { LanguageContext } from "../../context/LanguageContext";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { FileText, Clock, House, BookOpen } from "lucide-react";
+import Image from "next/image";
 
 type NavbarProps = {
   currentUserId: string;
@@ -90,8 +91,8 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
               href={buildCurrentUserHref("/", currentUserId)}
               className="flex items-center gap-3 text-2xl font-bold text-slate-900 transition hover:text-teal-800"
             >
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-400 via-teal-700 to-teal-950" />
-              <span className="hidden sm:inline">Recognition</span>
+              <Image src="/logo.png" alt="TeckBeeHang" width={132} height={48} className="h-12 w-auto object-contain" priority />
+              <span className="hidden sm:inline">{t.headerLabel}</span>
             </a>
 
             <div className="flex items-center gap-2 sm:gap-3">

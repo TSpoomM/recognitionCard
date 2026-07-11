@@ -88,7 +88,7 @@ export class EmailService {
       to: targetRecipients,
       cc: ccRecipients,
       subject: "Compliment",
-      html: EmailService.buildHtml(recipientName),
+      html: EmailService.buildHtml(recipientName, cardLanguage),
       attachments: [
         {
           filename: "compliment-card.png",
@@ -117,12 +117,14 @@ export class EmailService {
     return values.map((email) => email.trim()).filter(Boolean);
   }
 
-  private static buildHtml(recipientName: string) {
+  private static buildHtml(recipientName: string, cardLanguage: CardLanguage) {
+    const heading = cardLanguage === "th" ? "คุณได้รับบัตรส่งต่อคุณค่าใบใหม่!" : "You have received a new compliment!";
+    const recipientLabel = cardLanguage === "th" ? "เราขอชื่นชม" : "To";
     return `
       <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-        <h2 style="color: #0f172a; text-align: center;">You have received a new compliment!</h2>
-        <p style="color: #475569; font-size: 16px; line-height: 1.5;">
-          To: <strong>${recipientName}</strong>
+        <h2 style="color: #0f172a; text-align: center;">${heading}</h2>
+        <p style="color: #475569; font-size: 24px; line-height: 1.5; text-align:center;">
+          ${recipientLabel}: <strong style="color:#0f766e; font-size:30px; background:#fef3c7; padding:2px 10px; border-radius:8px;">${recipientName}</strong>
         </p>
         <div style="text-align: center; margin: 30px 0;">
           <img src="cid:recognitionCard" alt="Recognition Card" width="660" style="width: 660px; max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);" />

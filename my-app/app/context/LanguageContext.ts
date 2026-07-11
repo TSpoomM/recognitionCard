@@ -12,10 +12,10 @@ type LanguageContextType = {
 };
 
 export function getInitialLanguage(): Language {
-  if (typeof window === 'undefined') return 'en';
+  if (typeof window === 'undefined') return 'th';
 
   const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
-  return stored === 'th' || stored === 'en' ? stored : 'en';
+  return stored === 'th' || stored === 'en' ? stored : 'th';
 }
 
 export function persistLanguage(lang: Language) {
@@ -24,8 +24,8 @@ export function persistLanguage(lang: Language) {
 }
 
 export const LanguageContext = createContext<LanguageContextType>({
-  lang: 'en',
-  t: TRANSLATIONS['en'],
+  lang: 'th',
+  t: TRANSLATIONS['th'],
   setLang: () => { },
 });
 

@@ -1,14 +1,16 @@
 'use client';
 
 import { Component } from "react";
-import { Clock } from "lucide-react";
+import { Clock, Forward } from "lucide-react";
 import { COMMENT_TYPE_META, COMMENT_TYPES, CommentType } from "../../../types/commentType";
 import { HistoryItem } from "../../../types/history";
+import { LanguageContext } from "../../../context/LanguageContext";
 
 type HistoryListProps = {
   error: string;
   isLoading: boolean;
   items: HistoryItem[];
+  onForward: (item: HistoryItem) => void;
 };
 
 function formatDate(value: string | null) {
@@ -38,8 +40,10 @@ function sortCoreValues(values: string[]) {
 }
 
 export default class HistoryList extends Component<HistoryListProps> {
+  static contextType = LanguageContext;
+  declare context: React.ContextType<typeof LanguageContext>;
   render() {
-    const { error, isLoading, items } = this.props;
+    const { error, isLoading, items, onForward } = this.props;
 
     if (isLoading) {
       return <p className="text-base text-slate-600">Loading recognition history...</p>;
@@ -89,7 +93,7 @@ export default class HistoryList extends Component<HistoryListProps> {
                       key={`${item.id}-${value}`}
                       className={`rounded-full px-4 py-2 text-base font-bold ${meta?.tint || "bg-slate-100 text-slate-700"}`}
                     >
-                      {meta ? `${meta.emoji} ${meta.en}` : value}
+                      {meta ? `${meta.emoji} ${this.context.lang === "th" ? meta.th : meta.en}` : value}
                     </span>
                   );
                 })}
@@ -99,6 +103,7 @@ export default class HistoryList extends Component<HistoryListProps> {
             <p className="mt-4 whitespace-pre-wrap text-lg leading-relaxed font-medium text-slate-900">
               {item.comment}
             </p>
+            <button type="button" onClick={() => onForward(item)} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-teal-800 px-4 py-2 font-semibold text-white hover:bg-teal-900"><Forward className="h-4 w-4" /> {this.context.lang === "th" ? "ส่งต่อ" : "Forward"}</button>
           </article>
         ))}
       </div>

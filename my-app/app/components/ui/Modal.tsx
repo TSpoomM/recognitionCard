@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { CloseIcon } from "./Icons";
 
 type ModalProps = {
@@ -35,10 +36,10 @@ export default function Modal({ open, onClose, title, description, children, foo
 
     if (!open) return null;
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/30 p-4" onClick={onClose}>
             <div
-                className="app-surface w-full max-w-lg overflow-hidden rounded-3xl"
+                className="app-surface max-h-[min(80vh,46rem)] w-full max-w-2xl overflow-y-auto rounded-3xl"
                 onClick={(event) => event.stopPropagation()}
                 role="dialog"
                 aria-modal="true"
@@ -73,6 +74,7 @@ export default function Modal({ open, onClose, title, description, children, foo
                     <div className="border-t-[1.5px] border-amber-300 px-6 py-4">{footer}</div>
                 ) : null}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

@@ -37,7 +37,10 @@ export default class RecognitionUserSelect extends Component<RecognitionUserSele
                 </div>
                 <div className="min-w-0 flex-1">
                   <p title={`${user.firstName} ${user.lastName}`} className="truncate text-lg font-semibold text-slate-900">{user.firstName} {user.lastName}</p>
-                  <p className="mt-1 truncate text-sm text-slate-500">{user.role ? `${user.role}` : user.email}</p>
+                  <p className="mt-1 truncate text-sm text-slate-500">
+                    {user.role || user.email}
+                    {user.location ? ` · ${user.location}` : ""}
+                  </p>
                   {user.team && <p className="truncate text-sm text-slate-500">{user.team}</p>}
                 </div>
                 <div className={`grid h-6 w-6 shrink-0 place-items-center rounded-full border-[1.5px] ${selected ? "border-amber-400 bg-teal-600 text-white" : "border-amber-300 bg-white text-slate-300"}`}>

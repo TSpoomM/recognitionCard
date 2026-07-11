@@ -10,12 +10,17 @@ import { getClientCurrentUserId } from "../lib/currentUser";
 import { HistoryItem } from "../types/history";
 import { Language, TRANSLATIONS } from "../constants/translations";
 import { getInitialLanguage, LanguageContext, persistLanguage } from "../context/LanguageContext";
+import Button from "../components/ui/Button";
+import { FileText, Search } from "lucide-react";
+import { downloadHistoryCsv, downloadHistoryPdf } from "../lib/historyExport";
 
 type HistoryPageState = {
   lang: Language;
   currentUserId: string;
   items: HistoryItem[];
   selectedYear: string;
+  selectedPeople: string[];
+  peopleQuery: string;
   isLoading: boolean;
   error: string;
 };
@@ -27,10 +32,12 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
     super(props);
 
     this.state = {
-      lang: 'en',
+      lang: 'th',
       currentUserId: "",
       items: [],
       selectedYear: "",
+      selectedPeople: [],
+      peopleQuery: "",
       isLoading: true,
       error: "",
     };
@@ -56,9 +63,8 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
   }
 
   private get filteredItems() {
-    const { items, selectedYear } = this.state;
-    if (!selectedYear) return items;
-    return items.filter((item) => item.year === Number(selectedYear));
+    const { items, selectedYear, selectedPeople } = this.state;
+    return items.filter((item) => (!selectedYear || item.year === Number(selectedYear)) && (selectedPeople.length === 0 || selectedPeople.includes(item.recipient.user_id)));
   }
 
   private async loadHistory() {
@@ -108,8 +114,10 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
   }
 
   render() {
-    const { lang, currentUserId, error, isLoading, selectedYear } = this.state;
+    const { lang, currentUserId, error, isLoading, selectedYear, selectedPeople, peopleQuery } = this.state;
     const items = this.filteredItems;
+    const normalizedPeopleQuery = peopleQuery.trim().toLowerCase();
+    const people = Array.from(new Map(this.state.items.map((item) => [item.recipient.user_id, item.recipient])).values()).filter((person) => `${person.firstName} ${person.lastName} ${person.email} ${person.role || ""} ${person.branch || ""}`.toLowerCase().includes(normalizedPeopleQuery));
 
     return (
       <LanguageContext.Provider value={{
@@ -123,6 +131,10 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
           <div className="mx-auto max-w-5xl">
             <Card bordered={false} padding="xl" shadow="xl" className="app-surface">
               <HistoryHeader totalRecipients={items.length} />
+              <div className="mb-4 flex flex-wrap justify-end gap-2">
+                <Button variant="secondary" icon={<FileText className="h-4 w-4" />} disabled={!items.length} onClick={() => downloadHistoryCsv(items)}>{lang === "th" ? "ส่งออก CSV" : "Export CSV"}</Button>
+                <Button icon={<FileText className="h-4 w-4" />} disabled={!items.length} onClick={() => downloadHistoryPdf(items)}>{lang === "th" ? "ส่งออก PDF" : "Export PDF"}</Button>
+              </div>
               <section className="app-panel mb-6 rounded-3xl p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                   <div>
@@ -141,8 +153,30 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
                     />
                   </div>
                 </div>
+                <div className="mt-5">
+                  <div className="mb-2 flex items-center justify-between"><p className="text-base font-semibold text-slate-700">{lang === "th" ? `กรองตามผู้รับ · เลือกแล้ว ${selectedPeople.length} คน` : `Filter by people · ${selectedPeople.length} selected`}</p>{selectedPeople.length > 0 && <button type="button" onClick={() => this.setState({ selectedPeople: [] })} className="text-sm font-semibold text-rose-600">{lang === "th" ? "ล้าง" : "Clear"}</button>}</div>
+                  {selectedPeople.length > 0 && (
+                    <div className="mb-3 flex flex-wrap gap-2">
+                      {selectedPeople.map((personId) => {
+                        const person = this.state.items.find((item) => item.recipient.user_id === personId)?.recipient;
+                        if (!person) return null;
+                        return <button key={personId} type="button" onClick={() => this.setState({ selectedPeople: selectedPeople.filter((id) => id !== personId) })} className="inline-flex items-center gap-2 rounded-full bg-teal-800 px-3 py-1.5 text-sm font-semibold text-white">{person.firstName} {person.lastName}<span className="text-teal-200">×</span></button>;
+                      })}
+                    </div>
+                  )}
+                  <div className="relative mb-3"><Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><input type="text" value={peopleQuery} onChange={(event) => this.setState({ peopleQuery: event.target.value })} placeholder={lang === "th" ? "ค้นหาชื่อผู้รับ" : "Search people"} className="app-input w-full rounded-xl py-3 pl-9 pr-3 text-base" /></div>
+                  <div className="rounded-2xl border-[1.5px] border-amber-300 bg-white p-2">
+                    <div className="max-h-52 space-y-1 overflow-y-auto pr-2 [scrollbar-gutter:stable]">
+                    {people.map((person) => { const active = selectedPeople.includes(person.user_id); return <label key={person.user_id} className={`flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition ${active ? "bg-teal-800 text-white" : "text-slate-800 hover:bg-amber-50"}`}><input type="checkbox" checked={active} onChange={() => this.setState({ selectedPeople: active ? selectedPeople.filter((id) => id !== person.user_id) : [...selectedPeople, person.user_id] })} className="h-4 w-4 accent-amber-400" /><span className="font-semibold">{person.firstName} {person.lastName}</span></label>; })}
+                    {people.length === 0 && <p className="py-6 text-center text-sm text-slate-500">{lang === "th" ? "ไม่พบผู้รับ" : "No people found"}</p>}
+                    </div>
+                  </div>
+                </div>
               </section>
-              <HistoryList error={error} isLoading={isLoading} items={items} />
+              <HistoryList error={error} isLoading={isLoading} items={items} onForward={(item) => {
+                window.sessionStorage.setItem("recognition-forward-draft", JSON.stringify({ comment: item.comment, coreValues: item.coreValues, cardLanguage: "th" }));
+                window.location.href = "/";
+              }} />
             </Card>
           </div>
         </main>
