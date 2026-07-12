@@ -323,24 +323,27 @@ const CARD_COPY: Record<CardLanguage, {
   thankYou: string;
   date: string;
   footer: [string, string, string];
+  footerValues: [string, string, string];
 }> = {
   en: {
-    tagline: "You make a difference!",
-    appreciation: "Thank you for living our values and inspiring others every day.",
+    tagline: "Thank you for making a difference",
+    appreciation: "Your contribution creates a great impact. We and your colleagues appreciate you.",
     givenBy: "Given By",
     coreValuesTitle: "OUR 5 CORE VALUES",
-    thankYou: "Thank you!",
+    thankYou: "Thank you so much",
     date: "DATE",
     footer: ["ONE TEAM.", "ONE PURPOSE.", "LIMITLESS IMPACT."],
+    footerValues: ["Growing together", "Care for the environment", "Towards sustainability"],
   },
   th: {
-    tagline: "คุณสร้างความแตกต่าง",
-    appreciation: "ขอบคุณที่ร่วมส่งต่อคุณค่าของเราและเป็นแรงบันดาลใจให้ผู้อื่น",
+    tagline: "ขอบคุณที่คุณ สร้างความแตกต่าง",
+    appreciation: "การมีส่วนร่วมของคุณ สร้างผลลัพธ์ที่ยิ่งใหญ่ เราและเพื่อนร่วมงาน ขอชื่นชมคุณ",
     givenBy: "มอบโดย",
     coreValuesTitle: "ค่านิยมหลัก 5 ข้อของเรา",
-    thankYou: "ขอบคุณ!",
+    thankYou: "ขอบคุณมาก",
     date: "วันที่",
     footer: ["หนึ่งทีม", "หนึ่งเป้าหมาย", "สร้างผลลัพธ์ได้ไม่จำกัด"],
+    footerValues: ["เติบโตด้วยกัน", "ใส่ใจสิ่งแวดล้อม", "มุ่งสู่ความยั่งยืน"],
   },
 };
 
@@ -775,9 +778,12 @@ export class RecognitionCardImageRenderer {
               />
             </svg>
           </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontFamily: cardLanguage === "th" ? textFont : "GreatVibes", fontSize: "40px", color: PALETTE.green2, fontWeight: 500 }}>
+          <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+            <span style={{ fontFamily: cardLanguage === "th" ? textFont : "GreatVibes", fontSize: cardLanguage === "th" ? "34px" : "36px", color: PALETTE.green2, fontWeight: 500, lineHeight: 1.1 }}>
               {copy.thankYou}
+            </span>
+            <span style={{ fontFamily: textFont, fontSize: "12px", color: PALETTE.textMuted, lineHeight: 1.35, marginTop: "4px", maxWidth: "390px" }}>
+              {copy.appreciation}
             </span>
           </div>
         </div>
@@ -904,21 +910,35 @@ export class RecognitionCardImageRenderer {
         style={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "space-between",
           width: "100%",
           backgroundImage: `linear-gradient(90deg, ${PALETTE.darkGreen} 0%, ${PALETTE.green2} 60%, ${PALETTE.green3} 100%)`,
-          padding: "14px",
+          padding: "12px 28px",
         }}
       >
-        <span style={{ fontFamily: textFont, fontWeight: "bold", fontSize: cardLanguage === "th" ? "18px" : "14px", letterSpacing: cardLanguage === "th" ? "0.8px" : "2.5px", color: "#ffffff" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+          {copy.footerValues.map((label, index) => (
+            <div key={label} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <svg viewBox="0 0 24 24" style={{ width: 28, height: 28 }}>
+                {index === 0 && <path d="M4 19c0-3 2.4-5 5.5-5h5c3.1 0 5.5 2 5.5 5M8 7a3 3 0 1 0 0 .1M16 7a3 3 0 1 0 0 .1M9 19l3 2 3-2" fill="none" stroke="#d7dfb0" strokeWidth="1.7" strokeLinecap="round" />}
+                {index === 1 && <g><circle cx="12" cy="12" r="9" fill="none" stroke="#d7dfb0" strokeWidth="1.7" /><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" fill="none" stroke="#d7dfb0" strokeWidth="1.4" /></g>}
+                {index === 2 && <path d="M12 21v-9M12 13c-1-5-5-7-9-6 1 5 4 7 9 6Zm0-2c1-5 5-7 9-6-1 5-4 7-9 6ZM6 21h12" fill="none" stroke="#d7dfb0" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />}
+              </svg>
+              <span style={{ fontFamily: textFont, fontWeight: 500, fontSize: cardLanguage === "th" ? "13px" : "11px", color: "#ffffff", whiteSpace: "nowrap" }}>{label}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: "flex", alignItems: "center" }}>
+        <span style={{ fontFamily: textFont, fontWeight: "bold", fontSize: cardLanguage === "th" ? "14px" : "11px", letterSpacing: cardLanguage === "th" ? "0.5px" : "1.5px", color: "#ffffff" }}>
           {copy.footer[0]}{" "}
         </span>
-        <span style={{ fontFamily: textFont, fontWeight: "bold", fontSize: cardLanguage === "th" ? "18px" : "14px", letterSpacing: cardLanguage === "th" ? "0.8px" : "2.5px", color: PALETTE.accent }}>
+        <span style={{ fontFamily: textFont, fontWeight: "bold", fontSize: cardLanguage === "th" ? "14px" : "11px", letterSpacing: cardLanguage === "th" ? "0.5px" : "1.5px", color: PALETTE.accent }}>
           {copy.footer[1]}{" "}
         </span>
-        <span style={{ fontFamily: textFont, fontWeight: "bold", fontSize: cardLanguage === "th" ? "18px" : "14px", letterSpacing: cardLanguage === "th" ? "0.8px" : "2.5px", color: "#ffffff" }}>
+        <span style={{ fontFamily: textFont, fontWeight: "bold", fontSize: cardLanguage === "th" ? "14px" : "11px", letterSpacing: cardLanguage === "th" ? "0.5px" : "1.5px", color: "#ffffff" }}>
           {copy.footer[2]}
         </span>
+        </div>
       </div>
     );
   }
