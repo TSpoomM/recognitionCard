@@ -301,6 +301,8 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
       displayRows.map((row) => row.personId).filter(Boolean)
     ).size;
     const visibleBranchCount = new Set(displayRows.map((row) => row.branch).filter(Boolean)).size;
+    const sortedSelectedYears = [...selectedYears].sort((a, b) => Number(b) - Number(a));
+    const sortedYears = [...(data?.years || [])].sort((a, b) => b - a);
     const reportLabels = this.state.lang === "th"
       ? {
         results: "บัตรส่งต่อคุณค่า",
@@ -391,7 +393,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                   { label: reportLabels.results, value: displayRows.length.toLocaleString(), helper: `${totalRows.toLocaleString()} ${reportLabels.allRows}`, icon: FileText },
                   { label: reportLabels.recipients, value: visibleRecipientCount.toLocaleString(), helper: `${(data?.employees.length ?? 0).toLocaleString()} ${reportLabels.recipients}`, icon: Users },
                   { label: reportLabels.branches, value: visibleBranchCount.toLocaleString(), helper: `${data?.branches.length ?? 0} ${reportLabels.branches}`, icon: MapPin },
-                  { label: reportLabels.year, value: selectedYears.length ? selectedYears.join(", ") : reportLabels.allYears, helper: ``, icon: CalendarDays },
+                  { label: reportLabels.year, value: sortedSelectedYears.length ? sortedSelectedYears.join(" • ") : reportLabels.allYears, helper: "", icon: CalendarDays },
                   // { label: reportLabels.year, value: selectedYears.length ? selectedYears.join(", ") : reportLabels.allYears, helper: `${activeFilterCount} ${reportLabels.activeFilters}`, icon: CalendarDays },
                 ].map((item) => {
                   const Icon = item.icon;
@@ -406,7 +408,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                           <Icon className="h-5 w-5" />
                         </span>
                       </div>
-                      <p className="mt-3 text-base text-slate-500">จาก {item.helper}</p>
+                      {item.helper && <p className="mt-3 text-base text-slate-500">จาก {item.helper}</p>}
                     </div>
                   );
                 })}
@@ -512,7 +514,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                           onChange={() => undefined}
                           options={[
                             { value: "", label: this.t.historyAllYears },
-                            ...(data?.years || []).map((year) => ({ value: String(year), label: String(year) })),
+                            ...sortedYears.map((year) => ({ value: String(year), label: String(year) })),
                           ]}
                         />
                       </div>
@@ -579,7 +581,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                     </Modal>
                     <Modal open={this.state.filterModal === "year"} onClose={() => this.setState({ filterModal: null })} title={this.t.reportFilterYear}>
                       <div className="mb-4 flex items-center justify-between rounded-2xl bg-teal-50 px-4 py-3"><p className="font-semibold text-teal-950">{this.state.lang === "th" ? `เลือกแล้ว ${selectedYears.length} ปี` : `${selectedYears.length} years selected`}</p><button type="button" onClick={() => this.setState({ selectedYears: [] })} disabled={!selectedYears.length} className="text-sm font-bold text-rose-600 disabled:opacity-40">{this.state.lang === "th" ? "ล้างทั้งหมด" : "Clear all"}</button></div>
-                      <div className="grid max-h-[55vh] gap-2 overflow-y-auto pr-2 [scrollbar-gutter:stable] sm:grid-cols-2">{(data?.years || []).map((year) => { const value = String(year); const active = selectedYears.includes(value); return <button type="button" key={year} onClick={() => this.setState((state) => ({ selectedYears: active ? state.selectedYears.filter((item) => item !== value) : [...state.selectedYears, value] }))} className={`flex min-h-14 items-center justify-between rounded-2xl border-[1.5px] px-4 py-3 font-semibold transition ${active ? "border-teal-800 bg-teal-800 text-white" : "border-amber-300 bg-white text-slate-700 hover:bg-amber-50"}`}><span className="text-lg">{year}</span><span className={`grid h-5 w-5 place-items-center rounded-full border text-xs ${active ? "border-amber-300 bg-amber-300 text-teal-950" : "border-slate-300 text-transparent"}`}>✓</span></button>; })}</div>
+                      <div className="grid max-h-[55vh] gap-2 overflow-y-auto pr-2 [scrollbar-gutter:stable] sm:grid-cols-2">{sortedYears.map((year) => { const value = String(year); const active = selectedYears.includes(value); return <button type="button" key={year} onClick={() => this.setState((state) => ({ selectedYears: active ? state.selectedYears.filter((item) => item !== value) : [...state.selectedYears, value].sort((a, b) => Number(b) - Number(a)) }))} className={`flex min-h-14 items-center justify-between rounded-2xl border-[1.5px] px-4 py-3 font-semibold transition ${active ? "border-teal-800 bg-teal-800 text-white shadow-sm" : "border-amber-300 bg-gradient-to-r from-white to-amber-50/50 text-slate-700 hover:border-amber-400 hover:shadow-sm"}`}><span className="text-xl font-bold tabular-nums">{year}</span><span className={`grid h-6 w-6 place-items-center rounded-full border text-xs ${active ? "border-amber-300 bg-amber-300 text-teal-950" : "border-slate-300 text-transparent"}`}>✓</span></button>; })}</div>
                     </Modal>
                     <Modal open={this.state.filterModal === "people"} onClose={() => this.setState({ filterModal: null })} title={this.t.reportFilterPeople}>
                       <div className="mb-4 flex items-center justify-between rounded-2xl bg-teal-50 px-4 py-3"><p className="font-semibold text-teal-950">{this.state.lang === "th" ? `เลือกแล้ว ${selectedPeople.length} คน` : `${selectedPeople.length} people selected`}</p><button type="button" onClick={() => this.setState({ selectedPeople: [], query: "" })} disabled={!selectedPeople.length && !query} className="text-sm font-bold text-rose-600 disabled:opacity-40">{this.state.lang === "th" ? "ล้างทั้งหมด" : "Clear all"}</button></div>

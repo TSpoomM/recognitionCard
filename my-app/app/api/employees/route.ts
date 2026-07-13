@@ -9,6 +9,8 @@ type EmployeeRow = RowDataPacket & {
   location_emp: string | null;
   position: string | null;
   email: string | null;
+  branch_desc: string | null;
+  branch_name_en: string | null;
 };
 
 function splitName(fullName: string) {
@@ -28,10 +30,14 @@ export async function GET() {
         e.emp_name_en,
         e.location_emp,
         em.position,
-        em.email
+        em.email,
+        b.branch_desc,
+        b.branch_name_en
       FROM tb_employee_list e
       LEFT JOIN tb_emp_email em
         ON e.fs_id = em.Code
+      LEFT JOIN tb_branch_emp b
+        ON e.location_emp = b.branch_name
       ORDER BY e.emp_name_en ASC
       `
     );
@@ -48,6 +54,8 @@ export async function GET() {
         role: row.position || undefined,
         team: undefined,
         location: row.location_emp || undefined,        
+        branchDesc: row.branch_desc?.trim() || undefined,
+        branchNameEn: row.branch_name_en?.trim() || undefined,
       };
     });
 
@@ -55,6 +63,8 @@ export async function GET() {
       data.unshift({
         ...TEST_CURRENT_USER,
         team: undefined,
+        branchDesc: undefined,
+        branchNameEn: undefined,
       });
     }
 

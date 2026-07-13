@@ -2,6 +2,7 @@
 
 import { Component } from "react";
 import { User } from "../../../types/user";
+import { LanguageContext } from "../../../context/LanguageContext";
 
 type RecognitionUserSelectProps = {
   users: User[];
@@ -14,6 +15,9 @@ function getInitials(user: User) {
 }
 
 export default class RecognitionUserSelect extends Component<RecognitionUserSelectProps> {
+  static contextType = LanguageContext;
+  declare context: React.ContextType<typeof LanguageContext>;
+
   render() {
     const { users, selectedUserIds, onToggleUser } = this.props;
 
@@ -37,9 +41,8 @@ export default class RecognitionUserSelect extends Component<RecognitionUserSele
                 </div>
                 <div className="min-w-0 flex-1">
                   <p title={`${user.firstName} ${user.lastName}`} className="truncate text-lg font-semibold text-slate-900">{user.firstName} {user.lastName}</p>
-                  <p className="mt-1 truncate text-sm text-slate-500">
-                    {user.role || user.email}
-                    {user.location ? ` · ${user.location}` : ""}
+                  <p title={(this.context.lang === "th" ? user.branchDesc : user.branchNameEn) || user.branchDesc || user.branchNameEn || user.location || ""} className="mt-1 line-clamp-2 text-sm leading-5 text-slate-500">
+                    {(this.context.lang === "th" ? user.branchDesc : user.branchNameEn) || user.branchDesc || user.branchNameEn || user.location || "-"}
                   </p>
                   {user.team && <p className="truncate text-sm text-slate-500">{user.team}</p>}
                 </div>

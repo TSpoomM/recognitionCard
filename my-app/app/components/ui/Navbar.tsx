@@ -91,7 +91,15 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
               href={buildCurrentUserHref("/", currentUserId)}
               className="flex items-center gap-3 text-2xl font-bold text-slate-900 transition hover:text-teal-800"
             >
-              <Image src="/logo.png" alt="TeckBeeHang" width={50} height={50} priority={true} />
+              {/* <Image src="/logo.png" alt="TeckBeeHang" width={50} height={50} priority={true} /> */}
+              <Image
+                src="/logo.png"
+                alt="TeckBeeHang"
+                width={50}
+                height={51}
+                priority
+                style={{ width: "50px", height: "auto" }}
+              />
               <span className="hidden sm:inline">{t.headerLabel}</span>
             </a>
 

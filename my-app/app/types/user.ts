@@ -7,4 +7,6 @@ export interface User {
   role?: string; // e.g. "Product Designer"
   team?: string; // e.g. "Design"
   location?: string; // e.g. "Bangkok", "Chiang Mai"
+  branchDesc?: string;
+  branchNameEn?: string;
 };

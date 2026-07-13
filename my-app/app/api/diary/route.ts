@@ -9,6 +9,7 @@ type EmployeeEmailRow = RowDataPacket & {
   fs_id: string | number;
   emp_name_en: string | null;
   email: string | null;
+  location_emp: string | null;
 };
 
 export async function POST(request: Request) {
@@ -55,11 +56,12 @@ export async function POST(request: Request) {
     // Look up employee info for the email
     let recipientName = recipientIds.map((recipientId) => `Employee #${recipientId}`).join(", ");
     let recipientEmails: string[] = [];
+    let recipientDisplayName = recipientName;
     let recognizedByName = String(createdBy);
     try {
       const [empRows] = await pool.query<EmployeeEmailRow[]>(
         `
-        SELECT e.fs_id, e.emp_name_en, em.email
+        SELECT e.fs_id, e.emp_name_en, e.location_emp, em.email
         FROM tb_employee_list e
         LEFT JOIN tb_emp_email em ON e.fs_id = em.Code
         WHERE e.fs_id IN (?)
@@ -74,6 +76,11 @@ export async function POST(request: Request) {
         recipientEmails = recipientIds
           .map((recipientId) => rowById.get(recipientId)?.email || "")
           .filter(Boolean);
+        recipientDisplayName = recipientIds.map((recipientId) => {
+          const row = rowById.get(recipientId);
+          const name = row?.emp_name_en || `Employee #${recipientId}`;
+          return row?.location_emp ? `${name} (${row.location_emp})` : name;
+        }).join(", ");
       }
     } catch (err) {
       console.error("Failed to query employee info for email: ", err);
@@ -105,6 +112,7 @@ export async function POST(request: Request) {
       EmailService.sendComplimentEmail({
         toEmail: recipientEmails,
         recipientName,
+        recipientDisplayName,
         recognizedByName,
         comment: diary_comment,
         coreValues,

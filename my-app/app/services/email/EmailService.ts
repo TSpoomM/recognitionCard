@@ -6,6 +6,7 @@ import { CardLanguage } from "../../types/cardLanguage";
 type SendComplimentEmailParams = {
   toEmail: string | string[];
   recipientName: string;
+  recipientDisplayName?: string;
   recognizedByName: string;
   comment: string;
   coreValues: string[];
@@ -24,6 +25,7 @@ export class EmailService {
   static async sendComplimentEmail({
     toEmail,
     recipientName,
+    recipientDisplayName,
     recognizedByName,
     comment,
     coreValues,
@@ -88,7 +90,7 @@ export class EmailService {
       to: targetRecipients,
       cc: ccRecipients,
       subject: "Compliment",
-      html: EmailService.buildHtml(recipientName, cardLanguage),
+      html: EmailService.buildHtml(recipientDisplayName || recipientName, cardLanguage),
       attachments: [
         {
           filename: "compliment-card.png",
@@ -117,21 +119,32 @@ export class EmailService {
     return values.map((email) => email.trim()).filter(Boolean);
   }
 
-  private static buildHtml(recipientName: string, cardLanguage: CardLanguage) {
-    const heading = cardLanguage === "th" ? "คุณได้รับบัตรส่งต่อคุณค่าใบใหม่!" : "You have received a new compliment!";
-    const recipientLabel = cardLanguage === "th" ? "เราขอชื่นชม" : "To";
+  private static escapeHtml(value: string) {
+    return value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character] || character);
+  }
+
+  private static buildHtml(recipientDisplayName: string, cardLanguage: CardLanguage) {
+    const isThai = cardLanguage === "th";
+    const heading = isThai ? "คุณได้รับบัตรส่งต่อคุณค่าใบใหม่!" : "You’ve received a recognition card!";
+    const intro = isThai ? "ทีมของเราขอร่วมชื่นชม" : "Our team is celebrating";
+    const note = isThai ? "ขอบคุณที่ร่วมสร้างสิ่งดี ๆ ให้เกิดขึ้นในทีม" : "Thank you for making a positive difference to the team.";
+    const safeRecipientName = EmailService.escapeHtml(recipientDisplayName);
     return `
-      <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-        <h2 style="color: #0f172a; text-align: center;">${heading}</h2>
-        <p style="color: #475569; font-size: 24px; line-height: 1.5; text-align:center;">
-          ${recipientLabel}: <strong style="color:#0f766e; font-size:30px; background:#fef3c7; padding:2px 10px; border-radius:8px;">${recipientName}</strong>
-        </p>
-        <div style="text-align: center; margin: 30px 0;">
-          <img src="cid:recognitionCard" alt="Recognition Card" width="660" style="width: 660px; max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);" />
+      <div style="margin:0;background:#f0fdfa;padding:32px 12px;font-family:Arial,'Noto Sans Thai',sans-serif;color:#0f172a;">
+        <div style="max-width:760px;margin:0 auto;overflow:hidden;border:1px solid #f3d37a;border-radius:24px;background:#fff;box-shadow:0 12px 32px rgba(15,118,110,.12);">
+          <div style="height:8px;background:linear-gradient(90deg,#0f766e,#14b8a6,#f6c453);"></div>
+          <div style="padding:30px 24px 10px;text-align:center;">
+            <div style="display:inline-block;margin-bottom:14px;border-radius:999px;background:#ccfbf1;padding:7px 14px;color:#115e59;font-size:12px;font-weight:700;letter-spacing:1.5px;">TECKBEEHANG RECOGNITION</div>
+            <h1 style="margin:0;color:#134e4a;font-size:28px;line-height:1.35;">${heading}</h1>
+            <p style="margin:14px 0 8px;color:#64748b;font-size:16px;">${intro}</p>
+            <p style="margin:0;color:#0f766e;font-size:25px;font-weight:700;line-height:1.4;">${safeRecipientName}</p>
+          </div>
+          <div style="padding:18px 24px;text-align:center;">
+            <img src="cid:recognitionCard" alt="Recognition Card" width="660" style="display:block;width:660px;max-width:100%;height:auto;margin:0 auto;border-radius:16px;box-shadow:0 8px 24px rgba(15,23,42,.14);" />
+          </div>
+          <div style="padding:4px 24px 28px;text-align:center;color:#475569;font-size:15px;line-height:1.6;">${note}</div>
+          <div style="border-top:1px solid #e2e8f0;background:#f8fafc;padding:16px 24px;text-align:center;color:#94a3b8;font-size:12px;line-height:1.5;">This is an automated email from TeckBeeHang Recognition System.</div>
         </div>
-        <p style="color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 30px; text-align: center;">
-          This is an automated email from TeckBeeHang Recognition System.
-        </p>
       </div>
     `;
   }
