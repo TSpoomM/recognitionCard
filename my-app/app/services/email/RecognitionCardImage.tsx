@@ -78,7 +78,7 @@ const STAR_META: Record<StarKey, { word: string; questions: Record<CardLanguage,
     word: "SITUATION",
     questions: {
       en: "What was the situation or context?",
-      th: "สถานการณ์ หรือบริบท คืออะไร?",
+      th: "คุณต้องการชื่นชมเรื่องอะไร",
     },
     bg: PALETTE.darkGreen,
   },
@@ -86,7 +86,7 @@ const STAR_META: Record<StarKey, { word: string; questions: Record<CardLanguage,
     word: "TASK",
     questions: {
       en: "What was the task or challenge?",
-      th: "งาน หรือ ความท้าทาย คืออะไร?",
+      th: "บุคคลนั้นมีหน้าที่อะไรในเหตุการณ์นั้น",
     },
     bg: PALETTE.green1,
   },
@@ -94,7 +94,7 @@ const STAR_META: Record<StarKey, { word: string; questions: Record<CardLanguage,
     word: "ACTION",
     questions: {
       en: "What action did you take?",
-      th: "มีการลงมือทำ อย่างไร?",
+      th: "บุคคลนั้นได้ลงมือทำอะไร",
     },
     bg: PALETTE.green3,
   },
@@ -782,7 +782,7 @@ export class RecognitionCardImageRenderer {
             <span style={{ fontFamily: cardLanguage === "th" ? textFont : "GreatVibes", fontSize: cardLanguage === "th" ? "34px" : "36px", color: PALETTE.green2, fontWeight: 500, lineHeight: 1.1 }}>
               {copy.thankYou}
             </span>
-            <span style={{ fontFamily: textFont, fontSize: "12px", color: PALETTE.textMuted, lineHeight: 1.35, marginTop: "4px", maxWidth: "390px" }}>
+            <span style={{ fontFamily: textFont, fontSize: "14px", color: PALETTE.textMuted, lineHeight: 1.35, marginTop: "4px", maxWidth: "390px" }}>
               {copy.appreciation}
             </span>
           </div>
@@ -929,15 +929,15 @@ export class RecognitionCardImageRenderer {
           ))}
         </div>
         <div style={{ display: "flex", alignItems: "center" }}>
-        <span style={{ fontFamily: textFont, fontWeight: "bold", fontSize: cardLanguage === "th" ? "14px" : "11px", letterSpacing: cardLanguage === "th" ? "0.5px" : "1.5px", color: "#ffffff" }}>
-          {copy.footer[0]}{" "}
-        </span>
-        <span style={{ fontFamily: textFont, fontWeight: "bold", fontSize: cardLanguage === "th" ? "14px" : "11px", letterSpacing: cardLanguage === "th" ? "0.5px" : "1.5px", color: PALETTE.accent }}>
-          {copy.footer[1]}{" "}
-        </span>
-        <span style={{ fontFamily: textFont, fontWeight: "bold", fontSize: cardLanguage === "th" ? "14px" : "11px", letterSpacing: cardLanguage === "th" ? "0.5px" : "1.5px", color: "#ffffff" }}>
-          {copy.footer[2]}
-        </span>
+          <span style={{ fontFamily: textFont, fontWeight: "bold", fontSize: cardLanguage === "th" ? "14px" : "11px", letterSpacing: cardLanguage === "th" ? "0.5px" : "1.5px", color: "#ffffff" }}>
+            {copy.footer[0]}{" "}
+          </span>
+          <span style={{ fontFamily: textFont, fontWeight: "bold", fontSize: cardLanguage === "th" ? "14px" : "11px", letterSpacing: cardLanguage === "th" ? "0.5px" : "1.5px", color: PALETTE.accent }}>
+            {copy.footer[1]}{" "}
+          </span>
+          <span style={{ fontFamily: textFont, fontWeight: "bold", fontSize: cardLanguage === "th" ? "14px" : "11px", letterSpacing: cardLanguage === "th" ? "0.5px" : "1.5px", color: "#ffffff" }}>
+            {copy.footer[2]}
+          </span>
         </div>
       </div>
     );

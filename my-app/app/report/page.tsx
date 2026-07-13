@@ -303,9 +303,9 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
     const visibleBranchCount = new Set(displayRows.map((row) => row.branch).filter(Boolean)).size;
     const reportLabels = this.state.lang === "th"
       ? {
-        results: "ผลลัพธ์",
+        results: "บัตรส่งต่อคุณค่า",
         rows: "รายการ",
-        allRows: "รายการทั้งหมด",
+        allRows: "รายการ",
         recipients: "ผู้รับ",
         branches: "สาขา",
         year: "ปี",
@@ -315,9 +315,9 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
         searchPeople: "ค้นหาชื่อพนักงาน",
       }
       : {
-        results: "Results",
+        results: "Number of recognition cards",
         rows: "rows",
-        allRows: "Total rows",
+        allRows: "rows",
         recipients: "Recipients",
         branches: "Branches",
         year: "Year",
@@ -356,7 +356,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
             <Card bordered={false} padding="none" shadow="xl" className="app-surface mb-8 overflow-hidden text-base sm:text-lg">
               <div className="flex flex-col gap-5 border-b-[1.5px] border-amber-300/80 px-6 py-6 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-800">
+                  <p className="text-xl font-semibold uppercase tracking-[0.2em] text-teal-800">
                     {this.t.reportRecognitionCard}
                   </p>
                   <h1 className="mt-2 text-3xl font-bold text-slate-950">{this.t.reportTitle}</h1>
@@ -376,7 +376,11 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                     className="h-12 rounded-full px-5"
                     icon={<FileText className="h-5 w-5" />}
                     disabled={displayRows.length === 0}
-                    onClick={() => downloadReportPdf(exportRows)}
+                    onClick={() => {
+                      downloadReportPdf(exportRows);
+                      // console.log("export rows", exportRows);
+
+                    }}
                   >
                     {this.t.reportExportPdf}
                   </Button>
@@ -387,7 +391,8 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                   { label: reportLabels.results, value: displayRows.length.toLocaleString(), helper: `${totalRows.toLocaleString()} ${reportLabels.allRows}`, icon: FileText },
                   { label: reportLabels.recipients, value: visibleRecipientCount.toLocaleString(), helper: `${(data?.employees.length ?? 0).toLocaleString()} ${reportLabels.recipients}`, icon: Users },
                   { label: reportLabels.branches, value: visibleBranchCount.toLocaleString(), helper: `${data?.branches.length ?? 0} ${reportLabels.branches}`, icon: MapPin },
-                  { label: reportLabels.year, value: selectedYears.length ? selectedYears.join(", ") : reportLabels.allYears, helper: `${activeFilterCount} ${reportLabels.activeFilters}`, icon: CalendarDays },
+                  { label: reportLabels.year, value: selectedYears.length ? selectedYears.join(", ") : reportLabels.allYears, helper: ``, icon: CalendarDays },
+                  // { label: reportLabels.year, value: selectedYears.length ? selectedYears.join(", ") : reportLabels.allYears, helper: `${activeFilterCount} ${reportLabels.activeFilters}`, icon: CalendarDays },
                 ].map((item) => {
                   const Icon = item.icon;
                   return (
@@ -401,7 +406,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                           <Icon className="h-5 w-5" />
                         </span>
                       </div>
-                      <p className="mt-3 text-base text-slate-500">{item.helper}</p>
+                      <p className="mt-3 text-base text-slate-500">จาก {item.helper}</p>
                     </div>
                   );
                 })}

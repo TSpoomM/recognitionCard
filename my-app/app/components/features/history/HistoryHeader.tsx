@@ -19,7 +19,7 @@ export default class HistoryHeader extends Component<HistoryHeaderProps> {
     return (
       <header className="mb-8 flex flex-col gap-4 border-b-[1.5px] border-amber-300 pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="mb-2 text-base uppercase tracking-[0.2em] text-teal-800">{t.reportRecognitionCard}</p>
+          <p className="mb-2 text-xl uppercase tracking-[0.2em] text-teal-800">{t.reportRecognitionCard}</p>
           <h1 className="flex items-center gap-3 text-4xl font-bold text-slate-950">
             <HistoryIcon className="h-9 w-9 text-teal-800" />
             {t.historyTitle}

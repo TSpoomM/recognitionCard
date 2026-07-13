@@ -31,6 +31,8 @@ const FONT = "Sarabun";
 export function downloadReportPdf(rows: ReportRow[]) {
   // A4 portrait: 210mm wide. Narrower than landscape, so column
   // proportions below are tuned specifically for this width.
+  // console.log("item rows: ", rows);
+  
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
   // Embed the Thai-capable font and make it the default for the whole document.

@@ -64,6 +64,8 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
 
   private get filteredItems() {
     const { items, selectedYear, selectedPeople } = this.state;
+    // console.log("items", items);
+
     return items.filter((item) => (!selectedYear || item.year === Number(selectedYear)) && (selectedPeople.length === 0 || selectedPeople.includes(item.recipient.user_id)));
   }
 
@@ -134,6 +136,8 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
               <div className="mb-4 flex flex-wrap justify-end gap-2">
                 <Button variant="secondary" icon={<FileText className="h-4 w-4" />} disabled={!items.length} onClick={() => downloadHistoryCsv(items)}>{lang === "th" ? "ส่งออก CSV" : "Export CSV"}</Button>
                 <Button icon={<FileText className="h-4 w-4" />} disabled={!items.length} onClick={() => downloadHistoryPdf(items)}>{lang === "th" ? "ส่งออก PDF" : "Export PDF"}</Button>
+                {/* {JSON.stringify("items")}
+                {JSON.stringify(items)} */}
               </div>
               <section className="app-panel mb-6 rounded-3xl p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -167,8 +171,8 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
                   <div className="relative mb-3"><Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><input type="text" value={peopleQuery} onChange={(event) => this.setState({ peopleQuery: event.target.value })} placeholder={lang === "th" ? "ค้นหาชื่อผู้รับ" : "Search people"} className="app-input w-full rounded-xl py-3 pl-9 pr-3 text-base" /></div>
                   <div className="rounded-2xl border-[1.5px] border-amber-300 bg-white p-2">
                     <div className="max-h-52 space-y-1 overflow-y-auto pr-2 [scrollbar-gutter:stable]">
-                    {people.map((person) => { const active = selectedPeople.includes(person.user_id); return <label key={person.user_id} className={`flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition ${active ? "bg-teal-800 text-white" : "text-slate-800 hover:bg-amber-50"}`}><input type="checkbox" checked={active} onChange={() => this.setState({ selectedPeople: active ? selectedPeople.filter((id) => id !== person.user_id) : [...selectedPeople, person.user_id] })} className="h-4 w-4 accent-amber-400" /><span className="font-semibold">{person.firstName} {person.lastName}</span></label>; })}
-                    {people.length === 0 && <p className="py-6 text-center text-sm text-slate-500">{lang === "th" ? "ไม่พบผู้รับ" : "No people found"}</p>}
+                      {people.map((person) => { const active = selectedPeople.includes(person.user_id); return <label key={person.user_id} className={`flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition ${active ? "bg-teal-800 text-white" : "text-slate-800 hover:bg-amber-50"}`}><input type="checkbox" checked={active} onChange={() => this.setState({ selectedPeople: active ? selectedPeople.filter((id) => id !== person.user_id) : [...selectedPeople, person.user_id] })} className="h-4 w-4 accent-amber-400" /><span className="font-semibold">{person.firstName} {person.lastName}</span></label>; })}
+                      {people.length === 0 && <p className="py-6 text-center text-sm text-slate-500">{lang === "th" ? "ไม่พบผู้รับ" : "No people found"}</p>}
                     </div>
                   </div>
                 </div>
