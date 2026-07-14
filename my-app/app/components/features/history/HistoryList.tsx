@@ -75,7 +75,11 @@ export default class HistoryList extends Component<HistoryListProps> {
                   {item.recipient.firstName} {item.recipient.lastName}
                 </h2>
                 <p className="mt-1 text-base text-slate-500">
-                  {item.recipient.role || item.recipient.email || `Employee #${item.recipient.user_id}`}
+                  {(this.context.lang === "th" ? item.recipient.branchDesc : item.recipient.branchNameEn) ||
+                    item.recipient.branchDesc ||
+                    item.recipient.branchNameEn ||
+                    item.recipient.branch ||
+                    "-"}
                 </p>
               </div>
               <span className="app-chip inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-sm font-semibold">

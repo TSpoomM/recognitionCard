@@ -7,6 +7,8 @@ export type HistoryItem = {
     email: string;
     role?: string;
     branch?: string;
+    branchDesc?: string;
+    branchNameEn?: string;
   };
   senderName: string;
   comment: string;

@@ -315,8 +315,8 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
         searchPeople: "ค้นหาชื่อพนักงาน",
       }
       : {
-        results: "Number of recognition cards",
-        rows: "rows",
+        results: "Recognition cards",
+        rows: "cards",
         allRows: "rows",
         recipients: "Recipients",
         branches: "Branches",
@@ -326,6 +326,37 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
         noActiveFilters: "No active filters",
         searchPeople: "Search people",
       };
+    const filterStatusGroups = [
+      {
+        key: "branch",
+        label: this.state.lang === "th" ? "สาขา" : "Branches",
+        items: selectedBranches,
+        className: "border-sky-200 bg-sky-50 text-sky-800",
+      },
+      {
+        key: "coreValue",
+        label: this.state.lang === "th" ? "ค่านิยม" : "Core Values",
+        items: selectedCoreValues.map((value) => {
+          const meta = COMMENT_TYPE_META[value as CommentType];
+          return meta ? `${meta.emoji} ${this.state.lang === "th" ? meta.th : meta.en}` : value;
+        }),
+        className: "border-violet-200 bg-violet-50 text-violet-800",
+      },
+      {
+        key: "people",
+        label: this.state.lang === "th" ? "ผู้รับ" : "Recipients",
+        items: selectedPeople
+          .map((personId) => data?.employees.find((item) => item.user_id === personId)?.name)
+          .filter((name): name is string => Boolean(name)),
+        className: "border-emerald-200 bg-emerald-50 text-emerald-800",
+      },
+      {
+        key: "year",
+        label: this.state.lang === "th" ? "ปี" : "Years",
+        items: sortedSelectedYears,
+        className: "border-amber-200 bg-amber-50 text-amber-800",
+      },
+    ].filter((group) => group.items.length > 0);
     if (isLoadingAccess) {
       return (
         <main className="flex min-h-screen items-center justify-center px-6">
@@ -388,11 +419,17 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
               </div>
               <div className="grid gap-3 px-6 py-5 sm:grid-cols-2 sm:px-8 xl:grid-cols-4">
                 {[
-                  { label: reportLabels.results, value: displayRows.length.toLocaleString(), helper: `${displayRows.length.toLocaleString()} ${reportLabels.allRows}`, icon: FileText },
+                  { label: reportLabels.results, value: displayRows.length.toLocaleString(), helper: `${displayRows.length.toLocaleString()} ${reportLabels.rows}`, icon: FileText },
                   { label: reportLabels.recipients, value: visibleRecipientCount.toLocaleString(), helper: `${(data?.employees.length ?? 0).toLocaleString()} ${reportLabels.recipients}`, icon: Users },
                   { label: reportLabels.branches, value: visibleBranchCount.toLocaleString(), helper: `${data?.branches.length ?? 0} ${reportLabels.branches}`, icon: MapPin },
-                  { label: reportLabels.year, value: sortedSelectedYears.length ? sortedSelectedYears.join(" • ") : reportLabels.allYears, helper: `${data?.years.length ?? 0} ${reportLabels.year}`, icon: CalendarDays },
-                  // { label: reportLabels.year, value: selectedYears.length ? selectedYears.join(", ") : reportLabels.allYears, helper: `${activeFilterCount} ${reportLabels.activeFilters}`, icon: CalendarDays },
+                  {
+                    label: this.state.lang === "th" ? "ปีที่แสดง" : "Years shown",
+                    value: (selectedYears.length || data?.years.length || 0).toLocaleString(),
+                    helper: this.state.lang === "th"
+                      ? `${data?.years.length ?? 0} ปี`
+                      : `${data?.years.length ?? 0} years`,
+                    icon: CalendarDays,
+                  },
                 ].map((item) => {
                   const Icon = item.icon;
                   return (
@@ -604,33 +641,45 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                           {activeFilterCount > 0 ? `${activeFilterCount} ${reportLabels.activeFilters}` : reportLabels.noActiveFilters}
                         </p>
                       </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {selectedBranches.map((branch) => (
-                          <span
-                            key={branch}
-                            className="app-chip rounded-full px-3 py-1 text-xs font-semibold"
-                          >
-                            {branch}
-                          </span>
-                        ))}
-                        {selectedPeople.slice(0, 3).map((personId) => {
-                          const employee = data?.employees.find((item) => item.user_id === personId);
-                          return employee ? (
-                            <span
-                              key={personId}
-                              className="app-chip rounded-full px-3 py-1 text-xs font-semibold"
-                            >
-                              {employee.name}
+                      {filterStatusGroups.length > 0 ? (
+                        <div className="w-full rounded-2xl border border-amber-200 bg-gradient-to-br from-white to-amber-50/70 p-3 shadow-sm xl:max-w-[48rem]">
+                          <div className="mb-2 flex items-center justify-between gap-3">
+                            <span className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-slate-500">
+                              <Filter className="h-4 w-4 text-teal-700" />
+                              {reportLabels.activeFilters}
                             </span>
-                          ) : null;
-                        })}
-                        {selectedPeople.length > 3 && (
-                          <span className="app-chip rounded-full px-3 py-1 text-xs font-semibold">
-                            +{selectedPeople.length - 3} more
-                          </span>
-                        )}
-                        {selectedYears.map((year) => <span key={year} className="app-chip rounded-full px-3 py-1 text-xs font-semibold">{year}</span>)}
-                      </div>
+                            <span className="rounded-full bg-teal-800 px-2.5 py-1 text-xs font-bold text-white">
+                              {activeFilterCount}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {filterStatusGroups.map((group) => {
+                              const visibleItems = group.items.slice(0, 3);
+                              const remainingCount = group.items.length - visibleItems.length;
+                              return (
+                                <div key={group.key} className="flex min-w-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white/80 p-1.5">
+                                  <span className="shrink-0 px-1.5 text-xs font-bold text-slate-500">{group.label}</span>
+                                  {visibleItems.map((item) => (
+                                    <span key={item} className={`max-w-48 truncate rounded-lg border px-2.5 py-1 text-xs font-semibold ${group.className}`} title={item}>
+                                      {item}
+                                    </span>
+                                  ))}
+                                  {remainingCount > 0 ? (
+                                    <span className="shrink-0 rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold text-slate-600">
+                                      +{remainingCount}
+                                    </span>
+                                  ) : null}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-500">
+                          <Filter className="h-4 w-4" />
+                          {reportLabels.noActiveFilters}
+                        </div>
+                      )}
                     </div>
                     {displayRows.length === 0 ? (
                       <div className="p-12 text-center text-base text-slate-500">

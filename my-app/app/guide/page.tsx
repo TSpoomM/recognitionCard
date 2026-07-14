@@ -229,14 +229,14 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
                 onClick={() => this.handleDemoCardLanguage("en")}
                 className={`rounded-full px-4 py-2 text-sm font-bold transition active:scale-[0.98] ${demoCardLanguage === "en" ? "bg-teal-800 text-white" : "text-slate-500 hover:bg-white"}`}
               >
-                EN
+                TH
               </button>
               <button
                 type="button"
                 onClick={() => this.handleDemoCardLanguage("th")}
                 className={`rounded-full px-4 py-2 text-sm font-bold transition active:scale-[0.98] ${demoCardLanguage === "th" ? "bg-teal-800 text-white" : "text-slate-500 hover:bg-white"}`}
               >
-                TH
+                EN
               </button>
             </span>
           </div>
@@ -250,12 +250,47 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
         iconColor: "text-blue-700",
         borderColor: "border-blue-200",
         demo: (
-          <div className="flex flex-wrap items-center gap-3">
-            {demoButton(t.queue, "rounded-full bg-teal-800 px-5 text-white shadow-lg shadow-teal-900/25 hover:bg-teal-900", <Send className="h-4 w-4" />)}
-            {demoButton(t.edit, "border-[1.5px] border-amber-300 bg-white text-slate-700 hover:border-amber-400 hover:bg-amber-50", <Pencil className="h-4 w-4" />)}
-            {demoButton(t.cancel, "border border-rose-200 bg-white text-rose-600 hover:border-rose-300 hover:text-rose-700", <Trash2 className="h-4 w-4" />)}
-            {demoButton(t.confirmNow, "bg-teal-800 text-white hover:bg-teal-900", <Send className="h-4 w-4" />)}
-            {demoIconButton("Close", "border-[1.5px] border-amber-300 bg-white text-slate-500 hover:border-amber-400 hover:text-teal-900", <X className="h-5 w-5" />)}
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center gap-3">
+              {demoButton(t.queue, "rounded-full bg-teal-800 px-5 text-white shadow-lg shadow-teal-900/25 hover:bg-teal-900", <Send className="h-4 w-4" />)}
+              {demoButton(t.edit, "border-[1.5px] border-amber-300 bg-white text-slate-700 hover:border-amber-400 hover:bg-amber-50", <Pencil className="h-4 w-4" />)}
+              {demoButton(t.cancel, "border border-rose-200 bg-white text-rose-600 hover:border-rose-300 hover:text-rose-700", <Trash2 className="h-4 w-4" />)}
+              {demoButton(t.confirmNow, "bg-teal-800 text-white hover:bg-teal-900", <Send className="h-4 w-4" />)}
+              {demoIconButton("Close", "border-[1.5px] border-amber-300 bg-white text-slate-500 hover:border-amber-400 hover:text-teal-900", <X className="h-5 w-5" />)}
+            </div>
+
+            <div className="rounded-2xl border border-amber-300 bg-amber-50/50 p-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-xl border border-slate-200 bg-white/80 p-3">
+                  <p className="mb-2 text-base font-bold text-slate-800">{t.queueTo}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {["Alex Morgan", "Jamie Lee"].map((name) => (
+                      <span key={name} className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-base font-semibold text-teal-950">
+                        <span className="grid h-6 w-6 place-items-center rounded-full bg-teal-800 text-xs font-bold text-white">{name[0]}</span>
+                        {name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-white/80 p-3">
+                  <p className="mb-2 text-base font-bold text-slate-800">Core Values</p>
+                  <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-base font-bold ${COMMENT_TYPE_META.COMMUNICATION.tint}`}>
+                    {COMMENT_TYPE_META.COMMUNICATION.emoji} {lang === "th" ? COMMENT_TYPE_META.COMMUNICATION.th : COMMENT_TYPE_META.COMMUNICATION.en}
+                  </span>
+                </div>
+              </div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                {starItems.map((item) => (
+                  <div key={item.label} className="overflow-hidden rounded-xl border border-slate-200 bg-white/80">
+                    <div className="flex items-center gap-2 border-b border-slate-200 bg-teal-50 px-3 py-2">
+                      <span className="grid h-7 w-7 place-items-center rounded-lg bg-teal-800 text-sm font-bold text-white">{item.label}</span>
+                      <span className="text-base font-bold text-teal-950">{item.title.split(":")[0]}</span>
+                    </div>
+                    <p className="px-3 py-2 text-base text-slate-700">{item.title}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         ),
       },

@@ -119,7 +119,7 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
     const { lang, currentUserId, error, isLoading, selectedYear, selectedPeople, peopleQuery } = this.state;
     const items = this.filteredItems;
     const normalizedPeopleQuery = peopleQuery.trim().toLowerCase();
-    const people = Array.from(new Map(this.state.items.map((item) => [item.recipient.user_id, item.recipient])).values()).filter((person) => `${person.firstName} ${person.lastName} ${person.email} ${person.role || ""} ${person.branch || ""}`.toLowerCase().includes(normalizedPeopleQuery));
+    const people = Array.from(new Map(this.state.items.map((item) => [item.recipient.user_id, item.recipient])).values()).filter((person) => `${person.firstName} ${person.lastName} ${person.email} ${person.role || ""} ${person.branch || ""} ${person.branchDesc || ""} ${person.branchNameEn || ""}`.toLowerCase().includes(normalizedPeopleQuery));
 
     return (
       <LanguageContext.Provider value={{
