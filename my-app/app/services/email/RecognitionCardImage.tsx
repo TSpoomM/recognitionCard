@@ -1,7 +1,8 @@
 import fs from "fs";
 import path from "path";
 import React from "react";
-import { ImageResponse } from "next/og";
+import { renderToReadableStream } from "react-dom/server.edge";
+import puppeteer from "puppeteer";
 import { StarCommentParser, StarSection } from "./starComment";
 import { CardLanguage } from "../../types/cardLanguage";
 
@@ -58,6 +59,10 @@ function getFontData(fileName: string): Buffer {
     throw new Error(`Font file not found: ${filePath}`);
   }
   return fs.readFileSync(filePath);
+}
+
+function getFontDataUri(fileName: string): string {
+  return `data:font/ttf;base64,${getFontData(fileName).toString("base64")}`;
 }
 
 function getImageDataUri(fileName: string, mimeType: string): string {
@@ -694,7 +699,7 @@ export class RecognitionCardImageRenderer {
             style={{
               fontFamily: "Roboto",
               fontSize: "14px",
-              fontStyle: "italic",
+              fontStyle: "normal",
               color: PALETTE.textDark,
               lineHeight: 1.4,
               wordBreak: "break-word",
@@ -725,7 +730,7 @@ export class RecognitionCardImageRenderer {
           style={{
             fontFamily: "Roboto",
             fontSize: "16px",
-            fontStyle: "italic",
+            fontStyle: "normal",
             color: PALETTE.textDark,
             lineHeight: 1.55,
             textAlign: "center",
@@ -752,7 +757,7 @@ export class RecognitionCardImageRenderer {
     }
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: "10px" }}>
+      <div style={{ display: "flex", flexDirection: "column", flexShrink: 0, gap: "10px" }}>
         {STAR_ORDER.map((letter) => this.renderStarRow(letter, map[letter] ?? "", cardLanguage))}
       </div>
     );
@@ -1004,45 +1009,63 @@ export class RecognitionCardImageRenderer {
   }
 
   static async renderToBuffer(props: RecognitionCardImageProps): Promise<Buffer> {
-    const cardHeight = CARD_HEIGHT + this.computeExtraHeight(props.comment);
-    const imageResponse = new ImageResponse(this.renderImage(props), {
-      width: CARD_WIDTH,
-      height: cardHeight,
-      fonts: [
-        {
-          name: "Roboto",
-          data: getFontData("Roboto-Regular.ttf"),
-          style: "normal",
-          weight: 400,
-        },
-        {
-          name: "Roboto",
-          data: getFontData("Roboto-Medium.ttf"),
-          style: "normal",
-          weight: 500,
-        },
-        {
-          name: "GreatVibes",
-          data: getFontData("GreatVibes-Regular.ttf"),
-          style: "normal",
-          weight: 400,
-        },
-        {
-          name: "IBMPlexSansThai",
-          data: getFontData("IBMPlexSansThai-Regular.ttf"),
-          style: "normal",
-          weight: 400,
-        },
-        {
-          name: "IBMPlexSansThai",
-          data: getFontData("IBMPlexSansThai-Medium.ttf"),
-          style: "normal",
-          weight: 500,
-        },
-      ],
+    // Start with a generously sized viewport, then let Chromium measure the
+    // actual rendered content. The old estimate was designed for Satori and
+    // leaves a large empty area when Chromium wraps Thai text more accurately.
+    const initialHeight = CARD_HEIGHT + this.computeExtraHeight(props.comment);
+    const markupStream = await renderToReadableStream(this.renderImage(props));
+    const markup = await new Response(markupStream).text();
+    const fontCss = `
+      @font-face { font-family: Roboto; src: url('${getFontDataUri("Roboto-Regular.ttf")}') format('truetype'); font-weight: 400; }
+      @font-face { font-family: Roboto; src: url('${getFontDataUri("Roboto-Medium.ttf")}') format('truetype'); font-weight: 500 700; }
+      @font-face { font-family: GreatVibes; src: url('${getFontDataUri("GreatVibes-Regular.ttf")}') format('truetype'); font-weight: 400; }
+      @font-face { font-family: IBMPlexSansThai; src: url('${getFontDataUri("IBMPlexSansThai-Regular.ttf")}') format('truetype'); font-weight: 400; }
+      @font-face { font-family: IBMPlexSansThai; src: url('${getFontDataUri("IBMPlexSansThai-Medium.ttf")}') format('truetype'); font-weight: 500 600; }
+      @font-face { font-family: IBMPlexSansThai; src: url('${getFontDataUri("IBMPlexSansThai-Bold.ttf")}') format('truetype'); font-weight: 700; }
+      html, body { margin: 0; width: ${CARD_WIDTH}px; height: ${initialHeight}px; overflow: hidden; }
+      * { box-sizing: border-box; }
+    `;
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
-    const arrayBuffer = await imageResponse.arrayBuffer();
-    return Buffer.from(arrayBuffer);
+    try {
+      const page = await browser.newPage();
+      await page.setViewport({ width: CARD_WIDTH, height: initialHeight, deviceScaleFactor: 2 });
+      await page.setContent(
+        `<!doctype html><html lang="${props.cardLanguage === "th" ? "th" : "en"}"><head><meta charset="utf-8"><style>${fontCss}</style></head><body>${markup}</body></html>`,
+        { waitUntil: "load" }
+      );
+      await page.evaluate(() => document.fonts.ready);
+      const measuredHeight = await page.evaluate(() => {
+        const root = document.body.firstElementChild as HTMLElement | null;
+        if (!root) return document.body.scrollHeight;
+
+        root.style.height = "auto";
+        root.style.overflow = "visible";
+        const main = root.children.item(1) as HTMLElement | null;
+        if (main) main.style.flex = "none";
+        return Math.ceil(root.scrollHeight);
+      });
+      const cardHeight = Math.max(1, measuredHeight);
+      await page.setViewport({ width: CARD_WIDTH, height: cardHeight, deviceScaleFactor: 2 });
+      await page.evaluate((height) => {
+        document.documentElement.style.height = `${height}px`;
+        document.body.style.height = `${height}px`;
+        const root = document.body.firstElementChild as HTMLElement | null;
+        if (root) {
+          root.style.height = `${height}px`;
+          root.style.overflow = "hidden";
+        }
+      }, cardHeight);
+      const png = await page.screenshot({
+        type: "png",
+        clip: { x: 0, y: 0, width: CARD_WIDTH, height: cardHeight },
+      });
+      return Buffer.from(png);
+    } finally {
+      await browser.close();
+    }
   }
 }

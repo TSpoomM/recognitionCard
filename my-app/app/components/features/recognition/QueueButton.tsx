@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { PendingSubmission } from "../../../types/pendingSubmission";
 import { COMMENT_TYPE_META } from "../../../types/commentType";
 import { RecognitionEngine } from "../../../lib/RecognitionEngine";
+import { StarCommentParser } from "../../../services/email/starComment";
 import Card from "../../ui/Card";
 import { useLanguage } from "../../../context/LanguageContext";
 import { QueueIcon, ClockIcon, CheckIcon, PencilIcon, TrashIcon, SendIcon, CloseIcon } from "../../ui/Icons";
@@ -19,6 +20,13 @@ type RecognitionQueueButtonProps = {
 function getSubmissionTypes(submission: PendingSubmission) {
   return submission.types?.length ? submission.types : submission.type ? [submission.type] : [];
 }
+
+const STAR_SECTION_NAMES = {
+  S: "Situation",
+  T: "Task",
+  A: "Action",
+  R: "Result",
+} as const;
 
 export default function RecognitionQueueButton({
   submissions,
@@ -69,11 +77,11 @@ export default function RecognitionQueueButton({
       {open ? (
         <div className="fixed inset-0 z-[60] bg-slate-950/30 backdrop-blur-sm" onClick={() => setOpen(false)}>
           <aside
-            className="fixed bottom-20 right-5 w-[min(94vw,34rem)] overflow-hidden"
+            className="fixed bottom-10 right-5 w-[min(96vw,64rem)] overflow-hidden"
             aria-label="Recognition queue"
             onClick={(event) => event.stopPropagation()}
           >
-            <Card padding="none" shadow="xl" className="max-h-[80vh] overflow-hidden flex flex-col">
+            <Card padding="none" shadow="xl" className="max-h-[88vh] overflow-hidden flex flex-col">
               <header className="border-b-[1.5px] border-amber-300 bg-teal-50/40 p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -105,6 +113,7 @@ export default function RecognitionQueueButton({
                   submissions.map((submission) => {
                     const pending = submission.status === "pending";
                     const editing = editingSubmissionId === submission.id;
+                    const starSections = StarCommentParser.parse(submission.comment);
 
                     return (
                       <article
@@ -151,24 +160,75 @@ export default function RecognitionQueueButton({
                           </span>
                         </div> */}
 
-                        <div className="mt-3 text-base leading-7 text-slate-700">
-                          <span className="font-bold text-slate-800">{t.queueTo}</span>{" "}
-                          {submission.users.map((user) => `${user.firstName} ${user.lastName}`).join(", ") || "None"}
+                        <div className="mt-3 rounded-xl border border-slate-200 bg-white/70 p-3">
+                          <div className="mb-2 text-base font-bold text-slate-800">{t.queueTo}</div>
+                          {submission.users.length > 0 ? (
+                            <div className="flex flex-wrap gap-2">
+                              {submission.users.map((user) => {
+                                const fullName = `${user.firstName} ${user.lastName}`.trim();
+                                return (
+                                  <span
+                                    key={user.user_id}
+                                    className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-base font-semibold text-teal-950"
+                                  >
+                                    <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-800 text-xs font-bold text-white">
+                                      {fullName.slice(0, 1).toUpperCase()}
+                                    </span>
+                                    {fullName}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <span className="text-base text-slate-500">None</span>
+                          )}
                         </div>
 
-                        <div className="mt-3 flex flex-wrap gap-1.5">
-                          {getSubmissionTypes(submission).map((type) => {
-                            const meta = COMMENT_TYPE_META[type];
-                            if (!meta) return null;
-                            return (
-                              <span key={type} className={`rounded-full px-3 py-1.5 text-sm font-bold ${meta.tint}`}>
-                                {meta.emoji} {submission.cardLanguage === "th" ? meta.th : meta.en}
-                              </span>
-                            );
-                          })}
+                        <div className="mt-3 rounded-xl border border-slate-200 bg-white/70 p-3">
+                          <div className="mb-2 text-base font-bold text-slate-800">Core Values</div>
+                          <div className="flex flex-wrap gap-2">
+                            {getSubmissionTypes(submission).map((type) => {
+                              const meta = COMMENT_TYPE_META[type];
+                              if (!meta) return null;
+                              return (
+                                <span
+                                  key={type}
+                                  className={`inline-flex items-center gap-2 rounded-full border border-current/15 px-3 py-1.5 text-base font-bold ${meta.tint}`}
+                                >
+                                  <span className="text-lg leading-none" aria-hidden="true">{meta.emoji}</span>
+                                  {submission.cardLanguage === "th" ? meta.th : meta.en}
+                                </span>
+                              );
+                            })}
+                          </div>
                         </div>
 
-                        <p className="mt-3 whitespace-pre-wrap text-lg leading-relaxed font-medium text-slate-900">{submission.comment}</p>
+                        {starSections.length > 0 ? (
+                          <div className="mt-4 grid gap-3 md:grid-cols-2">
+                            {starSections.map((section) => (
+                              <section
+                                key={section.label}
+                                className="overflow-hidden rounded-xl border border-slate-200 bg-white/80"
+                              >
+                                <div className="flex items-center gap-2 border-b border-slate-200 bg-teal-50 px-4 py-2.5">
+                                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-teal-800 text-sm font-bold text-white">
+                                    {section.label}
+                                  </span>
+                                  <h3 className="text-base font-bold text-teal-950">
+                                    {STAR_SECTION_NAMES[section.label]}
+                                  </h3>
+                                </div>
+                                <p className="whitespace-pre-wrap px-4 py-3 text-lg font-medium leading-relaxed text-slate-900">
+                                  {section.text}
+                                </p>
+                              </section>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="mt-3 whitespace-pre-wrap text-lg font-medium leading-relaxed text-slate-900">
+                            {submission.comment}
+                          </p>
+                        )}
 
                         {pending ? (
                           <div className="mt-4 flex flex-wrap items-center gap-2 border-t-[1.5px] border-amber-300/70 pt-4">
