@@ -24,11 +24,11 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
   constructor(props: Record<string, never>) {
     super(props);
     this.state = {
-      lang: 'en',
+      lang: 'th',
       currentUserId: "",
       isAdmin: false,
       activeGuideSection: "recognition-card",
-      demoCardLanguage: "en",
+      demoCardLanguage: "th",
     };
   }
 

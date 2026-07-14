@@ -49,7 +49,7 @@ export const TRANSLATIONS = {
     // Queue Button
     queue: 'Waiting List',
     queueTitle: 'Waiting List',
-    queueDescription: 'Pending cards auto-confirm after 2 minutes. You can edit, cancel, or confirm during that window.',
+    queueDescription: 'Cards that are waiting will be sent automatically after 2 minutes. You can edit, cancel, or send them right away during that time.',
     queueEmpty: 'Your list is empty.',
     queueConfirmed: 'Confirmed',
     queueTo: 'To:',
@@ -59,18 +59,18 @@ export const TRANSLATIONS = {
     confirmNow: 'Confirm now',
 
     // Validation / error messages
-    errorNoUserId: 'Current user id is missing. Please open this page from the login system.',
-    errorSelectUser: 'Please choose at least one user to comment.',
+    errorNoUserId: 'Unable to identify you. Please try logging in again or refresh the page.',
+    errorSelectUser: 'Please choose at least one person to recognize.',
     errorSelfRecognize: 'You cannot recognize yourself.',
     errorSelectCoreValue: 'Please choose at least one core value.',
-    errorCommentTooShort: (length: number) => `Please write at least 70 characters (currently ${length}).`,
-    errorCommentTooLong: (length: number) => `Please keep the STAR comment within 500 characters (currently ${length}).`,
-    successQueued: 'Recognition card queued successfully.',
+    errorCommentTooShort: (length: number) => `Please write at least 70 characters (you have ${length}).`,
+    errorCommentTooLong: (length: number) => `Please keep your message within 500 characters (you have ${length}).`,
+    successQueued: 'Your recognition card has been added to the waiting list.',
     successUpdated: 'Recognition card updated successfully.',
-    successSaved: 'Recognition card saved to database.',
-    errorLoadUsers: (msg: string) => `Unable to load employee data: ${msg}`,
+    successSaved: 'Recognition card saved successfully.',
+    errorLoadUsers: (msg: string) => `Unable to load employee list: ${msg}`,
     errorSaveCard: (msg: string) => `Unable to save recognition card: ${msg}`,
-    errorNoUser: 'Please select at least one user.',
+    errorNoUser: 'Please select at least one person.',
 
     // History Page
     historyTitle: 'History',
@@ -86,20 +86,21 @@ export const TRANSLATIONS = {
 
     // Report Page
     reportTitle: 'Recognition Report',
-    reportSubtitle: 'Filter by people, branch, or year, then export PDF or CSV.',
+    reportSubtitle: 'Filter by recipients, branch, or year, then export PDF or Excel.',
     reportBackButton: 'Back',
     reportCheckingAccess: 'Checking report access...',
     reportAccessDenied: 'Access denied',
     reportOnlyAdmin: 'Only admin users can access the recognition report.',
-    reportExportCsv: 'Export CSV',
+    reportExportCsv: 'Export Excel',
     reportExportPdf: 'Export PDF',
     reportFilters: 'Filters',
-    reportFilterPeople: 'Filter by people',
+    reportFilterPeople: 'Filter by recipients',
     reportFilterBranch: 'Filter by branch',
     reportFilterYear: 'Filter by year',
     reportClearFilters: 'Clear filters',
     reportNoFilters: 'No filters applied',
     reportRecognitionCard: 'Recognition Card',
+    reportFrom: 'from',
 
     // Guide Page
     guideBackButton: 'Back',
@@ -155,7 +156,7 @@ export const TRANSLATIONS = {
     guideWalkthroughExportItems: [
       'The dashboard cards at the top show a quick summary such as results, recipients, branches, and year.',
       'The table below shows the detailed rows. Scroll sideways if the table is wider than your screen.',
-      'When the filtered result looks correct, click Export CSV for a spreadsheet file or Export PDF for a printable report.',
+      'When the filtered result looks correct, click Export Excel for a spreadsheet file or Export PDF for a printable report.',
       'If the export buttons look disabled, it means there are no rows to export yet.',
     ],
     guideHowToTitle: 'How to Send a Recognition Card',
@@ -172,7 +173,7 @@ export const TRANSLATIONS = {
     guideHistoryTitle: 'View History',
     guideHistoryDesc: 'All recognition cards you\'ve sent are saved in the History page. You can choose a year from the latest 5 years to review past recognitions.',
     guideReportTitle: 'Admin Report',
-    guideReportDesc: 'Admins can open the Report page to filter recognitions by multiple branches and multiple people. The filtered data appears as a summary dashboard at the top and detailed rows in the table below, then can be exported to PDF or CSV.',
+    guideReportDesc: 'Admins can open the Report page to filter recognitions by multiple branches and multiple people. The filtered data appears as a summary dashboard at the top and detailed rows in the table below, then can be exported to PDF or Excel.',
     guideStarTitle: 'What is the STAR Method?',
     guideStarSituation: 'Situation: Describe the context or challenge the person faced.',
     guideStarTask: 'Task: Explain the goal or responsibility they had.',
@@ -233,7 +234,7 @@ export const TRANSLATIONS = {
     // Queue Button
     queue: 'รายการ',
     queueTitle: 'รายการรอส่ง',
-    queueDescription: 'การ์ดที่รอดำเนินการจะยืนยันอัตโนมัติหลัง 2 นาที คุณสามารถแก้ไข ลบ หรือยืนยันได้ในช่วงเวลานั้น',
+    queueDescription: 'การ์ดที่รอส่งจะถูกส่งอัตโนมัติหลังจาก 2 นาที คุณสามารถแก้ไข ยกเลิก หรือส่งทันทีในช่วงเวลานั้น',
     queueEmpty: 'ไม่มีรายการในลิสต์',
     queueConfirmed: 'ยืนยันแล้ว',
     queueTo: 'ถึง:',
@@ -243,16 +244,16 @@ export const TRANSLATIONS = {
     confirmNow: 'ยืนยันทันที',
 
     // Validation / error messages
-    errorNoUserId: 'ไม่พบรหัสผู้ใช้งาน กรุณาเปิดหน้านี้จากระบบเข้าสู่ระบบ',
+    errorNoUserId: 'ไม่พบข้อมูลผู้ใช้ กรุณาลองเข้าสู่ระบบอีกครั้งหรือรีเฟรชหน้า',
     errorSelectUser: 'กรุณาเลือกผู้รับอย่างน้อยหนึ่งคน',
     errorSelfRecognize: 'ไม่สามารถส่งบัตรส่งต่อคุณค่าให้ตัวเองได้',
     errorSelectCoreValue: 'กรุณาเลือกค่านิยมอย่างน้อยหนึ่งข้อ',
     errorCommentTooShort: (length: number) => `กรุณาเขียนอย่างน้อย 70 ตัวอักษร (ปัจจุบัน ${length} ตัว)`,
     errorCommentTooLong: (length: number) => `กรุณาเขียนข้อความชื่นชมไม่เกิน 500 ตัวอักษร (ปัจจุบัน ${length} ตัว)`,
     successQueued: 'เพิ่มบัตรส่งต่อคุณค่าเข้ารายการรอส่งเรียบร้อยแล้ว',
-    successUpdated: 'อัปเดตบัตรส่งต่อคุณค่าเรียบร้อยแล้ว',
-    successSaved: 'บันทึกบัตรส่งต่อคุณค่าลงฐานข้อมูลเรียบร้อยแล้ว',
-    errorLoadUsers: (msg: string) => `ไม่สามารถโหลดข้อมูลพนักงาน: ${msg}`,
+    successUpdated: 'แก้ไขบัตรส่งต่อคุณค่าเรียบร้อยแล้ว',
+    successSaved: 'บันทึกบัตรส่งต่อคุณค่าเรียบร้อยแล้ว',
+    errorLoadUsers: (msg: string) => `ไม่สามารถดึงข้อมูลพนักงาน: ${msg}`,
     errorSaveCard: (msg: string) => `ไม่สามารถบันทึกบัตรส่งต่อคุณค่า: ${msg}`,
     errorNoUser: 'กรุณาเลือกผู้รับอย่างน้อยหนึ่งคน',
 
@@ -270,12 +271,12 @@ export const TRANSLATIONS = {
 
     // Report Page
     reportTitle: 'รายงานบัตรส่งต่อคุณค่า',
-    reportSubtitle: 'กรองตามผู้รับ สาขา หรือปี จากนั้นส่งออก PDF หรือ CSV',
+    reportSubtitle: 'กรองตามผู้รับ สาขา หรือปี จากนั้นส่งออก PDF หรือ Excel',
     reportBackButton: 'ย้อนกลับ',
     reportCheckingAccess: 'กำลังตรวจสอบสิทธิ์เข้าถึงรายงาน...',
     reportAccessDenied: 'ปฏิเสธการเข้าถึง',
     reportOnlyAdmin: 'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถเข้าถึงรายงานบัตรส่งต่อคุณค่าได้',
-    reportExportCsv: 'ส่งออก CSV',
+    reportExportCsv: 'ส่งออก Excel',
     reportExportPdf: 'ส่งออก PDF',
     reportFilters: 'ตัวกรอง',
     reportFilterPeople: 'กรองตามผู้รับ',
@@ -284,6 +285,7 @@ export const TRANSLATIONS = {
     reportClearFilters: 'ล้างตัวกรอง',
     reportNoFilters: 'ไม่มีการใช้ตัวกรอง',
     reportRecognitionCard: 'บัตรส่งต่อคุณค่า',
+    reportFrom: 'จาก',
 
     // Guide Page
     guideBackButton: 'ย้อนกลับ',
@@ -339,7 +341,7 @@ export const TRANSLATIONS = {
     guideWalkthroughExportItems: [
       'การ์ด dashboard ด้านบนจะแสดงสรุปแบบคร่าวๆ เช่น จำนวนผลลัพธ์ ผู้รับ สาขา และปี',
       'ตารางด้านล่างจะแสดงรายละเอียดแต่ละรายการ ถ้าตารางกว้างกว่าหน้าจอให้เลื่อนไปด้านข้าง',
-      'เมื่อข้อมูลที่กรองถูกต้องแล้ว ให้กด Export CSV เพื่อเอาไปเปิดใน spreadsheet หรือกด Export PDF เพื่อทำรายงานแบบพิมพ์ได้',
+      'เมื่อข้อมูลที่กรองถูกต้องแล้ว ให้กด Export Excel เพื่อเอาไปเปิดใน spreadsheet หรือกด Export PDF เพื่อทำรายงานแบบพิมพ์ได้',
       'ถ้าปุ่ม export กดไม่ได้ แปลว่ายังไม่มีข้อมูลในผลลัพธ์ให้ export',
     ],
     guideHowToTitle: 'วิธีส่งบัตรส่งต่อคุณค่า',

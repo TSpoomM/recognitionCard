@@ -57,6 +57,7 @@ export async function POST(request: Request) {
     let recipientName = recipientIds.map((recipientId) => `Employee #${recipientId}`).join(", ");
     let recipientEmails: string[] = [];
     let recipientDisplayName = recipientName;
+    let recipientDisplayNames: string[] = [];
     let recognizedByName = String(createdBy);
     try {
       const [empRows] = await pool.query<EmployeeEmailRow[]>(
@@ -81,6 +82,11 @@ export async function POST(request: Request) {
           const name = row?.emp_name_en || `Employee #${recipientId}`;
           return row?.location_emp ? `${name} (${row.location_emp})` : name;
         }).join(", ");
+        recipientDisplayNames = recipientIds.map((recipientId) => {
+          const row = rowById.get(recipientId);
+          const name = row?.emp_name_en || `Employee #${recipientId}`;
+          return row?.location_emp ? `${name} (${row.location_emp})` : name;
+        });
       }
     } catch (err) {
       console.error("Failed to query employee info for email: ", err);
@@ -113,6 +119,7 @@ export async function POST(request: Request) {
         toEmail: recipientEmails,
         recipientName,
         recipientDisplayName,
+        recipientDisplayNames,
         recognizedByName,
         comment: diary_comment,
         coreValues,

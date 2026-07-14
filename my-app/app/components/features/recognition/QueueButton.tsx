@@ -33,10 +33,11 @@ export default function RecognitionQueueButton({
   const pendingCount = useMemo(() => submissions.filter((item) => item.status === "pending").length, [submissions]);
 
   useEffect(() => {
-    if (pendingCount <= 0) return;
+    const pending = submissions.filter((item) => item.status === "pending");
+    if (pending.length === 0) return;
     const timer = window.setTimeout(() => setOpen(true), 0);
     return () => window.clearTimeout(timer);
-  }, [pendingCount]);
+  }, [submissions]);
 
   useEffect(() => {
     if (!open) return;

@@ -7,6 +7,7 @@ type SendComplimentEmailParams = {
   toEmail: string | string[];
   recipientName: string;
   recipientDisplayName?: string;
+  recipientDisplayNames?: string[];
   recognizedByName: string;
   comment: string;
   coreValues: string[];
@@ -26,6 +27,7 @@ export class EmailService {
     toEmail,
     recipientName,
     recipientDisplayName,
+    recipientDisplayNames,
     recognizedByName,
     comment,
     coreValues,
@@ -90,7 +92,7 @@ export class EmailService {
       to: targetRecipients,
       cc: ccRecipients,
       subject: "Compliment",
-      html: EmailService.buildHtml(recipientDisplayName || recipientName, cardLanguage),
+      html: EmailService.buildHtml(recipientDisplayName || recipientName, cardLanguage, recipientDisplayNames),
       attachments: [
         {
           filename: "compliment-card.png",
@@ -123,12 +125,29 @@ export class EmailService {
     return value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character] || character);
   }
 
-  private static buildHtml(recipientDisplayName: string, cardLanguage: CardLanguage) {
+  private static buildHtml(recipientDisplayName: string, cardLanguage: CardLanguage, recipientDisplayNames?: string[]) {
     const isThai = cardLanguage === "th";
-    const heading = isThai ? "คุณได้รับบัตรส่งต่อคุณค่าใบใหม่!" : "You’ve received a recognition card!";
+    const heading = isThai ? "คุณได้รับบัตรส่งต่อคุณค่า !" : "You've received a recognition card!";
     const intro = isThai ? "ทีมของเราขอร่วมชื่นชม" : "Our team is celebrating";
     const note = isThai ? "ขอบคุณที่ร่วมสร้างสิ่งดี ๆ ให้เกิดขึ้นในทีม" : "Thank you for making a positive difference to the team.";
-    const safeRecipientName = EmailService.escapeHtml(recipientDisplayName);
+
+    let namesHtml: string;
+    if (recipientDisplayNames && recipientDisplayNames.length > 0) {
+      const rows: string[] = [];
+      for (let i = 0; i < recipientDisplayNames.length; i += 2) {
+        const name1 = EmailService.escapeHtml(recipientDisplayNames[i]);
+        const name2 = i + 1 < recipientDisplayNames.length ? EmailService.escapeHtml(recipientDisplayNames[i + 1]) : "";
+        const col2 = name2
+          ? `<td style="width:50%;padding:6px 8px;text-align:start;color:#0f766e;font-size:17px;font-weight:700;line-height:1.4;">${name2}</td>`
+          : '<td style="width:50%;"></td>';
+        rows.push(`<tr><td style="width:50%;padding:6px 8px;text-align:start;color:#0f766e;font-size:17px;font-weight:700;line-height:1.4;">${name1}</td>${col2}</tr>`);
+      }
+      namesHtml = `<table style="margin:0 auto;border-collapse:collapse;"><tbody>${rows.join("")}</tbody></table>`;
+    } else {
+      const safeName = EmailService.escapeHtml(recipientDisplayName);
+      namesHtml = `<p style="margin:0;color:#0f766e;font-size:25px;font-weight:700;line-height:1.4;">${safeName}</p>`;
+    }
+
     return `
       <div style="margin:0;background:#f0fdfa;padding:32px 12px;font-family:Arial,'Noto Sans Thai',sans-serif;color:#0f172a;">
         <div style="max-width:760px;margin:0 auto;overflow:hidden;border:1px solid #f3d37a;border-radius:24px;background:#fff;box-shadow:0 12px 32px rgba(15,118,110,.12);">
@@ -137,7 +156,7 @@ export class EmailService {
             <div style="display:inline-block;margin-bottom:14px;border-radius:999px;background:#ccfbf1;padding:7px 14px;color:#115e59;font-size:12px;font-weight:700;letter-spacing:1.5px;">TECKBEEHANG RECOGNITION</div>
             <h1 style="margin:0;color:#134e4a;font-size:28px;line-height:1.35;">${heading}</h1>
             <p style="margin:14px 0 8px;color:#64748b;font-size:16px;">${intro}</p>
-            <p style="margin:0;color:#0f766e;font-size:25px;font-weight:700;line-height:1.4;">${safeRecipientName}</p>
+            ${namesHtml}
           </div>
           <div style="padding:18px 24px;text-align:center;">
             <img src="cid:recognitionCard" alt="Recognition Card" width="660" style="display:block;width:660px;max-width:100%;height:auto;margin:0 auto;border-radius:16px;box-shadow:0 8px 24px rgba(15,23,42,.14);" />

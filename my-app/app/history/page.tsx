@@ -134,7 +134,7 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
             <Card bordered={false} padding="xl" shadow="xl" className="app-surface">
               <HistoryHeader totalRecipients={items.length} />
               <div className="mb-4 flex flex-wrap justify-end gap-2">
-                <Button variant="secondary" icon={<FileText className="h-4 w-4" />} disabled={!items.length} onClick={() => downloadHistoryCsv(items)}>{lang === "th" ? "ส่งออก CSV" : "Export CSV"}</Button>
+                <Button variant="secondary" icon={<FileText className="h-4 w-4" />} disabled={!items.length} onClick={() => downloadHistoryCsv(items)}>{lang === "th" ? "ส่งออก Excel" : "Export Excel"}</Button>
                 <Button icon={<FileText className="h-4 w-4" />} disabled={!items.length} onClick={() => downloadHistoryPdf(items)}>{lang === "th" ? "ส่งออก PDF" : "Export PDF"}</Button>
                 {/* {JSON.stringify("items")}
                 {JSON.stringify(items)} */}
@@ -158,7 +158,7 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
                   </div>
                 </div>
                 <div className="mt-5">
-                  <div className="mb-2 flex items-center justify-between"><p className="text-base font-semibold text-slate-700">{lang === "th" ? `กรองตามผู้รับ · เลือกแล้ว ${selectedPeople.length} คน` : `Filter by people · ${selectedPeople.length} selected`}</p>{selectedPeople.length > 0 && <button type="button" onClick={() => this.setState({ selectedPeople: [] })} className="text-sm font-semibold text-rose-600">{lang === "th" ? "ล้าง" : "Clear"}</button>}</div>
+                  <div className="mb-2 flex items-center justify-between"><p className="text-base font-semibold text-slate-700">{lang === "th" ? `กรองตามผู้รับ · เลือกแล้ว ${selectedPeople.length} คน` : `Filter by recipients · ${selectedPeople.length} selected`}</p>{selectedPeople.length > 0 && <button type="button" onClick={() => this.setState({ selectedPeople: [] })} className="text-sm font-semibold text-rose-600">{lang === "th" ? "ล้าง" : "Clear"}</button>}</div>
                   {selectedPeople.length > 0 && (
                     <div className="mb-3 flex flex-wrap gap-2">
                       {selectedPeople.map((personId) => {

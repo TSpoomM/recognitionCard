@@ -47,7 +47,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
       isLoadingUsers: true,
       selectedUserIds: [],
       selectedTypes: [],
-      selectedCardLanguage: "th",
+      selectedCardLanguage: 'th',
       comment: "",
       searchQuery: "",
       selectedBranch: "",
@@ -144,7 +144,8 @@ export default class Home extends Component<Record<string, never>, PageState> {
   }
 
   componentDidMount() {
-    this.setState({ lang: getInitialLanguage() });
+    const initialLang = getInitialLanguage();
+    this.setState({ lang: initialLang, selectedCardLanguage: initialLang });
     this.setState({ currentUserId: getClientCurrentUserId() });
     this.loadUsers();
     this.setState({
@@ -291,7 +292,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
       currentStep: 1,
       selectedUserIds: [],
       selectedTypes: [],
-      selectedCardLanguage: "th",
+      selectedCardLanguage: this.state.lang,
       comment: "",
       searchQuery: "",
       selectedBranch: "",
@@ -400,7 +401,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
         currentStep: 1,
         selectedUserIds: [],
         selectedTypes: [],
-        selectedCardLanguage: "th",
+        selectedCardLanguage: this.state.lang,
         comment: "",
         searchQuery: "",
         editingId: null,
@@ -416,7 +417,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
       currentStep: 1,
       selectedUserIds: [],
       selectedTypes: [],
-      selectedCardLanguage: "th",
+      selectedCardLanguage: this.state.lang,
       comment: "",
       searchQuery: "",
       editingId: null,
@@ -471,7 +472,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
 
   private handleSetLang = (lang: Language) => {
     persistLanguage(lang);
-    this.setState({ lang });
+    this.setState({ lang, selectedCardLanguage: lang });
   };
 
   private handleCardLanguageChange = (selectedCardLanguage: CardLanguage) => {
@@ -484,8 +485,8 @@ export default class Home extends Component<Record<string, never>, PageState> {
     const options: { value: CardLanguage; title: string; description: string }[] = [
       {
         value: "th",
-        title: "ภาษาไทย",
-        description: "ส่งรูปบัตรส่งต่อคุณค่าเป็นภาษาไทย",
+        title: isThai ? "ภาษาไทย" : "Thai",
+        description: isThai ? "ส่งรูปบัตรส่งต่อคุณค่าเป็นภาษาไทย" : "Send the recognition card image in Thai.",
       },
       {
         value: "en",

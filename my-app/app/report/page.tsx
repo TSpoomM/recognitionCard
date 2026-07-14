@@ -393,7 +393,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                   { label: reportLabels.results, value: displayRows.length.toLocaleString(), helper: `${totalRows.toLocaleString()} ${reportLabels.allRows}`, icon: FileText },
                   { label: reportLabels.recipients, value: visibleRecipientCount.toLocaleString(), helper: `${(data?.employees.length ?? 0).toLocaleString()} ${reportLabels.recipients}`, icon: Users },
                   { label: reportLabels.branches, value: visibleBranchCount.toLocaleString(), helper: `${data?.branches.length ?? 0} ${reportLabels.branches}`, icon: MapPin },
-                  { label: reportLabels.year, value: sortedSelectedYears.length ? sortedSelectedYears.join(" • ") : reportLabels.allYears, helper: "", icon: CalendarDays },
+                  { label: reportLabels.year, value: sortedSelectedYears.length ? sortedSelectedYears.join(" • ") : reportLabels.allYears, helper: `${data?.years.length ?? 0} ${reportLabels.year}`, icon: CalendarDays },
                   // { label: reportLabels.year, value: selectedYears.length ? selectedYears.join(", ") : reportLabels.allYears, helper: `${activeFilterCount} ${reportLabels.activeFilters}`, icon: CalendarDays },
                 ].map((item) => {
                   const Icon = item.icon;
@@ -408,7 +408,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                           <Icon className="h-5 w-5" />
                         </span>
                       </div>
-                      {item.helper && <p className="mt-3 text-base text-slate-500">จาก {item.helper}</p>}
+                      {item.helper && <p className="mt-3 text-base text-slate-500">{this.t.reportFrom} {item.helper}</p>}
                     </div>
                   );
                 })}
