@@ -5,6 +5,7 @@ import { LanguageContext, getInitialLanguage } from "../context/LanguageContext"
 import { TRANSLATIONS, Language } from "../constants/translations";
 import { buildCurrentUserHref, getClientCurrentUserId } from "../lib/currentUser";
 import { reportAccessClient } from "../lib/reportAccessClient";
+import { logRecognitionAction } from "../lib/recognitionLog";
 import { COMMENT_TYPE_META, COMMENT_TYPES } from "../types/commentType";
 import Navbar from "../components/ui/Navbar";
 import { Users, Heart, MessageSquare, Languages, Clock, History, Star, Lightbulb, Sparkles, CheckCircle, ArrowRight, BarChart3, MousePointerClick, Send, Filter, Download, Search, Pencil, Trash2, X, CalendarDays, FileText } from "lucide-react";
@@ -38,6 +39,7 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
       lang: getInitialLanguage(),
       currentUserId,
     });
+    logRecognitionAction("GuidePage", currentUserId);
     this.loadAdminAccess(currentUserId);
     this.updateActiveGuideSection();
     window.addEventListener("scroll", this.updateActiveGuideSection, { passive: true });

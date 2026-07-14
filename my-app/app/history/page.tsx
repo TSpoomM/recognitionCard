@@ -13,6 +13,7 @@ import { getInitialLanguage, LanguageContext, persistLanguage } from "../context
 import Button from "../components/ui/Button";
 import { FileText, Search } from "lucide-react";
 import { downloadHistoryCsv, downloadHistoryPdf } from "../lib/historyExport";
+import { logRecognitionAction } from "../lib/recognitionLog";
 
 type HistoryPageState = {
   lang: Language;
@@ -134,8 +135,8 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
             <Card bordered={false} padding="xl" shadow="xl" className="app-surface">
               <HistoryHeader totalRecipients={items.length} />
               <div className="mb-4 flex flex-wrap justify-end gap-2">
-                <Button variant="secondary" icon={<FileText className="h-4 w-4" />} disabled={!items.length} onClick={() => downloadHistoryCsv(items)}>{lang === "th" ? "ส่งออก Excel" : "Export Excel"}</Button>
-                <Button icon={<FileText className="h-4 w-4" />} disabled={!items.length} onClick={() => downloadHistoryPdf(items)}>{lang === "th" ? "ส่งออก PDF" : "Export PDF"}</Button>
+                <Button variant="secondary" icon={<FileText className="h-4 w-4" />} disabled={!items.length} onClick={() => { logRecognitionAction("HistoryPage_ExportExcel", currentUserId); downloadHistoryCsv(items); }}>{lang === "th" ? "ส่งออก Excel" : "Export Excel"}</Button>
+                <Button icon={<FileText className="h-4 w-4" />} disabled={!items.length} onClick={() => { logRecognitionAction("HistoryPage_ExportPDF", currentUserId); downloadHistoryPdf(items); }}>{lang === "th" ? "ส่งออก PDF" : "Export PDF"}</Button>
                 {/* {JSON.stringify("items")}
                 {JSON.stringify(items)} */}
               </div>
@@ -178,6 +179,7 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
                 </div>
               </section>
               <HistoryList error={error} isLoading={isLoading} items={items} onForward={(item) => {
+                logRecognitionAction("HistoryPage_Forward", currentUserId);
                 window.sessionStorage.setItem("recognition-forward-draft", JSON.stringify({ comment: item.comment, coreValues: item.coreValues, cardLanguage: "th" }));
                 window.location.href = "/";
               }} />

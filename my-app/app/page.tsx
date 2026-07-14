@@ -21,6 +21,7 @@ import Navbar from "./components/ui/Navbar";
 import { RecognitionEngine } from "./lib/RecognitionEngine";
 import { getClientCurrentUserId, isSameUserId } from "./lib/currentUser";
 import { STAR_COMMENT_MAX_LENGTH, STAR_COMMENT_MIN_LENGTH, STAR_SECTION_MIN_LENGTH } from "./constants/recognitionFlow";
+import { logRecognitionAction } from "./lib/recognitionLog";
 
 type PageState = HomeState & { lang: Language };
 type StarSectionKey = "s" | "t" | "a" | "r";
@@ -145,8 +146,9 @@ export default class Home extends Component<Record<string, never>, PageState> {
 
   componentDidMount() {
     const initialLang = getInitialLanguage();
-    this.setState({ lang: initialLang, selectedCardLanguage: initialLang });
-    this.setState({ currentUserId: getClientCurrentUserId() });
+    const currentUserId = getClientCurrentUserId();
+    this.setState({ lang: initialLang, selectedCardLanguage: initialLang, currentUserId });
+    logRecognitionAction("step1", currentUserId);
     this.loadUsers();
     this.setState({
       pendingSubmissions: RecognitionEngine.loadSubmissions(),
@@ -333,16 +335,18 @@ export default class Home extends Component<Record<string, never>, PageState> {
     if (currentStep === 1 && !this.validateStep(1)) return;
     if (currentStep === 2 && !this.validateStep(2)) return;
 
-    this.setState((state) => ({
-      currentStep: Math.min(4, state.currentStep + 1),
-    }));
+    const nextStep = Math.min(4, currentStep + 1);
+    this.setState({ currentStep: nextStep });
+    logRecognitionAction(`step${nextStep}`, this.state.currentUserId);
   };
 
   private handlePrevStep = () => {
+    const previousStep = Math.max(1, this.state.currentStep - 1);
     this.setState({
       formError: "",
-      currentStep: Math.max(1, this.state.currentStep - 1),
+      currentStep: previousStep,
     });
+    logRecognitionAction(`step${previousStep}`, this.state.currentUserId);
   };
 
   private submitRecognition = () => {
@@ -411,6 +415,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
     }
 
     const newSubmission = RecognitionEngine.createPendingSubmission(this.selectedUsers, selectedTypes, comment, selectedCardLanguage);
+    logRecognitionAction("sendRecog", currentUserId);
     this.persistSubmissions([newSubmission, ...pendingSubmissions]);
     this.setState({
       currentStep: 1,
@@ -430,6 +435,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
   };
 
   private handleEditPending = (submission: PendingSubmission) => {
+    logRecognitionAction("editRecog", this.state.currentUserId);
     this.setState({
       selectedUserIds: submission.users.map((user) => user.user_id),
       selectedTypes: submission.types,
@@ -444,6 +450,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
   };
 
   private handleDeletePending = (submissionId: string) => {
+    logRecognitionAction("deleteRecog", this.state.currentUserId);
     const next = this.state.pendingSubmissions.filter((item) => item.id !== submissionId);
     this.persistSubmissions(next);
 
@@ -465,6 +472,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
 
     const submission = pendingSubmissions.find((item) => item.id === submissionId);
     if (submission) {
+      logRecognitionAction("confirmRecog", this.state.currentUserId);
       this.sendSubmission(submission);
     }
   };

@@ -2,6 +2,7 @@
 
 import { useLanguage } from '../../context/LanguageContext';
 import { Language } from '../../constants/translations';
+import { logRecognitionAction } from '../../lib/recognitionLog';
 
 export default function LanguageSwitcher() {
   const { lang, setLang } = useLanguage();
@@ -12,7 +13,10 @@ export default function LanguageSwitcher() {
         <button
           key={code}
           type="button"
-          onClick={() => setLang(code)}
+          onClick={() => {
+            if (code !== lang) logRecognitionAction(code === 'en' ? 'switchTo_EN' : 'switchTo_TH');
+            setLang(code);
+          }}
           className={`inline-flex h-10 min-w-[3.25rem] items-center justify-center rounded-full px-4 text-base font-semibold transition-all duration-200 ${lang === code
             ? 'bg-teal-800 text-white shadow-sm'
             : 'text-slate-500 hover:text-teal-900'

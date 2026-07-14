@@ -9,6 +9,7 @@ import Modal from "../components/ui/Modal";
 import { getClientCurrentUserId } from "../lib/currentUser";
 import { reportAccessClient } from "../lib/reportAccessClient";
 import { downloadReportCsv, downloadReportPdf } from "../lib/reportExport";
+import { logRecognitionAction } from "../lib/recognitionLog";
 import { ReportData, ReportEmployee, ReportRow } from "../types/report";
 import { COMMENT_TYPE_META, COMMENT_TYPES, CommentType } from "../types/commentType";
 import { Language, TRANSLATIONS } from "../constants/translations";
@@ -399,7 +400,10 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                     className="h-12 rounded-full"
                     icon={<FileText className="h-5 w-5" />}
                     disabled={displayRows.length === 0}
-                    onClick={() => downloadReportCsv(exportRows)}
+                    onClick={() => {
+                      logRecognitionAction("ReportPage_ExportExcel", currentUserId);
+                      downloadReportCsv(exportRows);
+                    }}
                   >
                     {this.t.reportExportCsv}
                   </Button>
@@ -408,6 +412,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                     icon={<FileText className="h-5 w-5" />}
                     disabled={displayRows.length === 0}
                     onClick={() => {
+                      logRecognitionAction("ReportPage_ExportPDF", currentUserId);
                       downloadReportPdf(exportRows);
                       // console.log("export rows", exportRows);
 
