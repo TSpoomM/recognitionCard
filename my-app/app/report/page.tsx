@@ -10,6 +10,12 @@ import { getClientCurrentUserId } from "../lib/currentUser";
 import { reportAccessClient } from "../lib/reportAccessClient";
 import { downloadReportCsv, downloadReportPdf } from "../lib/reportExport";
 import { logRecognitionAction } from "../lib/recognitionLog";
+import {
+  getCoreValueDisplayLabel,
+  normalizeCoreValueCode,
+  sortCoreValues,
+  toggleArrayItem,
+} from "../lib/reportUtils";
 import { ReportData, ReportEmployee, ReportRow } from "../types/report";
 import { COMMENT_TYPE_META, COMMENT_TYPES, CommentType } from "../types/commentType";
 import { Language, TRANSLATIONS } from "../constants/translations";
@@ -34,33 +40,6 @@ type GroupedReportRow = Omit<ReportRow, "coreValue" | "coreValueLabel"> & {
   coreValues: string[];
   coreValueLabels: string[];
 };
-
-function normalizeCoreValueCode(value: string) {
-  const raw = value.trim().toUpperCase();
-  const beforeParen = raw.replace(/\(.*\)$/, "").trim();
-  const candidate = beforeParen.replace(/\s+/g, "_").replace(/[^A-Z0-9_]/g, "_").replace(/^_+|_+$/g, "");
-  if (COMMENT_TYPES.includes(candidate as CommentType)) return candidate;
-  const fallback = COMMENT_TYPES.find((type) => beforeParen.includes(type));
-  return fallback || candidate;
-}
-
-function getCoreValueDisplayLabel(value: string) {
-  const code = normalizeCoreValueCode(value);
-  const meta = COMMENT_TYPE_META[code as CommentType];
-  return meta ? meta.en : value.trim();
-}
-
-function sortReportCoreValues(values: string[]) {
-  return [...values].sort((a, b) => {
-    const indexA = COMMENT_TYPES.indexOf(a.toUpperCase() as CommentType);
-    const indexB = COMMENT_TYPES.indexOf(b.toUpperCase() as CommentType);
-
-    if (indexA === -1 && indexB === -1) return 0;
-    if (indexA === -1) return 1;
-    if (indexB === -1) return -1;
-    return indexA - indexB;
-  });
-}
 
 export default class ReportPage extends Component<Record<string, never>, ReportPageState> {
   private cancelled = false;
@@ -88,8 +67,10 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
     return TRANSLATIONS[this.state.lang];
   }
   componentDidMount() {
-    this.setState({ lang: getInitialLanguage() });
-    this.setState({ currentUserId: getClientCurrentUserId() });
+    this.setState({
+      lang: getInitialLanguage(),
+      currentUserId: getClientCurrentUserId(),
+    });
     this.loadAccess();
   }
   componentWillUnmount() {
@@ -147,7 +128,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
 
     const groupedRows = Array.from(grouped.values()).map((row) => ({
       ...row,
-      coreValues: sortReportCoreValues(row.coreValues),
+      coreValues: sortCoreValues(row.coreValues),
       coreValueLabels: row.coreValueLabels,
     }));
 
@@ -221,23 +202,17 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
   }
   private togglePerson = (personId: string) => {
     this.setState((state) => ({
-      selectedPeople: state.selectedPeople.includes(personId)
-        ? state.selectedPeople.filter((id) => id !== personId)
-        : [...state.selectedPeople, personId],
+      selectedPeople: toggleArrayItem(state.selectedPeople, personId),
     }));
   };
   private toggleBranch = (branch: string) => {
     this.setState((state) => ({
-      selectedBranches: state.selectedBranches.includes(branch)
-        ? state.selectedBranches.filter((value) => value !== branch)
-        : [...state.selectedBranches, branch],
+      selectedBranches: toggleArrayItem(state.selectedBranches, branch),
     }));
   };
   private toggleCoreValue = (value: string) => {
     this.setState((state) => ({
-      selectedCoreValues: state.selectedCoreValues.includes(value)
-        ? state.selectedCoreValues.filter((item) => item !== value)
-        : [...state.selectedCoreValues, value],
+      selectedCoreValues: toggleArrayItem(state.selectedCoreValues, value),
     }));
   };
   private clearFilters = () => {
@@ -251,9 +226,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
   };
   private toggleRowExpanded = (rowId: string) => {
     this.setState((state) => ({
-      expandedRowIds: state.expandedRowIds.includes(rowId)
-        ? state.expandedRowIds.filter((id) => id !== rowId)
-        : [...state.expandedRowIds, rowId],
+      expandedRowIds: toggleArrayItem(state.expandedRowIds, rowId),
     }));
   };
   private formatDateParts(value: string | null) {

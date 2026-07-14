@@ -3,7 +3,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { registerThaiFont } from "./thaiFont";
 
-function formatDate(value: string | null) {
+function formatDateTime(value: string | Date | null) {
   if (!value) return "";
   return new Date(value).toLocaleString("en-GB", {
     year: "numeric",
@@ -32,7 +32,7 @@ export function downloadReportPdf(rows: ReportRow[]) {
   // A4 portrait: 210mm wide. Narrower than landscape, so column
   // proportions below are tuned specifically for this width.
   // console.log("item rows: ", rows);
-  
+
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
   // Embed the Thai-capable font and make it the default for the whole document.
@@ -43,13 +43,7 @@ export function downloadReportPdf(rows: ReportRow[]) {
   const pageHeight = doc.internal.pageSize.getHeight();
   const marginX = 12;
 
-  const generatedAt = new Date().toLocaleString("th-TH", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const generatedAt = formatDateTime(new Date());
 
   const drawHeader = () => {
     doc.setFont(FONT, "bold");
@@ -116,7 +110,7 @@ export function downloadReportPdf(rows: ReportRow[]) {
       (row.coreValueLabel || "-").replace(/,\s*/g, "\n\n"),
       row.comment,
       row.senderName,
-      formatDate(row.createdAt),
+      formatDateTime(row.createdAt),
     ]),
     theme: "grid",
     tableWidth: usableWidth,
@@ -187,7 +181,7 @@ export function downloadReportPdf(rows: ReportRow[]) {
 
   autoTable(doc, {
     startY: 47,
-    head: [["Employee", "Recognitions Received"]],
+    head: [["Recipients", "Recognitions Received"]],
     body: summary.map((item) => [item.personName, String(item.recognitionCount)]),
     theme: "grid",
     tableWidth: usableWidth,
@@ -232,7 +226,7 @@ function csvEscape(value: string) {
 }
 
 export function downloadReportCsv(rows: ReportRow[]) {
-  const headers = ["Employee", "Branch", "Core Value", "Comment", "Given By", "Date"];
+  const headers = ["Recipients", "Branch", "Core Value", "Comment", "Given By", "Date"];
   const lines = [headers.join(",")];
 
   for (const row of rows) {
@@ -243,7 +237,7 @@ export function downloadReportCsv(rows: ReportRow[]) {
         row.coreValueLabel,
         row.comment,
         row.senderName,
-        formatDate(row.createdAt),
+        formatDateTime(row.createdAt),
       ]
         .map((value) => csvEscape(String(value)))
         .join(",")

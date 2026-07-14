@@ -1,5 +1,6 @@
 import { pool } from "@/app/lib/db";
 import { getRequestCurrentUserId } from "@/app/lib/currentUser";
+import { parseCoreValues, splitName } from "@/app/lib/reportUtils";
 import { NextResponse } from "next/server";
 import { RowDataPacket } from "mysql2";
 
@@ -17,14 +18,6 @@ type HistoryRow = RowDataPacket & {
   recipient_branch_name_en: string | null;
   sender_name: string | null;
 };
-
-function splitName(fullName: string) {
-  const [firstName = "", ...rest] = fullName.trim().split(/\s+/);
-  return {
-    firstName: firstName || fullName,
-    lastName: rest.join(" "),
-  };
-}
 
 export async function GET(request: Request) {
   try {
@@ -87,9 +80,7 @@ export async function GET(request: Request) {
         },
         senderName: row.sender_name?.trim() || String(currentUserId),
         comment: row.diary_comment || "",
-        coreValues: row.diary_corevalue
-          ? row.diary_corevalue.split(",").map((value) => value.trim()).filter(Boolean)
-          : [],
+        coreValues: parseCoreValues(row.diary_corevalue),
         createdDate: createdDate ? createdDate.toISOString() : null,
         year: createdDate ? createdDate.getFullYear() : null,
       };
