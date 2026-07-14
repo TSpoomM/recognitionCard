@@ -287,7 +287,6 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
       selectedCoreValues,
       expandedRowIds,
     } = this.state;
-    const rows = this.filteredRows;
     const displayRows = this.groupedRows;
     const exportRows = displayRows.map((row) => ({
       ...row,
@@ -295,7 +294,6 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
       coreValueLabel: row.coreValueLabels.join(", "),
     }));
     const employees = this.filteredEmployees;
-    const totalRows = data?.rows.length ?? 0;
     const activeFilterCount = selectedBranches.length + selectedCoreValues.length + selectedPeople.length + selectedYears.length;
     const visibleRecipientCount = new Set(
       displayRows.map((row) => row.personId).filter(Boolean)
@@ -390,7 +388,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
               </div>
               <div className="grid gap-3 px-6 py-5 sm:grid-cols-2 sm:px-8 xl:grid-cols-4">
                 {[
-                  { label: reportLabels.results, value: displayRows.length.toLocaleString(), helper: `${totalRows.toLocaleString()} ${reportLabels.allRows}`, icon: FileText },
+                  { label: reportLabels.results, value: displayRows.length.toLocaleString(), helper: `${displayRows.length.toLocaleString()} ${reportLabels.allRows}`, icon: FileText },
                   { label: reportLabels.recipients, value: visibleRecipientCount.toLocaleString(), helper: `${(data?.employees.length ?? 0).toLocaleString()} ${reportLabels.recipients}`, icon: Users },
                   { label: reportLabels.branches, value: visibleBranchCount.toLocaleString(), helper: `${data?.branches.length ?? 0} ${reportLabels.branches}`, icon: MapPin },
                   { label: reportLabels.year, value: sortedSelectedYears.length ? sortedSelectedYears.join(" • ") : reportLabels.allYears, helper: `${data?.years.length ?? 0} ${reportLabels.year}`, icon: CalendarDays },
@@ -599,7 +597,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
                         <div className="flex flex-wrap items-center gap-2">
                           <h2 className="text-3xl font-semibold text-slate-900">{reportLabels.results}</h2>
                           <span className="app-chip rounded-full px-3 py-1 text-lg font-semibold">
-                            {rows.length} {reportLabels.rows}
+                            {displayRows.length} {reportLabels.rows}
                           </span>
                         </div>
                         <p className="mt-1 text-base text-slate-500">

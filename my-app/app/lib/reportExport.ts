@@ -5,7 +5,7 @@ import { registerThaiFont } from "./thaiFont";
 
 function formatDate(value: string | null) {
   if (!value) return "";
-  return new Date(value).toLocaleString("th-TH", {
+  return new Date(value).toLocaleString("en-GB", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -172,6 +172,51 @@ export function downloadReportPdf(rows: ReportRow[]) {
     },
   });
 
+  const summary = buildRecognitionSummary(rows);
+  doc.addPage();
+  drawHeader();
+
+  doc.setFont(FONT, "bold");
+  doc.setFontSize(14);
+  doc.setTextColor(...COLORS.ink);
+  doc.text("Recognition Summary", marginX, 36);
+  doc.setFont(FONT, "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...COLORS.subtle);
+  doc.text("Total recognitions received by each employee", marginX, 42);
+
+  autoTable(doc, {
+    startY: 47,
+    head: [["Employee", "Recognitions Received"]],
+    body: summary.map((item) => [item.personName, String(item.recognitionCount)]),
+    theme: "grid",
+    tableWidth: usableWidth,
+    styles: {
+      font: FONT,
+      fontSize: 9,
+      cellPadding: { top: 2.5, bottom: 2.5, left: 2, right: 2 },
+      lineColor: COLORS.line,
+      lineWidth: 0.2,
+      textColor: COLORS.ink,
+    },
+    headStyles: {
+      font: FONT,
+      fontSize: 13,
+      cellPadding: { top: 3, bottom: 3, left: 2, right: 2 },
+      fillColor: COLORS.headerBg,
+      textColor: COLORS.headerText,
+      fontStyle: "bold",
+    },
+    alternateRowStyles: { fillColor: COLORS.stripe },
+    columnStyles: {
+      0: { cellWidth: usableWidth * 0.75 },
+      1: { cellWidth: usableWidth * 0.25, halign: "center", fontStyle: "bold" },
+    },
+    margin: { left: marginX, right: marginX, top: 31, bottom: 16 },
+    didParseCell: (data) => { data.cell.styles.font = FONT; },
+    didDrawPage: (data) => { if (data.pageNumber > 1) drawHeader(); },
+  });
+
   const pageCount = doc.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
@@ -205,6 +250,16 @@ export function downloadReportCsv(rows: ReportRow[]) {
     );
   }
 
+  const summary = buildRecognitionSummary(rows);
+  lines.push("", "Recognition Summary", "Employee,Recognitions Received");
+  for (const item of summary) {
+    lines.push(
+      [item.personName, item.recognitionCount]
+        .map((value) => csvEscape(String(value)))
+        .join(",")
+    );
+  }
+
   const blob = new Blob(["\uFEFF" + lines.join("\n")], {
     type: "text/csv;charset=utf-8;",
   });
@@ -216,4 +271,28 @@ export function downloadReportCsv(rows: ReportRow[]) {
   anchor.click();
   anchor.remove();
   URL.revokeObjectURL(url);
+}
+
+type RecognitionSummary = {
+  personName: string;
+  recognitionCount: number;
+};
+
+function buildRecognitionSummary(rows: ReportRow[]): RecognitionSummary[] {
+  const counts = new Map<string, RecognitionSummary>();
+
+  for (const row of rows) {
+    const key = row.personId || row.personName.trim().toLocaleLowerCase();
+    const current = counts.get(key);
+
+    if (current) {
+      current.recognitionCount += 1;
+    } else {
+      counts.set(key, { personName: row.personName, recognitionCount: 1 });
+    }
+  }
+
+  return [...counts.values()].sort(
+    (a, b) => b.recognitionCount - a.recognitionCount || a.personName.localeCompare(b.personName, "en")
+  );
 }
