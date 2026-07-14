@@ -95,9 +95,12 @@ export default class RecognitionCommentStep extends Component<RecognitionComment
 
   private handleChange = (section: keyof StarSections) => (event: ChangeEvent<HTMLTextAreaElement>) => {
     const nextSections = { ...this.state, [section]: event.target.value };
-    const nextComment = this.buildComment(nextSections);
+    const nextContentLength = (Object.keys(nextSections) as (keyof StarSections)[])
+      .reduce((total, key) => total + nextSections[key].trim().length, 0);
 
-    if (nextComment.trim().length > this.props.maxLength) return;
+    if (nextContentLength > this.props.maxLength) return;
+
+    const nextComment = this.buildComment(nextSections);
 
     this.lastEmittedComment = nextComment;
     this.setState(nextSections);

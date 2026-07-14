@@ -283,7 +283,6 @@ export default class Home extends Component<Record<string, never>, PageState> {
   };
 
   private handleCommentChange = (comment: string) => {
-    if (comment.trim().length > STAR_COMMENT_MAX_LENGTH) return;
     this.setState({ comment, formError: "", formSuccess: "" });
   };
 
