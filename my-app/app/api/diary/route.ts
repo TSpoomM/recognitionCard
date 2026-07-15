@@ -15,7 +15,10 @@ type EmployeeEmailRow = RowDataPacket & {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { diary_emp_id, diary_emp_ids, diary_comment, diary_corevalue } = body;
+    const { diary_emp_id, diary_emp_ids, diary_comment, diary_preview, diary_corevalue } = body;
+    const previewComment = typeof diary_preview === "string" && diary_preview.trim()
+      ? diary_preview.trim()
+      : diary_comment;
     const createdBy = await getRequestCurrentUserId(request, body);
     const cardLanguage: CardLanguage = body.cardLanguage === "th" ? "th" : "en";
     const recipientIds = Array.from(
@@ -44,10 +47,10 @@ export async function POST(request: Request) {
       recipientIds.map(async (recipientId) => {
         const [result] = await pool.query<ResultSetHeader>(
           `
-          INSERT INTO tb_diary_list (diary_emp_id, diary_comment, createdBy, createdDate, diary_corevalue)
-          VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?)
+          INSERT INTO tb_diary_list (diary_emp_id, diary_comment, diary_preview, createdBy, createdDate, diary_corevalue)
+          VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
           `,
-          [recipientId, diary_comment, createdBy, diary_corevalue || null]
+          [recipientId, diary_comment, previewComment, createdBy, diary_corevalue || null]
         );
         return result;
       })
@@ -121,7 +124,7 @@ export async function POST(request: Request) {
         recipientDisplayName,
         recipientDisplayNames,
         recognizedByName,
-        comment: diary_comment,
+        comment: previewComment,
         coreValues,
         cardLanguage,
       }).catch((emailErr) => {

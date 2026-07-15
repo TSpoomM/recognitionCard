@@ -2,6 +2,7 @@ import { CommentType } from "../types/commentType";
 import { PendingSubmission } from "../types/pendingSubmission";
 import { User } from "../types/user";
 import { CardLanguage } from "../types/cardLanguage";
+import type { StarSections } from "../components/features/starComment/RecognitionCommentStep";
 
 export class RecognitionEngine {
   static STORAGE_KEY = "recognition-card-submissions";
@@ -58,6 +59,7 @@ export class RecognitionEngine {
       type,
       cardLanguage,
       comment,
+      starSections: submission.starSections as StarSections | undefined,
       createdAt,
       status,
     };
@@ -86,13 +88,14 @@ export class RecognitionEngine {
     window.localStorage.setItem(this.STORAGE_KEY, JSON.stringify(submissions));
   }
 
-  static createPendingSubmission(users: User[], types: CommentType[], comment: string, cardLanguage: CardLanguage): PendingSubmission {
+  static createPendingSubmission(users: User[], types: CommentType[], comment: string, cardLanguage: CardLanguage, starSections?: StarSections): PendingSubmission {
     return {
       id: `${Date.now()}`,
       users,
       types,
       cardLanguage,
       comment,
+      starSections,
       createdAt: Date.now(),
       status: "pending",
     };

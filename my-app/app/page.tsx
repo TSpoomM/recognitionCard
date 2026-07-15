@@ -11,7 +11,7 @@ import { getInitialLanguage, LanguageContext, persistLanguage } from "./context/
 import RecognitionStepper from "./components/features/recognition/Stepper";
 import RecognitionHeader from "./components/features/recognition/RecognitionHeader";
 import RecognitionUserStep from "./components/features/userSelected/RecognitionUserStep";
-import RecognitionCommentStep from "./components/features/starComment/RecognitionCommentStep";
+import RecognitionCommentStep, { StarSections } from "./components/features/starComment/RecognitionCommentStep";
 import CoreValueSelect from "./components/features/coreValue/CoreValueSelect";
 import FormMessages from "./components/features/recognition/FormMessages";
 import FormActions from "./components/features/recognition/FormActions";
@@ -32,6 +32,14 @@ const STAR_SECTION_LABELS: Record<StarSectionKey, string> = {
   a: "Action",
   r: "Result",
 };
+const EMPTY_STAR_SECTIONS: StarSections = { s: "", t: "", a: "", r: "" };
+
+function serializeStarSections(sections?: StarSections, fallback = "") {
+  if (!sections || Object.values(sections).every((value) => !value.trim())) return fallback;
+  return (["s", "t", "a", "r"] as (keyof StarSections)[])
+    .map((key) => `${key.toUpperCase()}: ${sections[key].trim()}`)
+    .join("\n\n");
+}
 
 export default class Home extends Component<Record<string, never>, PageState> {
   private intervalId: number | null = null;
@@ -50,6 +58,8 @@ export default class Home extends Component<Record<string, never>, PageState> {
       selectedTypes: [],
       selectedCardLanguage: 'th',
       comment: "",
+      starSections: { ...EMPTY_STAR_SECTIONS },
+      previewConfirmed: false,
       searchQuery: "",
       selectedBranch: "",
       pendingSubmissions: [],
@@ -100,47 +110,16 @@ export default class Home extends Component<Record<string, never>, PageState> {
   }
 
   private get commentLength() {
-    const sections = this.starSections;
-    return (Object.keys(sections) as StarSectionKey[]).reduce((total, key) => total + sections[key].trim().length, 0);
+    return this.state.comment.trim().length;
   }
 
   private get starSections(): Record<StarSectionKey, string> {
-    const sections: Record<StarSectionKey, string> = { s: "", t: "", a: "", r: "" };
-
-    if (!this.state.comment.trim()) {
-      return sections;
-    }
-
-    const sectionMap: Record<string, StarSectionKey> = {
-      S: "s",
-      T: "t",
-      A: "a",
-      R: "r",
-    };
-    let currentSection: StarSectionKey | null = null;
-
-    this.state.comment.split(/\n/).forEach((line) => {
-      const match = line.match(/^(S|T|A|R)\s*[:\-]?\s*(.*)$/i);
-
-      if (match) {
-        const key = sectionMap[match[1].toUpperCase()];
-        if (key) {
-          sections[key] = match[2];
-          currentSection = key;
-          return;
-        }
-      }
-
-      if (currentSection) {
-        sections[currentSection] = `${sections[currentSection]}${sections[currentSection] ? "\n" : ""}${line}`;
-      }
-    });
-
-    return sections;
+    return this.state.starSections;
   }
 
   private get firstInvalidStarSection() {
     const sections = this.starSections;
+    if (this.state.previewConfirmed && Object.values(sections).every((value) => !value.trim())) return null;
     return (Object.keys(sections) as StarSectionKey[]).find((key) => sections[key].trim().length < STAR_SECTION_MIN_LENGTH) ?? null;
   }
 
@@ -183,7 +162,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
       const draft = rawDraft ? JSON.parse(rawDraft) as { comment: string; coreValues: CommentType[]; cardLanguage: CardLanguage } : null;
       if (draft) window.sessionStorage.removeItem("recognition-forward-draft");
       if (draft) {
-        this.setState({ users: result.data as User[], isLoadingUsers: false, formError: "", currentStep: 1, selectedUserIds: [], selectedTypes: draft.coreValues, comment: draft.comment, selectedCardLanguage: draft.cardLanguage });
+        this.setState({ users: result.data as User[], isLoadingUsers: false, formError: "", currentStep: 1, selectedUserIds: [], selectedTypes: draft.coreValues, comment: draft.comment, previewConfirmed: true, selectedCardLanguage: draft.cardLanguage });
       } else {
         this.setState({ users: result.data as User[], isLoadingUsers: false, formError: "" });
       }
@@ -216,7 +195,8 @@ export default class Home extends Component<Record<string, never>, PageState> {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           diary_emp_ids: submission.users.map((user) => user.user_id),
-          diary_comment: submission.comment,
+          diary_comment: serializeStarSections(submission.starSections, submission.comment),
+          diary_preview: submission.comment,
           diary_corevalue: submission.types.join(", "),
           cardLanguage: submission.cardLanguage,
           createdBy: currentUserId,
@@ -288,6 +268,10 @@ export default class Home extends Component<Record<string, never>, PageState> {
     this.setState({ comment, formError: "", formSuccess: "" });
   };
 
+  private handleStarSectionsChange = (starSections: StarSections) => {
+    this.setState({ starSections, formError: "", formSuccess: "" });
+  };
+
   private resetForm = () => {
     this.setState({
       currentStep: 1,
@@ -295,6 +279,8 @@ export default class Home extends Component<Record<string, never>, PageState> {
       selectedTypes: [],
       selectedCardLanguage: this.state.lang,
       comment: "",
+      starSections: { ...EMPTY_STAR_SECTIONS },
+      previewConfirmed: false,
       searchQuery: "",
       selectedBranch: "",
       editingId: null,
@@ -334,6 +320,17 @@ export default class Home extends Component<Record<string, never>, PageState> {
     const { currentStep } = this.state;
     if (currentStep === 1 && !this.validateStep(1)) return;
     if (currentStep === 2 && !this.validateStep(2)) return;
+    if (currentStep === 3) {
+      const invalid = this.firstInvalidStarSection;
+      if (invalid || this.commentLength < STAR_COMMENT_MIN_LENGTH) {
+        this.submitRecognition();
+        return;
+      }
+      if (!this.state.previewConfirmed) {
+        this.setState({ formError: this.state.lang === "th" ? "กรุณากดตกลงที่กล่อง Preview ก่อนดำเนินการต่อ" : "Please confirm the preview before continuing.", formSuccess: "" });
+        return;
+      }
+    }
 
     const nextStep = Math.min(4, currentStep + 1);
     this.setState({ currentStep: nextStep });
@@ -396,7 +393,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
     if (editingId) {
       const updated = pendingSubmissions.map((submission) =>
         submission.id === editingId
-          ? { ...submission, users: this.selectedUsers, types: selectedTypes, cardLanguage: selectedCardLanguage, comment, createdAt: Date.now(), status: "pending" as const }
+          ? { ...submission, users: this.selectedUsers, types: selectedTypes, cardLanguage: selectedCardLanguage, comment, starSections: this.state.starSections, createdAt: Date.now(), status: "pending" as const }
           : submission
       );
       this.persistSubmissions(updated);
@@ -406,6 +403,8 @@ export default class Home extends Component<Record<string, never>, PageState> {
         selectedTypes: [],
         selectedCardLanguage: this.state.lang,
         comment: "",
+        starSections: { ...EMPTY_STAR_SECTIONS },
+        previewConfirmed: false,
         searchQuery: "",
         editingId: null,
         formError: "",
@@ -414,7 +413,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
       return;
     }
 
-    const newSubmission = RecognitionEngine.createPendingSubmission(this.selectedUsers, selectedTypes, comment, selectedCardLanguage);
+    const newSubmission = RecognitionEngine.createPendingSubmission(this.selectedUsers, selectedTypes, comment, selectedCardLanguage, this.state.starSections);
     logRecognitionAction("sendRecog", currentUserId);
     this.persistSubmissions([newSubmission, ...pendingSubmissions]);
     this.setState({
@@ -423,6 +422,8 @@ export default class Home extends Component<Record<string, never>, PageState> {
       selectedTypes: [],
       selectedCardLanguage: this.state.lang,
       comment: "",
+      starSections: { ...EMPTY_STAR_SECTIONS },
+      previewConfirmed: false,
       searchQuery: "",
       editingId: null,
       formError: "",
@@ -441,6 +442,8 @@ export default class Home extends Component<Record<string, never>, PageState> {
       selectedTypes: submission.types,
       selectedCardLanguage: submission.cardLanguage,
       comment: submission.comment,
+      starSections: submission.starSections ?? { ...EMPTY_STAR_SECTIONS },
+      previewConfirmed: true,
       editingId: submission.id,
       formError: "",
       formSuccess: "",
@@ -591,11 +594,16 @@ export default class Home extends Component<Record<string, never>, PageState> {
           users={this.selectedUsers}
           selectedTypes={selectedTypes}
           comment={comment}
+          sections={this.state.starSections}
+          previewConfirmed={this.state.previewConfirmed}
           commentLength={this.commentLength}
           minLength={STAR_COMMENT_MIN_LENGTH}
           sectionMinLength={STAR_SECTION_MIN_LENGTH}
           maxLength={STAR_COMMENT_MAX_LENGTH}
           onCommentChange={this.handleCommentChange}
+          onSectionsChange={this.handleStarSectionsChange}
+          onPreviewConfirmed={() => this.setState({ previewConfirmed: true })}
+          onEditStar={() => this.setState({ previewConfirmed: false })}
         />
       );
     }

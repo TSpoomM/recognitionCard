@@ -8,6 +8,7 @@ type HistoryRow = RowDataPacket & {
   diary_list: number;
   diary_emp_id: string | number | null;
   diary_comment: string | null;
+  diary_preview: string | null;
   diary_corevalue: string | null;
   createdDate: Date | string | null;
   recipient_name: string | null;
@@ -36,6 +37,7 @@ export async function GET(request: Request) {
         d.diary_list,
         d.diary_emp_id,
         d.diary_comment,
+        d.diary_preview,
         d.diary_corevalue,
         d.createdDate,
         e.emp_name_en AS recipient_name,
@@ -79,7 +81,7 @@ export async function GET(request: Request) {
           branchNameEn: row.recipient_branch_name_en?.trim() || undefined,
         },
         senderName: row.sender_name?.trim() || String(currentUserId),
-        comment: row.diary_comment || "",
+        comment: row.diary_preview || row.diary_comment || "",
         coreValues: parseCoreValues(row.diary_corevalue),
         createdDate: createdDate ? createdDate.toISOString() : null,
         year: createdDate ? createdDate.getFullYear() : null,

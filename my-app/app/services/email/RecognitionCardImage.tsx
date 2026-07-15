@@ -3,7 +3,7 @@ import path from "path";
 import React from "react";
 import { renderToReadableStream } from "react-dom/server.edge";
 import puppeteer from "puppeteer";
-import { StarCommentParser, StarSection } from "./starComment";
+import { StarSection } from "./starComment";
 import { CardLanguage } from "../../types/cardLanguage";
 
 /**
@@ -305,7 +305,7 @@ const CORE_VALUES_META: CoreValueMeta[] = [
       th: {
         name: "ความซื่อสัตย์",
         // description: "ปฏิบัติด้วยความซื่อสัตย์ รับผิดชอบ และตรงต่อเวลา",
-        description: "ซื้อสัตย์ สุจริต สำนึกรับผิดชอบ และตรงต่อเวลา",
+        description: "ซื่อสัตย์ สุจริต สำนึกรับผิดชอบ และตรงต่อเวลา",
       },
     },
     circleColor: PALETTE.green1,
@@ -482,7 +482,7 @@ export class RecognitionCardImageRenderer {
           alignItems: "center",
           width: "100%",
           gap: "22px",
-          padding: compact ? "16px 36px" : "18px 36px",
+          padding: compact ? "26px 36px 16px" : "26px 36px 18px",
           backgroundImage: `linear-gradient(115deg, ${PALETTE.cream} 0%, ${PALETTE.cream} 52%, ${PALETTE.green1} 58%, ${PALETTE.darkGreen} 100%)`,
         }}
       >
@@ -506,24 +506,13 @@ export class RecognitionCardImageRenderer {
           </span>
           <div style={{ display: "flex", flexDirection: "column", margin: "3px 0" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ fontFamily: textFont, fontSize: compact ? "23px" : "24px", fontWeight: 500, color: PALETTE.green2 }}>
-                {cardLanguage === "th" ? (
-                  <>
-                    {"ขอบคุณที่คุณ "}
-                    <span style={{ fontFamily: "GreatVibes", fontSize: compact ? "26px" : "28px", fontWeight: 400, color: PALETTE.green2 }}>
-                      {"สร้างความแตกต่าง"}
-                    </span>
-                  </>
-                ) : (
-                  copy.tagline
-                )}
-              </span>
+              <span style={{ fontFamily: textFont, fontSize: compact ? "23px" : "24px", fontWeight: 500, color: PALETTE.green2 }}>{copy.tagline}</span>
               <SparkleIcon size={16} color={PALETTE.green2} />
             </div>
             <span
               style={{
                 fontFamily: textFont,
-                fontSize: compact ? "14px" : "14px",
+                fontSize: "14px",
                 fontWeight: 400,
                 color: PALETTE.textMuted,
                 lineHeight: 1.3,
@@ -594,29 +583,9 @@ export class RecognitionCardImageRenderer {
   private static computeExtraHeight(comment: string): number {
     const LEFT_COLUMN_WIDTH = CARD_WIDTH - 80 - 380; // outer padding + core-values panel
 
-    const sections = StarCommentParser.parse(comment);
-    const map = this.mapSectionsToStar(sections);
-    const hasAnyStarText = STAR_ORDER.some((k) => !!map[k]);
-
-    if (!hasAnyStarText) {
-      const boxWidth = LEFT_COLUMN_WIDTH - 56; // freeform panel padding (28px x2)
-      const lines = this.estimateLineCount(comment, boxWidth, 16);
-      const contentHeight = lines * 16 * 1.55 + 44; // line-height + vertical padding
-      const baseline = 193;
-      return Math.max(0, Math.ceil(contentHeight - baseline));
-    }
-
-    const answerBoxWidth = LEFT_COLUMN_WIDTH - 108 - 150 - 32; // badge + question col + padding
-    let totalRowsHeight = 0;
-    STAR_ORDER.forEach((letter) => {
-      const lines = this.estimateLineCount(map[letter] ?? "", answerBoxWidth, 14);
-      const contentHeight = lines * 14 * 1.4 + 24; // line-height + vertical padding
-      totalRowsHeight += Math.max(88, contentHeight);
-    });
-    totalRowsHeight += 30; // gaps between the 4 rows
-
-    const baseline = 4 * 88 + 30;
-    return Math.max(0, Math.ceil(totalRowsHeight - baseline));
+    const boxWidth = LEFT_COLUMN_WIDTH - 56;
+    const lines = this.estimateLineCount(comment, boxWidth, 16);
+    return Math.max(0, Math.ceil(lines * 16 * 1.55 + 44 - 193));
   }
 
   private static renderStarRow(letter: StarKey, text: string, cardLanguage: CardLanguage) {
@@ -712,53 +681,40 @@ export class RecognitionCardImageRenderer {
     );
   }
 
-  private static renderFreeformPanel(comment: string) {
+  private static renderFreeformPanel(comment: string, cardLanguage: CardLanguage) {
     const displayText = (comment || "").replace(/\s+/g, " ").trim();
+    const commentFont = this.getTextFont(cardLanguage);
     return (
       <div
         style={{
           display: "flex",
           flexDirection: "column",
           flex: 1,
-          justifyContent: "center",
-          backgroundColor: PALETTE.panelBg,
-          borderRadius: "10px",
-          padding: "22px 28px",
+          backgroundColor: "#ffffff",
+          border: `1px solid ${PALETTE.dashGray}`,
+          borderRadius: "18px",
+          overflow: "hidden",
+          boxShadow: "0 8px 24px rgba(12,58,34,0.07)",
         }}
       >
-        <span
-          style={{
-            fontFamily: "Roboto",
-            fontSize: "16px",
-            fontStyle: "normal",
-            color: PALETTE.textDark,
-            lineHeight: 1.55,
-            textAlign: "center",
-            wordBreak: "break-word",
-          }}
-        >
-          {displayText || " "}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "14px 20px", backgroundImage: `linear-gradient(90deg, ${PALETTE.darkGreen}, ${PALETTE.green2})`, color: "#ffffff" }}>
+          <div style={{ display: "flex", width: "32px", height: "32px", alignItems: "center", justifyContent: "center", borderRadius: "10px", backgroundColor: "rgba(255,255,255,.16)" }}><SparkleIcon size={18} /></div>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontFamily: commentFont, fontSize: "17px", fontWeight: 600 }}>{cardLanguage === "th" ? "ข้อความชื่นชม" : "Recognition Message"}</span>
+            <span style={{ fontFamily: commentFont, fontSize: "12px", color: "#d7e8d8" }}>{cardLanguage === "th" ? "คำขอบคุณจากใจ" : "A note of appreciation"}</span>
+          </div>
+        </div>
+        <div style={{ display: "flex", flex: 1, alignItems: "center", padding: "28px 30px", backgroundColor: "#fbfcf8", borderLeft: `6px solid ${PALETTE.accent}` }}>
+          <span style={{ fontFamily: commentFont, fontSize: "18px", fontWeight: 500, color: PALETTE.textDark, lineHeight: 1.65, textAlign: "left", wordBreak: "break-word" }}>{displayText || " "}</span>
+        </div>
       </div>
     );
   }
 
   private static renderStarSection(comment: string, cardLanguage: CardLanguage) {
-    const sections = StarCommentParser.parse(comment);
-    const map = this.mapSectionsToStar(sections);
-    const hasAnyStarText = STAR_ORDER.some((k) => !!map[k]);
-
-    if (!hasAnyStarText) {
-      return (
-        <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: "10px" }}>
-          {this.renderFreeformPanel(comment)}
-        </div>
-      );
-    }
-
     return (
-      <div style={{ display: "flex", flexDirection: "column", flexShrink: 0, gap: "10px" }}>
-        {STAR_ORDER.map((letter) => this.renderStarRow(letter, map[letter] ?? "", cardLanguage))}
+      <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: "10px" }}>
+        {this.renderFreeformPanel(comment, cardLanguage)}
       </div>
     );
   }
@@ -994,13 +950,13 @@ export class RecognitionCardImageRenderer {
       >
         {this.renderHeader(recognizedByName, cardLanguage)}
 
-        <div style={{ display: "flex", flex: 1, padding: "18px 40px", gap: "0px" }}>
+        <div style={{ display: "flex", flex: 1, padding: "22px 40px", gap: "28px" }}>
           <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
             {this.renderStarSection(comment, cardLanguage)}
             {this.renderBottomStrip(dateString, cardLanguage)}
           </div>
 
-          {this.renderCoreValues(coreValues, cardLanguage)}
+          <div style={{ display: "flex", borderRadius: "18px", backgroundColor: "rgba(255,255,255,.58)", padding: "14px 14px 8px 0", boxShadow: "0 8px 24px rgba(12,58,34,.05)" }}>{this.renderCoreValues(coreValues, cardLanguage)}</div>
         </div>
 
         {this.renderFooter(cardLanguage)}

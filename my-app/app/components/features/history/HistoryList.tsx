@@ -140,7 +140,7 @@ export default class HistoryList extends Component<HistoryListProps> {
               {item.coreValues.length > 0 ? (
                 <div className="mt-4 rounded-xl border border-slate-200 bg-white/70 p-3">
                   <div className="mb-2 text-base font-bold text-slate-800">
-                    {this.context.lang === "th" ? "Core Values" : "Core Values"}
+                    {this.context.lang === "th" ? "ค่านิยม" : "Core Values"}
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {sortCoreValues(item.coreValues).map((value) => {

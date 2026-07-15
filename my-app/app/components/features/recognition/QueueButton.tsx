@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { PendingSubmission } from "../../../types/pendingSubmission";
 import { COMMENT_TYPE_META } from "../../../types/commentType";
 import { RecognitionEngine } from "../../../lib/RecognitionEngine";
-import { StarCommentParser } from "../../../services/email/starComment";
 import Card from "../../ui/Card";
 import { useLanguage } from "../../../context/LanguageContext";
 import { QueueIcon, ClockIcon, CheckIcon, PencilIcon, TrashIcon, SendIcon, CloseIcon } from "../../ui/Icons";
@@ -21,13 +20,6 @@ function getSubmissionTypes(submission: PendingSubmission) {
   return submission.types?.length ? submission.types : submission.type ? [submission.type] : [];
 }
 
-const STAR_SECTION_NAMES = {
-  S: "Situation",
-  T: "Task",
-  A: "Action",
-  R: "Result",
-} as const;
-
 export default function RecognitionQueueButton({
   submissions,
   editingSubmissionId = null,
@@ -37,7 +29,7 @@ export default function RecognitionQueueButton({
 }: RecognitionQueueButtonProps) {
   const [open, setOpen] = useState(false);
   const [, setTick] = useState(0);
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const pendingCount = useMemo(() => submissions.filter((item) => item.status === "pending").length, [submissions]);
 
   useEffect(() => {
@@ -113,7 +105,6 @@ export default function RecognitionQueueButton({
                   submissions.map((submission) => {
                     const pending = submission.status === "pending";
                     const editing = editingSubmissionId === submission.id;
-                    const starSections = StarCommentParser.parse(submission.comment);
 
                     return (
                       <article
@@ -185,7 +176,7 @@ export default function RecognitionQueueButton({
                         </div>
 
                         <div className="mt-3 rounded-xl border border-slate-200 bg-white/70 p-3">
-                          <div className="mb-2 text-base font-bold text-slate-800">Core Values</div>
+                          <div className="mb-2 text-base font-bold text-slate-800">{lang === "th" ? "ค่านิยม" : "Core Values"}</div>
                           <div className="flex flex-wrap gap-2">
                             {getSubmissionTypes(submission).map((type) => {
                               const meta = COMMENT_TYPE_META[type];
@@ -203,32 +194,15 @@ export default function RecognitionQueueButton({
                           </div>
                         </div>
 
-                        {starSections.length > 0 ? (
-                          <div className="mt-4 grid gap-3 md:grid-cols-2">
-                            {starSections.map((section) => (
-                              <section
-                                key={section.label}
-                                className="overflow-hidden rounded-xl border border-slate-200 bg-white/80"
-                              >
-                                <div className="flex items-center gap-2 border-b border-slate-200 bg-teal-50 px-4 py-2.5">
-                                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-teal-800 text-sm font-bold text-white">
-                                    {section.label}
-                                  </span>
-                                  <h3 className="text-base font-bold text-teal-950">
-                                    {STAR_SECTION_NAMES[section.label]}
-                                  </h3>
-                                </div>
-                                <p className="whitespace-pre-wrap px-4 py-3 text-lg font-medium leading-relaxed text-slate-900">
-                                  {section.text}
-                                </p>
-                              </section>
-                            ))}
+                        <section className="mt-4 overflow-hidden rounded-2xl border border-teal-200 bg-white shadow-sm">
+                          <div className="flex items-center gap-3 border-b border-teal-100 bg-gradient-to-r from-teal-50 to-amber-50/60 px-5 py-3">
+                            <span className="grid h-9 w-9 place-items-center rounded-xl bg-teal-800 text-white">★</span>
+                            <div><h3 className="font-bold text-teal-950">{submission.cardLanguage === "th" ? "ข้อความชื่นชม" : "Recognition message"}</h3><p className="text-xs text-slate-500">Preview</p></div>
                           </div>
-                        ) : (
-                          <p className="mt-3 whitespace-pre-wrap text-lg font-medium leading-relaxed text-slate-900">
+                          <p className="whitespace-pre-wrap border-l-4 border-amber-300 px-5 py-4 text-lg font-medium leading-8 text-slate-800">
                             {submission.comment}
                           </p>
-                        )}
+                        </section>
 
                         {pending ? (
                           <div className="mt-4 flex flex-wrap items-center gap-2 border-t-[1.5px] border-amber-300/70 pt-4">

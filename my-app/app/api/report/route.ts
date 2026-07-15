@@ -9,6 +9,7 @@ type DiaryReportRow = RowDataPacket & {
   diary_list: number;
   diary_emp_id: string | number;
   diary_comment: string | null;
+  diary_preview: string | null;
   diary_corevalue: string | null;
   createdDate: Date | string | null;
   createdBy: string | number;
@@ -40,6 +41,7 @@ export async function GET(request: Request) {
         d.diary_list,
         d.diary_emp_id,
         d.diary_comment,
+        d.diary_preview,
         d.diary_corevalue,
         d.createdDate,
         d.createdBy,
@@ -81,7 +83,7 @@ export async function GET(request: Request) {
           personId,
           personName,
           branch,
-          comment: row.diary_comment || "",
+          comment: row.diary_preview || row.diary_comment || "",
           coreValue,
           coreValueLabel: coreValue ? getCoreValueLabel(coreValue) : "",
           createdAt: createdAt ? createdAt.toISOString() : null,
