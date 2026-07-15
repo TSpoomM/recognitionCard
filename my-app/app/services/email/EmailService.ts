@@ -128,7 +128,7 @@ export class EmailService {
   private static buildHtml(recipientDisplayName: string, cardLanguage: CardLanguage, recipientDisplayNames?: string[]) {
     const isThai = cardLanguage === "th";
     const heading = isThai ? "คุณได้รับบัตรส่งต่อคุณค่า !" : "You've received a recognition card!";
-    const intro = isThai ? "ทีมของเราขอร่วมชื่นชม" : "Our team is celebrating";
+    const intro = isThai ? "เราขอชื่นชม" : "We would like to recognize";
     const note = isThai ? "ขอบคุณที่ร่วมสร้างสิ่งดี ๆ ให้เกิดขึ้นในทีม" : "Thank you for making a positive difference to the team.";
 
     let namesHtml: string;
@@ -155,7 +155,7 @@ export class EmailService {
           <div style="padding:30px 24px 10px;text-align:center;">
             <div style="display:inline-block;margin-bottom:14px;border-radius:999px;background:#ccfbf1;padding:7px 14px;color:#115e59;font-size:12px;font-weight:700;letter-spacing:1.5px;">TECKBEEHANG RECOGNITION</div>
             <h1 style="margin:0;color:#134e4a;font-size:28px;line-height:1.35;">${heading}</h1>
-            <p style="margin:14px 0 8px;color:#64748b;font-size:16px;">${intro}</p>
+            <p style="margin:14px 0 8px;color:#64748b;font-size:18px;">${intro}</p>
             ${namesHtml}
           </div>
           <div style="padding:18px 24px;text-align:center;">

@@ -91,7 +91,7 @@ const STAR_META: Record<StarKey, { word: string; questions: Record<CardLanguage,
     word: "TASK",
     questions: {
       en: "What was the task or challenge?",
-      th: "บุคคลนั้นมีหน้าที่อะไรในเหตุการณ์นั้น",
+      th: "บทบาทหน้าที่ของบุคคลนั้น คืออะไร",
     },
     bg: PALETTE.green1,
   },
