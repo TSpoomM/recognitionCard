@@ -326,10 +326,6 @@ export default class Home extends Component<Record<string, never>, PageState> {
         this.submitRecognition();
         return;
       }
-      if (!this.state.previewConfirmed) {
-        this.setState({ formError: this.state.lang === "th" ? "กรุณากดตกลงที่กล่อง Preview ก่อนดำเนินการต่อ" : "Please confirm the preview before continuing.", formSuccess: "" });
-        return;
-      }
     }
 
     const nextStep = Math.min(4, currentStep + 1);

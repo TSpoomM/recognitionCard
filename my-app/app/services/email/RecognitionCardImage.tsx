@@ -44,6 +44,24 @@ const PALETTE = {
   white: "#ffffff",
 };
 
+const HEADER_BACKGROUND = `url("data:image/svg+xml,${encodeURIComponent(`
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 170" preserveAspectRatio="none">
+    <path fill="#dfe8df" d="M470 170C555 119 575 52 700 0h400v170Z"/>
+    <path fill="#9fbea7" d="M565 170C650 111 681 47 808 0h292v170Z"/>
+    <path fill="#1f7040" d="M660 170C748 106 789 43 914 0h186v170Z"/>
+    <path fill="#0c3a22" d="M770 170C851 109 902 50 1018 0h82v170Z"/>
+  </svg>
+`)}")`;
+
+const FOOTER_BACKGROUND = `url("data:image/svg+xml,${encodeURIComponent(`
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 64" preserveAspectRatio="none">
+    <rect width="1100" height="64" fill="#0c3a22"/>
+    <path fill="#165c30" d="M535 64C620 50 651 18 715 0h385v64Z"/>
+    <path fill="#1f7040" d="M700 64C778 48 814 17 872 0h228v64Z"/>
+    <path fill="#2f8a4a" d="M875 64C942 47 970 17 1024 0h76v64Z"/>
+  </svg>
+`)}")`;
+
 type RecognitionCardImageProps = {
   recipientName: string;
   recognizedByName: string;
@@ -194,7 +212,7 @@ type CoreValueMeta = {
   icon: React.ReactNode;
 };
 
-const cvCommonStyle = { width: 34, height: 34 };
+const cvCommonStyle = { width: 36, height: 36, overflow: "visible" };
 
 const CORE_VALUES_META: CoreValueMeta[] = [
   {
@@ -220,14 +238,11 @@ const CORE_VALUES_META: CoreValueMeta[] = [
         strokeLinejoin="round"
         style={cvCommonStyle}
       >
-        <path d="m11 17 2 2a1 1 0 1 0 3-3" />
-        <path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.83-3.83a3 3 0 0 0-3.88-.18a3 3 0 0 0-1.89 1.54l-1.5 3.5" />
-        <path d="M22 11.5V11a2 2 0 0 0-2-2h-3" />
-        <path d="m8.5 8.5 1.5 1.5" />
-        <path d="M12 11a2 2 0 0 0-2-2h-3" />
-        <path d="M2 11.5V15a2 2 0 0 0 2 2h2" />
-        <path d="M22 11.5a2 2 0 1 0-4 0v3a2 2 0 0 0 4 0Z" />
-        <path d="M2 11.5a2 2 0 1 1 4 0v3a2 2 0 0 1-4 0Z" />
+        <path d="M5 9V5l4-2v4M19 9V5l-4-2v4" />
+        <path d="M3 10.5 6.5 9l3 1.5 2-1.2a2.6 2.6 0 0 1 3.1.3l1.1.9 2.3-1 3 1.5-2 6-3.1 1.2" />
+        <path d="m8.5 14 4 3.5a1.15 1.15 0 0 0 1.7-1.55M6.5 15.5l3.8 3.4a1.15 1.15 0 0 0 1.7-1.55" />
+        <path d="m10.2 11.8 1.2-1a2 2 0 0 1 2.6.05l3.2 2.8" />
+        <path d="M3 10.5 5 17l2.2-.7M21 11l-2 6-2-.7" />
       </svg>
     ),
   },
@@ -283,12 +298,11 @@ const CORE_VALUES_META: CoreValueMeta[] = [
         strokeLinejoin="round"
         style={cvCommonStyle}
       >
-        <circle cx="12" cy="12" r="10" />
-        <circle cx="12" cy="12" r="6" />
-        <circle cx="12" cy="12" r="2" />
-        <path d="m22 2-10 10" />
-        <path d="m22 2-4 0v4" />
-        <path d="m12 8v4h4" />
+        <circle cx="10.5" cy="13.5" r="8" />
+        <circle cx="10.5" cy="13.5" r="4" />
+        <circle cx="10.5" cy="13.5" r="1" />
+        <path d="m10.5 13.5 10-10" />
+        <path d="M16.5 3.5h4v4" />
       </svg>
     ),
   },
@@ -315,13 +329,11 @@ const CORE_VALUES_META: CoreValueMeta[] = [
         strokeLinejoin="round"
         style={cvCommonStyle}
       >
-        <path d="M12 21v-2a4 4 0 0 0-4-4H4a4 4 0 0 0-4 4v2" />
-        <circle cx="8" cy="7" r="4" />
-        <path d="M15 21v-4" />
-        <path d="M18 21v-7" />
-        <path d="M21 21v-10" />
-        <path d="m14 17 8-8" />
-        <path d="M18 9h4v4" />
+        <circle cx="6.5" cy="6.5" r="2.8" />
+        <path d="M2.5 17.5v-4a3 3 0 0 1 3-3h2a3 3 0 0 1 3 3v4M4.5 20v-5M8.5 20v-5" />
+        <path d="M12.5 20v-3h2.5v3M16.5 20v-6h2.5v6M20.5 20v-9H23v9" />
+        <path d="m12.5 14.5 3.2-3.2 2.2 1.5 4-4" />
+        <path d="M19 8.8h3v3" />
       </svg>
     ),
   },
@@ -509,7 +521,6 @@ export class RecognitionCardImageRenderer {
     const copy = CARD_COPY[cardLanguage];
     const textFont = this.getTextFont(cardLanguage);
     const compact = cardLanguage === "th";
-
     return (
       <div
         style={{
@@ -518,11 +529,13 @@ export class RecognitionCardImageRenderer {
           width: "100%",
           gap: "22px",
           padding: compact ? "26px 36px 16px" : "26px 36px 18px",
-          backgroundImage: `linear-gradient(115deg, ${PALETTE.cream} 0%, ${PALETTE.cream} 52%, ${PALETTE.green1} 58%, ${PALETTE.darkGreen} 100%)`,
+          backgroundColor: PALETTE.cream,
+          backgroundImage: HEADER_BACKGROUND,
+          backgroundSize: "100% 100%",
         }}
       >
         {logoUri ? (
-          <img src={logoUri} style={{ width: compact ? "100px" : "110px", height: compact ? "56px" : "62px", objectFit: "contain", display: "flex", flexShrink: 0 }} />
+          <img src={logoUri} alt="" style={{ width: compact ? "100px" : "110px", height: compact ? "56px" : "62px", objectFit: "contain", display: "flex", flexShrink: 0 }} />
         ) : (
           this.renderDiamondLogo()
         )}
@@ -757,14 +770,16 @@ export class RecognitionCardImageRenderer {
         {formalMascotGang && (
           <img
             src={formalMascotGang}
+            alt=""
             style={{
               position: "absolute",
-              right: "20px",
-              top: "-50px",
-              width: "280px",
-              height: "105px",
+              right: "24px",
+              top: "-30px",
+              width: "176px",
+              height: "76px",
               objectFit: "contain",
-              zIndex: 10,
+              opacity: 0.9,
+              zIndex: 2,
             }}
           />
         )}
@@ -775,14 +790,37 @@ export class RecognitionCardImageRenderer {
             flex: 1,
             alignItems: "center",
             justifyContent: "center",
-            padding: "28px 30px",
+            padding: "32px 38px",
             backgroundColor: "#fbfcf8",
-            borderLeft: `6px solid ${PALETTE.accent}`,
+            position: "relative",
+            overflow: "hidden",
             borderBottomLeftRadius: "18px",
             borderBottomRightRadius: "18px",
           }}
         >
-          <span style={{ fontFamily: commentFont, fontSize: "18px", fontWeight: 500, color: PALETTE.textDark, lineHeight: 1.65, textAlign: "center", wordBreak: "break-word", width: "100%" }}>{displayText || " "}</span>
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              bottom: "1px",
+              left: "1px",
+              width: "5px",
+              backgroundImage: `linear-gradient(180deg, ${PALETTE.darkGreen} 0%, ${PALETTE.green3} 52%, #f6c453 100%)`,
+              borderBottomLeftRadius: "18px",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              bottom: "1px",
+              right: "1px",
+              width: "5px",
+              backgroundImage: `linear-gradient(180deg, ${PALETTE.darkGreen} 0%, ${PALETTE.green3} 52%, #f6c453 100%)`,
+              borderBottomRightRadius: "18px",
+            }}
+          />
+          <span style={{ fontFamily: commentFont, fontSize: "19px", fontWeight: 500, color: PALETTE.textDark, lineHeight: 1.7, textAlign: "center", wordBreak: "break-word", width: "100%" }}>{displayText || " "}</span>
         </div>
       </div>
     );
@@ -878,33 +916,30 @@ export class RecognitionCardImageRenderer {
     const selected = new Set(coreValues.map((v) => v.trim().toUpperCase()));
     const copy = CARD_COPY[cardLanguage];
     const textFont = this.getTextFont(cardLanguage);
-    const compact = cardLanguage === "th";
 
     return (
-      <div style={{ display: "flex", width: "100%", gap: "12px", alignItems: "stretch" }}>
-        <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: "6px" }}>
+      <div style={{ display: "flex", width: "100%", gap: "12px", alignItems: "center" }}>
+        <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: "9px" }}>
           <div
             style={{
               display: "flex",
               alignItems: "center",
               gap: "6px",
-              backgroundImage: `linear-gradient(90deg, ${PALETTE.darkGreen}, ${PALETTE.green2})`,
-              color: "#ffffffff",
-              borderRadius: "30px",
-              padding: "6px 12px",
+              color: PALETTE.darkGreen,
+              padding: "0 2px",
               fontFamily: textFont,
               fontWeight: 500,
-              fontSize: "17px",
+              fontSize: "15px",
               letterSpacing: "0.4px",
               alignSelf: "flex-start",
-              marginBottom: "5px"
+              marginBottom: "1px"
             }}
           >
-            <StarBadgeIcon size={12} color="#fbfcf8" />
+            <StarBadgeIcon size={12} color={PALETTE.green2} />
             <span>{copy.coreValuesTitle}</span>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "row", gap: "8px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", flexDirection: "row", gap: "7px" }}>
             {CORE_VALUES_META.map((cv) => {
               const isChecked = selected.has(cv.key);
               const labels = cv.labels[cardLanguage];
@@ -913,24 +948,26 @@ export class RecognitionCardImageRenderer {
                   key={cv.key}
                   style={{
                     display: "flex",
-                    flexDirection: "column",
+                    flexDirection: "row",
                     alignItems: "center",
-                    padding: "20px 8px 10px",
-                    borderRadius: "12px",
-                    backgroundColor: isChecked ? "rgba(242, 255, 247, 1)" : "#fbfcf8",
-                    border: isChecked ? `1.5px solid ${PALETTE.green2}` : `1px solid ${PALETTE.dashGray}`,
+                    justifyContent: "flex-start",
+                    gap: "8px",
+                    padding: "9px 8px",
+                    borderRadius: "10px",
+                    backgroundColor: isChecked ? PALETTE.panelBg : "#ffffff",
+                    border: isChecked ? `1.5px solid ${PALETTE.green3}` : `1px solid ${PALETTE.dashGray}`,
                     position: "relative",
                     flex: "1 0 0",
                     minWidth: "0",
-                    minHeight: "50px",
-                    boxShadow: isChecked ? "0 4px 12px rgba(22,92,48,0.04)" : "none",
+                    minHeight: "56px",
+                    boxShadow: isChecked ? "0 3px 10px rgba(12,58,34,0.08)" : "none",
                   }}
                 >
                   <div
                     style={{
                       position: "absolute",
-                      top: "6px",
-                      right: "6px",
+                      top: "4px",
+                      right: "4px",
                       display: "flex",
                     }}
                   >
@@ -938,9 +975,9 @@ export class RecognitionCardImageRenderer {
                       <div
                         style={{
                           display: "flex",
-                          width: "16px",
-                          height: "16px",
-                          borderRadius: "8px",
+                          width: "14px",
+                          height: "14px",
+                          borderRadius: "7px",
                           backgroundColor: PALETTE.green2,
                           alignItems: "center",
                           justifyContent: "center",
@@ -948,17 +985,7 @@ export class RecognitionCardImageRenderer {
                       >
                         <CheckIcon size={8} color="#ffffff" strokeWidth={3.5} />
                       </div>
-                    ) : (
-                      <div
-                        style={{
-                          width: "14px",
-                          height: "14px",
-                          borderRadius: "3px",
-                          border: `1.5px solid ${PALETTE.textFaint}`,
-                          backgroundColor: "#ffffff",
-                        }}
-                      />
-                    )}
+                    ) : null}
                   </div>
 
                   <div
@@ -966,9 +993,10 @@ export class RecognitionCardImageRenderer {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      height: "40px",
+                      width: "36px",
+                      height: "36px",
                       color: PALETTE.darkGreen,
-                      marginBottom: "5px",
+                      flexShrink: 0,
                     }}
                   >
                     {cv.icon}
@@ -978,11 +1006,12 @@ export class RecognitionCardImageRenderer {
                     style={{
                       fontFamily: textFont,
                       fontWeight: 600,
-                      fontSize: "11.5px",
-                      color: PALETTE.darkGreen,
+                      fontSize: "10.5px",
+                      color: isChecked ? PALETTE.darkGreen : PALETTE.textMuted,
                       textAlign: "center",
                       lineHeight: 1.25,
-                      marginTop: "auto",
+                      flex: 1,
+                      paddingRight: "8px",
                     }}
                   >
                     {labels.name}
@@ -1007,7 +1036,9 @@ export class RecognitionCardImageRenderer {
           alignItems: "center",
           justifyContent: "space-between",
           width: "100%",
-          backgroundImage: `linear-gradient(90deg, ${PALETTE.darkGreen} 0%, ${PALETTE.green2} 60%, ${PALETTE.green3} 100%)`,
+          backgroundColor: PALETTE.darkGreen,
+          backgroundImage: FOOTER_BACKGROUND,
+          backgroundSize: "100% 100%",
           padding: "12px 28px",
         }}
       >
