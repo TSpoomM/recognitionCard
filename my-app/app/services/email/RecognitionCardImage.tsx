@@ -194,6 +194,8 @@ type CoreValueMeta = {
   icon: React.ReactNode;
 };
 
+const cvCommonStyle = { width: 34, height: 34 };
+
 const CORE_VALUES_META: CoreValueMeta[] = [
   {
     key: "RESPECT",
@@ -201,22 +203,31 @@ const CORE_VALUES_META: CoreValueMeta[] = [
       en: {
         name: "RESPECT",
         description: "Respects others and treats everyone equally.",
-        // description: "To respect the opinions and responsibilities of others, and to treat all individuals with equality.",
       },
       th: {
-        // name: "การให้เกียรติ",
         description: "เคารพผู้อื่นและปฏิบัติต่อทุกคนอย่างเท่าเทียม",
         name: "การเครพให้เกียรติซึ่งกันและกัน",
-        // description: "เคารพในความคิดเห็น และหน้าที่ของผู้อื่น และปฏิบัติต่อทุกคนอย่างเท่าเทียม",
       },
     },
     circleColor: PALETTE.green4,
     icon: (
-      <svg viewBox="0 0 24 24" style={{ width: 20, height: 20 }}>
-        <path
-          fill="#ffffff"
-          d="M11 2C6.48 2 2 6.48 2 11s4.48 9 9 9 9-4.48 9-9-4.48-9-9-9zm-1 14H8V8h2v8zm4 0h-2V8h2v8z"
-        />
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={PALETTE.darkGreen}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={cvCommonStyle}
+      >
+        <path d="m11 17 2 2a1 1 0 1 0 3-3" />
+        <path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.83-3.83a3 3 0 0 0-3.88-.18a3 3 0 0 0-1.89 1.54l-1.5 3.5" />
+        <path d="M22 11.5V11a2 2 0 0 0-2-2h-3" />
+        <path d="m8.5 8.5 1.5 1.5" />
+        <path d="M12 11a2 2 0 0 0-2-2h-3" />
+        <path d="M2 11.5V15a2 2 0 0 0 2 2h2" />
+        <path d="M22 11.5a2 2 0 1 0-4 0v3a2 2 0 0 0 4 0Z" />
+        <path d="M2 11.5a2 2 0 1 1 4 0v3a2 2 0 0 1-4 0Z" />
       </svg>
     ),
   },
@@ -226,22 +237,26 @@ const CORE_VALUES_META: CoreValueMeta[] = [
       en: {
         name: "LEADERSHIP",
         description: "Shows initiative, confidence, and fair leadership.",
-        // description: "Demonstrating initiative, assertiveness, and decisiveness. Skilled in task delegation, teamwork, and exhibiting a fair and compassionate demeanor.",
       },
       th: {
-        // name: "ภาวะผู้นำ",
         description: "กล้าคิด กล้าทำ กล้าแสดงออก และมีความเป็นธรรม",
         name: "ความเป็นผู้นำที่่ดี",
-        // description: "กล้าคิด กล้าทำ กล้าแสดงออก รู้จักรับงาน แบ่งงาน ตัดสินใจเด็ดขาด โอบอ้อมอารี มีความเป็นธรรม",
       },
     },
     circleColor: PALETTE.darkGreen,
     icon: (
-      <svg viewBox="0 0 24 24" style={{ width: 20, height: 20 }}>
-        <path
-          fill="#ffffff"
-          d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-        />
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={PALETTE.darkGreen}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={cvCommonStyle}
+      >
+        <path d="M16.051 12.616a1 1 0 0 1 1.909.024l.737 1.452a1 1 0 0 0 .737.535l1.634.256a1 1 0 0 1 .588 1.806l-1.172 1.168a1 1 0 0 0-.282.866l.259 1.613a1 1 0 0 1-1.541 1.134l-1.465-.75a1 1 0 0 0-.912 0l-1.465.75a1 1 0 0 1-1.539-1.133l.258-1.613a1 1 0 0 0-.282-.866l-1.156-1.153a1 1 0 0 1 .572-1.822l1.633-.256a1 1 0 0 0 .737-.535z" />
+        <path d="M8 15H7a4 4 0 0 0-4 4v2" />
+        <circle cx="10" cy="7" r="4" />
       </svg>
     ),
   },
@@ -251,22 +266,29 @@ const CORE_VALUES_META: CoreValueMeta[] = [
       en: {
         name: "COMMUNICATION",
         description: "Communicates clearly and listens well.",
-        // description: "Communicates clearly and directly, while actively listening and maintaining a friendly demeanor.",
       },
       th: {
-        // name: "การสื่อสาร",
         description: "สื่อสารชัดเจน รับฟังอย่างตั้งใจ และพูดอย่างเป็นมิตร",
         name: "การสื่อสารอย่างมีประสิทธิภาพ",
-        // description: "สื่อสารได้ชัดเจนตรงไปตรงมา รับฟังอย่างตั้งใจและพูดอย่างเป็นมิตร",
       },
     },
     circleColor: PALETTE.green5,
     icon: (
-      <svg viewBox="0 0 24 24" style={{ width: 20, height: 20 }}>
-        <path
-          fill="#ffffff"
-          d="M20 2H4a2 2 0 00-2 2v18l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"
-        />
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={PALETTE.darkGreen}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={cvCommonStyle}
+      >
+        <circle cx="12" cy="12" r="10" />
+        <circle cx="12" cy="12" r="6" />
+        <circle cx="12" cy="12" r="2" />
+        <path d="m22 2-10 10" />
+        <path d="m22 2-4 0v4" />
+        <path d="m12 8v4h4" />
       </svg>
     ),
   },
@@ -276,21 +298,30 @@ const CORE_VALUES_META: CoreValueMeta[] = [
       en: {
         name: "PROFESSIONALISM",
         description: "Has strong expertise and solves problems effectively.",
-        // description: "Possesses in-depth knowledge and expertise in their field, and is capable of resolving problems quickly and accurately.",
       },
       th: {
         name: "ความเป็นมืออาชีพ",
-        // description: "มีความเชี่ยวชาญสูงและแก้ปัญหาได้อย่างมีประสิทธิภาพ",
         description: "รอบรู้ เชี่ยวชาญในงานของตน แก้ปัญหาได้รวดเร็ว แม่นยำ",
       },
     },
     circleColor: PALETTE.green3,
     icon: (
-      <svg viewBox="0 0 24 24" style={{ width: 20, height: 20 }}>
-        <path
-          fill="#ffffff"
-          d="M12 2a4 4 0 014 4 4 4 0 01-4 4 4 4 0 01-4-4 4 4 0 014-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4z"
-        />
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={PALETTE.darkGreen}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={cvCommonStyle}
+      >
+        <path d="M12 21v-2a4 4 0 0 0-4-4H4a4 4 0 0 0-4 4v2" />
+        <circle cx="8" cy="7" r="4" />
+        <path d="M15 21v-4" />
+        <path d="M18 21v-7" />
+        <path d="M21 21v-10" />
+        <path d="m14 17 8-8" />
+        <path d="M18 9h4v4" />
       </svg>
     ),
   },
@@ -300,21 +331,25 @@ const CORE_VALUES_META: CoreValueMeta[] = [
       en: {
         name: "INTEGRITY",
         description: "Acts with integrity, responsibility, and punctuality.",
-        // description: "Demonstrates high levels of integrity and responsibility, serving as a positive role model and always punctual.",
       },
       th: {
         name: "ความซื่อสัตย์",
-        // description: "ปฏิบัติด้วยความซื่อสัตย์ รับผิดชอบ และตรงต่อเวลา",
         description: "ซื่อสัตย์ สุจริต สำนึกรับผิดชอบ และตรงต่อเวลา",
       },
     },
     circleColor: PALETTE.green1,
     icon: (
-      <svg viewBox="0 0 24 24" style={{ width: 20, height: 20 }}>
-        <path
-          fill="#ffffff"
-          d="M12 2L4 5v6c0 5.25 3.5 10.1 8 11.5C16.5 21.1 20 16.25 20 11V5l-8-3zm-1.5 12.5l-3-3 1.4-1.4 1.6 1.6 4.1-4.1 1.4 1.4-5.5 5.5z"
-        />
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={PALETTE.darkGreen}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={cvCommonStyle}
+      >
+        <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.8 17 5 19 5a1 1 0 0 1 1 1z" />
+        <path d="m9 12 2 2 4-4" />
       </svg>
     ),
   },
@@ -554,20 +589,22 @@ export class RecognitionCardImageRenderer {
                 <path fill="#ffffff" d="M2 21l21-9L2 3v7l15 2-15 2z" />
               </svg>
             </div>
-            <span style={{ fontFamily: textFont, fontWeight: 700, fontSize: "14px", color: "#022e10ff", whiteSpace: "nowrap" }}>
-              {copy.givenBy}
-            </span>
-            <span
-              style={{
-                fontFamily: "Roboto",
-                fontWeight: 600,
-                fontSize: "14px",
-                color: PALETTE.black,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {this.truncateText(recognizedByName, 20)}
-            </span>
+            <div className="flex flex-row gap-2 justify-center">
+              <span style={{ fontFamily: textFont, fontWeight: 700, fontSize: "18px", color: "#022e10ff", whiteSpace: "nowrap", marginRight: "15px" }}>
+                {copy.givenBy}
+              </span>
+              <span
+                style={{
+                  fontFamily: "Roboto",
+                  fontWeight: 600,
+                  fontSize: "18px",
+                  color: PALETTE.black,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {this.truncateText(recognizedByName, 20)}
+              </span>
+            </div>
           </div>
 
         </div>
@@ -581,11 +618,10 @@ export class RecognitionCardImageRenderer {
    * real pixel widths of the boxes the text will render into.
    */
   private static computeExtraHeight(comment: string): number {
-    const LEFT_COLUMN_WIDTH = CARD_WIDTH - 80 - 380; // outer padding + core-values panel
-
-    const boxWidth = LEFT_COLUMN_WIDTH - 56;
-    const lines = this.estimateLineCount(comment, boxWidth, 16);
-    return Math.max(0, Math.ceil(lines * 16 * 1.55 + 44 - 193));
+    // Full width now since layout is top-to-bottom
+    const boxWidth = CARD_WIDTH - 80 - 56;
+    const lines = this.estimateLineCount(comment, boxWidth, 18);
+    return Math.max(0, Math.ceil(lines * 18 * 1.65 + 44 - 193));
   }
 
   private static renderStarRow(letter: StarKey, text: string, cardLanguage: CardLanguage) {
@@ -594,7 +630,7 @@ export class RecognitionCardImageRenderer {
     const questionFont = this.getTextFont(cardLanguage);
 
     return (
-      <div key={letter} style={{ display: "flex", alignItems: "stretch", minHeight: "88px", width: "100%" }}>
+      <div key={letter} style={{ display: "flex", alignItems: "stretch", minHeight: "60px", width: "100%" }}>
         <div
           style={{
             display: "flex",
@@ -615,8 +651,8 @@ export class RecognitionCardImageRenderer {
           <div
             style={{
               display: "flex",
-              width: "28px",
-              height: "28px",
+              width: "25px",
+              height: "25px",
               borderRadius: "14px",
               backgroundColor: "rgba(255,255,255,0.22)",
               alignItems: "center",
@@ -684,6 +720,8 @@ export class RecognitionCardImageRenderer {
   private static renderFreeformPanel(comment: string, cardLanguage: CardLanguage) {
     const displayText = (comment || "").replace(/\s+/g, " ").trim();
     const commentFont = this.getTextFont(cardLanguage);
+    const formalMascotGang = getImageDataUri("formalMascotGang.png", "image/png");
+
     return (
       <div
         style={{
@@ -693,19 +731,58 @@ export class RecognitionCardImageRenderer {
           backgroundColor: "#ffffff",
           border: `1px solid ${PALETTE.dashGray}`,
           borderRadius: "18px",
-          overflow: "hidden",
+          position: "relative",
           boxShadow: "0 8px 24px rgba(12,58,34,0.07)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "14px 20px", backgroundImage: `linear-gradient(90deg, ${PALETTE.darkGreen}, ${PALETTE.green2})`, color: "#ffffff" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            padding: "14px 20px",
+            backgroundImage: `linear-gradient(90deg, ${PALETTE.darkGreen}, ${PALETTE.green2})`,
+            color: "#ffffff",
+            borderTopLeftRadius: "18px",
+            borderTopRightRadius: "18px",
+          }}
+        >
           <div style={{ display: "flex", width: "32px", height: "32px", alignItems: "center", justifyContent: "center", borderRadius: "10px", backgroundColor: "rgba(255,255,255,.16)" }}><SparkleIcon size={18} /></div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontFamily: commentFont, fontSize: "17px", fontWeight: 600 }}>{cardLanguage === "th" ? "ข้อความชื่นชม" : "Recognition Message"}</span>
-            <span style={{ fontFamily: commentFont, fontSize: "12px", color: "#d7e8d8" }}>{cardLanguage === "th" ? "คำขอบคุณจากใจ" : "A note of appreciation"}</span>
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <span style={{ fontFamily: commentFont, fontSize: "24px", fontWeight: 600 }}>{cardLanguage === "th" ? "ข้อความชื่นชม" : "Recognition Message"}</span>
+            {/* <span style={{ fontFamily: commentFont, fontSize: "12px", color: "#d7e8d8" }}>{cardLanguage === "th" ? "คำขอบคุณจากใจ" : "A note of appreciation"}</span> */}
           </div>
         </div>
-        <div style={{ display: "flex", flex: 1, alignItems: "center", padding: "28px 30px", backgroundColor: "#fbfcf8", borderLeft: `6px solid ${PALETTE.accent}` }}>
-          <span style={{ fontFamily: commentFont, fontSize: "18px", fontWeight: 500, color: PALETTE.textDark, lineHeight: 1.65, textAlign: "left", wordBreak: "break-word" }}>{displayText || " "}</span>
+
+        {formalMascotGang && (
+          <img
+            src={formalMascotGang}
+            style={{
+              position: "absolute",
+              right: "20px",
+              top: "-50px",
+              width: "280px",
+              height: "105px",
+              objectFit: "contain",
+              zIndex: 10,
+            }}
+          />
+        )}
+
+        <div
+          style={{
+            display: "flex",
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "28px 30px",
+            backgroundColor: "#fbfcf8",
+            borderLeft: `6px solid ${PALETTE.accent}`,
+            borderBottomLeftRadius: "18px",
+            borderBottomRightRadius: "18px",
+          }}
+        >
+          <span style={{ fontFamily: commentFont, fontSize: "18px", fontWeight: 500, color: PALETTE.textDark, lineHeight: 1.65, textAlign: "center", wordBreak: "break-word", width: "100%" }}>{displayText || " "}</span>
         </div>
       </div>
     );
@@ -729,9 +806,9 @@ export class RecognitionCardImageRenderer {
           display: "flex",
           alignItems: "center",
           backgroundColor: PALETTE.panelBg,
-          borderRadius: "10px",
-          marginTop: "4px",
-          minHeight: "76px",
+          borderRadius: "8px",
+          marginTop: "2px",
+          minHeight: "64px",
           width: "100%",
         }}
       >
@@ -740,8 +817,8 @@ export class RecognitionCardImageRenderer {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            gap: "12px",
-            padding: "12px 18px",
+            gap: "10px",
+            padding: "8px 14px",
             flex: 1,
             borderRight: `1px solid ${PALETTE.dashGray}`,
           }}
@@ -749,17 +826,17 @@ export class RecognitionCardImageRenderer {
           <div
             style={{
               display: "flex",
-              width: "42px",
-              height: "42px",
-              borderRadius: "21px",
-              border: `2px solid ${PALETTE.green3}`,
+              width: "32px",
+              height: "32px",
+              borderRadius: "16px",
+              border: `1.5px solid ${PALETTE.green3}`,
               backgroundColor: "#ffffff",
               alignItems: "center",
               justifyContent: "center",
               flexShrink: 0,
             }}
           >
-            <svg viewBox="0 0 24 24" style={{ width: 18, height: 18 }}>
+            <svg viewBox="0 0 24 24" style={{ width: 14, height: 14 }}>
               <path
                 d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
                 fill={PALETTE.green4}
@@ -769,25 +846,26 @@ export class RecognitionCardImageRenderer {
             </svg>
           </div>
           <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-            <span style={{ fontFamily: cardLanguage === "th" ? textFont : "GreatVibes", fontSize: cardLanguage === "th" ? "34px" : "36px", color: PALETTE.green2, fontWeight: 500, lineHeight: 1.1 }}>
+            {/* <div style={{ display: "flex", flex: 1, marginRight: "20px" }}> */}
+            <span style={{ fontFamily: cardLanguage === "th" ? textFont : "GreatVibes", fontSize: cardLanguage === "th" ? "28px" : "30px", color: PALETTE.green2, fontWeight: 500, lineHeight: 1.1 }}>
               {copy.thankYou}
             </span>
-            <span style={{ fontFamily: textFont, fontSize: "16px", color: PALETTE.textMuted, lineHeight: 1.35, marginTop: "4px", maxWidth: "390px" }}>
+            <span style={{ fontFamily: textFont, fontSize: "14px", color: PALETTE.textMuted, lineHeight: 1.3, marginTop: "2px" }}>
               {copy.appreciation}
             </span>
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "12px 20px", minWidth: "230px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <svg viewBox="0 0 24 24" style={{ width: 16, height: 16 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "6px", padding: "8px 16px", minWidth: "190px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <svg viewBox="0 0 24 24" style={{ width: 14, height: 14 }}>
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" fill="none" stroke={PALETTE.textDark} strokeWidth={2} />
               <line x1="16" y1="2" x2="16" y2="6" stroke={PALETTE.textDark} strokeWidth={2} />
               <line x1="8" y1="2" x2="8" y2="6" stroke={PALETTE.textDark} strokeWidth={2} />
               <line x1="3" y1="10" x2="21" y2="10" stroke={PALETTE.textDark} strokeWidth={2} />
             </svg>
-            <span style={{ fontFamily: textFont, fontWeight: 500, fontSize: "16px", color: PALETTE.textDark }}>{copy.date}</span>
-            <span style={{ fontFamily: "Roboto", fontWeight: 600, fontSize: "16px", color: PALETTE.textDark }}>
+            <span style={{ fontFamily: textFont, fontWeight: 500, fontSize: "13px", color: PALETTE.textDark }}>{copy.date}</span>
+            <span style={{ fontFamily: "Roboto", fontWeight: 600, fontSize: "13px", color: PALETTE.textDark }}>
               {dateString}
             </span>
           </div>
@@ -801,92 +879,119 @@ export class RecognitionCardImageRenderer {
     const copy = CARD_COPY[cardLanguage];
     const textFont = this.getTextFont(cardLanguage);
     const compact = cardLanguage === "th";
-    const gangMascot = getImageDataUri("theMascotGang.png", "image/png")
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", width: "380px", flexShrink: 0, paddingLeft: "28px" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            backgroundImage: `linear-gradient(90deg, ${PALETTE.darkGreen}, ${PALETTE.green2})`,
-            color: "#ffffff",
-            borderRadius: "30px",
-            padding: compact ? "10px 18px" : "11px 20px",
-            fontFamily: textFont,
-            fontWeight: 500,
-            fontSize: "16px",
-            letterSpacing: "0.4px",
-            marginBottom: compact ? "6px" : "8px",
-          }}
-        >
-          <StarBadgeIcon size={18} color="#ffffff" />
-          <span>{copy.coreValuesTitle}</span>
-        </div>
-
-        {CORE_VALUES_META.map((cv, i) => {
-          const isChecked = selected.has(cv.key);
-          const labels = cv.labels[cardLanguage];
-          return (
-            <div
-              key={cv.key}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                padding: compact ? "6px 0" : "9px 0",
-                borderBottom: i === CORE_VALUES_META.length - 1 ? "none" : `1px dashed ${PALETTE.dashGray}`,
-                width: "100%",
-                marginTop: compact ? "1px" : "2px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  width: "42px",
-                  height: "42px",
-                  borderRadius: "21px",
-                  backgroundColor: cv.circleColor,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                {cv.icon}
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-                <span style={{ fontFamily: textFont, fontWeight: 500, fontSize: "16px", color: PALETTE.darkGreen, wordBreak: "break-word" }}>
-                  {labels.name}
-                </span>
-                <span style={{ fontFamily: textFont, fontWeight: 500, fontSize: "13.5px", color: PALETTE.textMuted, lineHeight: compact ? 1.15 : 1.2, wordBreak: "break-word" }}>
-                  {labels.description}
-                </span>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "9px",
-                  flexShrink: 0,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: isChecked ? PALETTE.darkGreen : "#ffffff",
-                  border: isChecked ? "none" : `2.5px solid ${PALETTE.lineGray}`,
-                }}
-              >
-                {isChecked && <CheckIcon size={18} color="#ffffff" strokeWidth={3} />}
-              </div>
-            </div>
-          );
-        })}
-
-        {gangMascot && (
-          <div style={{ display: "flex", flex: 1, justifyContent: "center", alignItems: "center", width: "100%", overflow: "hidden" }}>
-            <img src={gangMascot} style={{ width: compact ? "340px" : "340px", height: compact ? "155px" : "145px", objectFit: "contain", borderRadius: "10px", marginTop: compact ? "14px" : "10px" }} />
+      <div style={{ display: "flex", width: "100%", gap: "12px", alignItems: "stretch" }}>
+        <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: "6px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              backgroundImage: `linear-gradient(90deg, ${PALETTE.darkGreen}, ${PALETTE.green2})`,
+              color: "#ffffffff",
+              borderRadius: "30px",
+              padding: "6px 12px",
+              fontFamily: textFont,
+              fontWeight: 500,
+              fontSize: "17px",
+              letterSpacing: "0.4px",
+              alignSelf: "flex-start",
+              marginBottom: "5px"
+            }}
+          >
+            <StarBadgeIcon size={12} color="#fbfcf8" />
+            <span>{copy.coreValuesTitle}</span>
           </div>
-        )}
+
+          <div style={{ display: "flex", flexDirection: "row", gap: "8px", flexWrap: "wrap" }}>
+            {CORE_VALUES_META.map((cv) => {
+              const isChecked = selected.has(cv.key);
+              const labels = cv.labels[cardLanguage];
+              return (
+                <div
+                  key={cv.key}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    padding: "20px 8px 10px",
+                    borderRadius: "12px",
+                    backgroundColor: isChecked ? "rgba(242, 255, 247, 1)" : "#fbfcf8",
+                    border: isChecked ? `1.5px solid ${PALETTE.green2}` : `1px solid ${PALETTE.dashGray}`,
+                    position: "relative",
+                    flex: "1 0 0",
+                    minWidth: "0",
+                    minHeight: "50px",
+                    boxShadow: isChecked ? "0 4px 12px rgba(22,92,48,0.04)" : "none",
+                  }}
+                >
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "6px",
+                      right: "6px",
+                      display: "flex",
+                    }}
+                  >
+                    {isChecked ? (
+                      <div
+                        style={{
+                          display: "flex",
+                          width: "16px",
+                          height: "16px",
+                          borderRadius: "8px",
+                          backgroundColor: PALETTE.green2,
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <CheckIcon size={8} color="#ffffff" strokeWidth={3.5} />
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          width: "14px",
+                          height: "14px",
+                          borderRadius: "3px",
+                          border: `1.5px solid ${PALETTE.textFaint}`,
+                          backgroundColor: "#ffffff",
+                        }}
+                      />
+                    )}
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      height: "40px",
+                      color: PALETTE.darkGreen,
+                      marginBottom: "5px",
+                    }}
+                  >
+                    {cv.icon}
+                  </div>
+
+                  <span
+                    style={{
+                      fontFamily: textFont,
+                      fontWeight: 600,
+                      fontSize: "11.5px",
+                      color: PALETTE.darkGreen,
+                      textAlign: "center",
+                      lineHeight: 1.25,
+                      marginTop: "auto",
+                    }}
+                  >
+                    {labels.name}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
     );
   }
@@ -915,19 +1020,19 @@ export class RecognitionCardImageRenderer {
                 {index === 2 && <path d="M12 21v-9M12 13c-1-5-5-7-9-6 1 5 4 7 9 6Zm0-2c1-5 5-7 9-6-1 5-4 7-9 6ZM6 21h12" fill="none" stroke="#d7dfb0" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />}
               </svg>
               {/* <span style={{ fontFamily: textFont, fontWeight: 500, fontSize: cardLanguage === "th" ? "13px" : "11px", color: "#ffffff", whiteSpace: "nowrap" }}>{label}</span> */}
-              <span style={{ fontFamily: textFont, fontWeight: 500, fontSize: "18px", color: "#ffffff", whiteSpace: "nowrap" }}>{label}</span>
+              <span style={{ fontFamily: textFont, fontWeight: 500, fontSize: "14px", color: "#ffffff", whiteSpace: "nowrap" }}>{label}</span>
             </div>
           ))}
         </div>
         <div style={{ display: "flex", alignItems: "center" }}>
           {/* <span style={{ fontFamily: textFont, fontWeight: "bold", fontSize: cardLanguage === "th" ? "18px" : "14px", letterSpacing: cardLanguage === "th" ? "0.5px" : "1.5px", color: "#ffffff" }}> */}
-          <span style={{ fontFamily: textFont, fontWeight: "bold", fontSize: "18px", letterSpacing: cardLanguage === "th" ? "0.5px" : "1.5px", color: "#ffffff" }}>
+          <span style={{ fontFamily: textFont, fontWeight: "bold", fontSize: "14px", letterSpacing: cardLanguage === "th" ? "0.5px" : "1.5px", color: "#ffffff" }}>
             {copy.footer[0]}{" "}
           </span>
-          <span style={{ fontFamily: textFont, fontWeight: "bold", fontSize: "18px", letterSpacing: cardLanguage === "th" ? "0.5px" : "1.5px", color: PALETTE.accent }}>
+          <span style={{ fontFamily: textFont, fontWeight: "bold", fontSize: "14px", letterSpacing: cardLanguage === "th" ? "0.5px" : "1.5px", color: PALETTE.accent }}>
             {copy.footer[1]}{" "}
           </span>
-          <span style={{ fontFamily: textFont, fontWeight: "bold", fontSize: "18px", letterSpacing: cardLanguage === "th" ? "0.5px" : "1.5px", color: "#ffffff" }}>
+          <span style={{ fontFamily: textFont, fontWeight: "bold", fontSize: "14px", letterSpacing: cardLanguage === "th" ? "0.5px" : "1.5px", color: "#ffffff" }}>
             {copy.footer[2]}
           </span>
         </div>
@@ -950,13 +1055,14 @@ export class RecognitionCardImageRenderer {
       >
         {this.renderHeader(recognizedByName, cardLanguage)}
 
-        <div style={{ display: "flex", flex: 1, padding: "22px 40px", gap: "28px" }}>
-          <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+        <div style={{ display: "flex", flexDirection: "column", flex: 1, padding: "18px 40px", gap: "14px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             {this.renderStarSection(comment, cardLanguage)}
-            {this.renderBottomStrip(dateString, cardLanguage)}
           </div>
-
-          <div style={{ display: "flex", borderRadius: "18px", backgroundColor: "rgba(255,255,255,.58)", padding: "14px 14px 8px 0", boxShadow: "0 8px 24px rgba(12,58,34,.05)" }}>{this.renderCoreValues(coreValues, cardLanguage)}</div>
+          <div style={{ display: "flex", borderRadius: "14px", backgroundColor: "#fbfcf8", padding: "10px 16px", boxShadow: "0 6px 18px rgba(12,58,34,.04)" }}>
+            {this.renderCoreValues(coreValues, cardLanguage)}
+          </div>
+          {this.renderBottomStrip(dateString, cardLanguage)}
         </div>
 
         {this.renderFooter(cardLanguage)}
