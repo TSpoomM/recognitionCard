@@ -406,7 +406,7 @@ const CARD_COPY: Record<CardLanguage, {
 
 export class RecognitionCardImageRenderer {
   private static getTextFont(cardLanguage: CardLanguage) {
-    return cardLanguage === "th" ? "IBMPlexSansThai" : "Roboto";
+    return "IBMPlexSansThai, Roboto";
   }
 
   private static truncateText(text: string, maxChars: number) {
@@ -608,7 +608,7 @@ export class RecognitionCardImageRenderer {
               </span>
               <span
                 style={{
-                  fontFamily: "Roboto",
+                  fontFamily: textFont,
                   fontWeight: 600,
                   fontSize: "18px",
                   color: PALETTE.black,
@@ -715,7 +715,7 @@ export class RecognitionCardImageRenderer {
         >
           <span
             style={{
-              fontFamily: "Roboto",
+              fontFamily: questionFont,
               fontSize: "14px",
               fontStyle: "normal",
               color: PALETTE.textDark,
@@ -775,8 +775,8 @@ export class RecognitionCardImageRenderer {
               position: "absolute",
               right: "24px",
               top: "-30px",
-              width: "176px",
-              height: "76px",
+              width: "200px",
+              height: "100px",
               objectFit: "contain",
               opacity: 0.9,
               zIndex: 2,
@@ -796,6 +796,7 @@ export class RecognitionCardImageRenderer {
             overflow: "hidden",
             borderBottomLeftRadius: "18px",
             borderBottomRightRadius: "18px",
+            minHeight: "226px",
           }}
         >
           <div
@@ -903,7 +904,7 @@ export class RecognitionCardImageRenderer {
               <line x1="3" y1="10" x2="21" y2="10" stroke={PALETTE.textDark} strokeWidth={2} />
             </svg>
             <span style={{ fontFamily: textFont, fontWeight: 500, fontSize: "13px", color: PALETTE.textDark }}>{copy.date}</span>
-            <span style={{ fontFamily: "Roboto", fontWeight: 600, fontSize: "13px", color: PALETTE.textDark }}>
+            <span style={{ fontFamily: textFont, fontWeight: 600, fontSize: "13px", color: PALETTE.textDark }}>
               {dateString}
             </span>
           </div>

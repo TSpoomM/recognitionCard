@@ -41,6 +41,21 @@ function serializeStarSections(sections?: StarSections, fallback = "") {
     .join("\n\n");
 }
 
+function parseStarCommentToSections(comment: string): StarSections {
+  const sections: StarSections = { s: "", t: "", a: "", r: "" };
+  const matches = Array.from(comment.matchAll(/(^|\n)\s*(S|T|A|R)\s*[:\-]\s*/gi));
+  if (matches.length === 0) return sections;
+  matches.forEach((match, index) => {
+    const label = match[2].toLowerCase() as keyof StarSections;
+    if (!(label in sections)) return;
+    const textStart = (match.index ?? 0) + match[0].length;
+    const nextMatchIndex = matches[index + 1]?.index ?? comment.length;
+    const text = comment.slice(textStart, nextMatchIndex).trim();
+    sections[label] = text;
+  });
+  return sections;
+}
+
 export default class Home extends Component<Record<string, never>, PageState> {
   private intervalId: number | null = null;
   private sendingSubmissionIds = new Set<string>();
@@ -119,7 +134,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
 
   private get firstInvalidStarSection() {
     const sections = this.starSections;
-    if (this.state.previewConfirmed && Object.values(sections).every((value) => !value.trim())) return null;
+    // STAR sections are always required — every section must meet the minimum length.
     return (Object.keys(sections) as StarSectionKey[]).find((key) => sections[key].trim().length < STAR_SECTION_MIN_LENGTH) ?? null;
   }
 
@@ -159,10 +174,14 @@ export default class Home extends Component<Record<string, never>, PageState> {
       }
 
       const rawDraft = window.sessionStorage.getItem("recognition-forward-draft");
-      const draft = rawDraft ? JSON.parse(rawDraft) as { comment: string; coreValues: CommentType[]; cardLanguage: CardLanguage } : null;
+      const draft = rawDraft ? JSON.parse(rawDraft) as { comment: string; coreValues: CommentType[]; cardLanguage: CardLanguage; starComment?: string } : null;
       if (draft) window.sessionStorage.removeItem("recognition-forward-draft");
       if (draft) {
-        this.setState({ users: result.data as User[], isLoadingUsers: false, formError: "", currentStep: 1, selectedUserIds: [], selectedTypes: draft.coreValues, comment: draft.comment, previewConfirmed: true, selectedCardLanguage: draft.cardLanguage });
+        const starSections = draft.starComment ? parseStarCommentToSections(draft.starComment) : { ...EMPTY_STAR_SECTIONS };
+        const hasStarSections = Object.values(starSections).some((v) => v.trim());
+        // If STAR sections were restored, open the STAR panel (previewConfirmed=false) so user can see/edit them.
+        // If there are no STAR sections (preview-only old entry), keep previewConfirmed=true.
+        this.setState({ users: result.data as User[], isLoadingUsers: false, formError: "", currentStep: 1, selectedUserIds: [], selectedTypes: draft.coreValues, comment: draft.comment, starSections: hasStarSections ? starSections : { ...EMPTY_STAR_SECTIONS }, previewConfirmed: !hasStarSections, selectedCardLanguage: draft.cardLanguage });
       } else {
         this.setState({ users: result.data as User[], isLoadingUsers: false, formError: "" });
       }

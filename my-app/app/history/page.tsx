@@ -180,7 +180,7 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
               </section>
               <HistoryList error={error} isLoading={isLoading} items={items} onForward={(item) => {
                 logRecognitionAction("HistoryPage_Forward", currentUserId);
-                window.sessionStorage.setItem("recognition-forward-draft", JSON.stringify({ comment: item.comment, coreValues: item.coreValues, cardLanguage: "th" }));
+                window.sessionStorage.setItem("recognition-forward-draft", JSON.stringify({ comment: item.comment, coreValues: item.coreValues, cardLanguage: "th", starComment: item.starComment }));
                 window.location.href = "/";
               }} />
             </Card>

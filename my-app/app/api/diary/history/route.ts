@@ -82,6 +82,7 @@ export async function GET(request: Request) {
         },
         senderName: row.sender_name?.trim() || String(currentUserId),
         comment: row.diary_preview || row.diary_comment || "",
+        starComment: row.diary_comment || "",
         coreValues: parseCoreValues(row.diary_corevalue),
         createdDate: createdDate ? createdDate.toISOString() : null,
         year: createdDate ? createdDate.getFullYear() : null,

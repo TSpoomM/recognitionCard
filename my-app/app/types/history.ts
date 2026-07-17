@@ -15,4 +15,5 @@ export type HistoryItem = {
   coreValues: string[];
   createdDate: string | null;
   year: number | null;
+  starComment?: string;
 };
