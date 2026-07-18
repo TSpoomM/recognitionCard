@@ -3,6 +3,9 @@
 export type ReportAccessResult = {
   userId: string;
   isAdmin: boolean;
+  isBranchManager: boolean;
+  branch: string | null;
+  canAccessReport: boolean;
 };
 
 export class ReportAccessClient {
@@ -21,6 +24,9 @@ export class ReportAccessClient {
     return {
       userId: String(result.data?.userId || currentUserId),
       isAdmin: Boolean(result.data?.isAdmin),
+      isBranchManager: Boolean(result.data?.isBranchManager),
+      branch: result.data?.branch ? String(result.data.branch) : null,
+      canAccessReport: Boolean(result.data?.canAccessReport),
     };
   }
 }

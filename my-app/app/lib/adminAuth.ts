@@ -6,9 +6,17 @@ type EmployeeRoleRow = RowDataPacket & {
   position: string | null;
 };
 
+type EmployeeReportAccessRow = RowDataPacket & {
+  section: string | number | null;
+  location_emp: string | null;
+};
+
 export type AdminAccess = {
   userId: string;
   isAdmin: boolean;
+  isBranchManager: boolean;
+  branch: string | null;
+  canAccessReport: boolean;
 };
 
 export class AdminAuthService {
@@ -55,7 +63,36 @@ export class AdminAuthService {
     const userId = await currentUserService.getRequestCurrentUserId(request, body);
     const isAdmin = await this.isUserAdmin(userId);
 
-    return { userId, isAdmin };
+    let isBranchManager = false;
+    let branch: string | null = null;
+
+    if (!isAdmin) {
+      try {
+        const [rows] = await pool.query<EmployeeReportAccessRow[]>(
+          `
+          SELECT section, location_emp
+          FROM tb_employee_list
+          WHERE fs_id = ?
+          LIMIT 1
+          `,
+          [currentUserService.normalizeUserId(userId)]
+        );
+
+        branch = rows[0]?.location_emp?.trim() || null;
+        isBranchManager = Number(rows[0]?.section) === 1 && Boolean(branch);
+      } catch {
+        isBranchManager = false;
+        branch = null;
+      }
+    }
+
+    return {
+      userId,
+      isAdmin,
+      isBranchManager,
+      branch,
+      canAccessReport: isAdmin || isBranchManager,
+    };
   }
 
   async requireAdmin(request: Request, body?: Record<string, unknown>): Promise<AdminAccess> {

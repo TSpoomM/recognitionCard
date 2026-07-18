@@ -26,14 +26,20 @@ type EmployeeBranchRow = RowDataPacket & {
 
 export async function GET(request: Request) {
   try {
-    const { isAdmin } = await requireAdmin(request);
+    const { isAdmin, isBranchManager, branch, canAccessReport } = await requireAdmin(request);
 
-    if (!isAdmin) {
+    if (!canAccessReport) {
       return NextResponse.json(
-        { success: false, error: "Admin access required." },
+        { success: false, error: "Admin or branch manager access required." },
         { status: 403 }
       );
     }
+
+    const branchFilter = isBranchManager && !isAdmin ? branch : null;
+    const diaryWhere = branchFilter ? "WHERE e.location_emp = ?" : "";
+    const employeeWhere = branchFilter
+      ? "WHERE emp_name_en IS NOT NULL AND location_emp = ?"
+      : "WHERE emp_name_en IS NOT NULL";
 
     const [diaryRows] = await pool.query<DiaryReportRow[]>(
       `
@@ -53,17 +59,20 @@ export async function GET(request: Request) {
         ON d.diary_emp_id = e.fs_id
       LEFT JOIN tb_employee_list sender
         ON d.createdBy = sender.fs_id
+      ${diaryWhere}
       ORDER BY d.createdDate DESC, d.diary_list DESC
-      `
+      `,
+      branchFilter ? [branchFilter] : []
     );
 
     const [employeeRows] = await pool.query<EmployeeBranchRow[]>(
       `
       SELECT fs_id, emp_name_en, location_emp
       FROM tb_employee_list
-      WHERE emp_name_en IS NOT NULL
+      ${employeeWhere}
       ORDER BY emp_name_en ASC
-      `
+      `,
+      branchFilter ? [branchFilter] : []
     );
 
     const rows: ReportRow[] = [];

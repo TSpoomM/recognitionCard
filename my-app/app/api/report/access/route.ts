@@ -3,13 +3,17 @@ import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   try {
-    const { userId, isAdmin } = await adminAuthService.getAccess(request);
+    const { userId, isAdmin, isBranchManager, branch, canAccessReport } =
+      await adminAuthService.getAccess(request);
 
     return NextResponse.json({
       success: true,
       data: {
         userId,
         isAdmin,
+        isBranchManager,
+        branch,
+        canAccessReport,
       },
     });
   } catch (error) {

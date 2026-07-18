@@ -13,7 +13,7 @@ type NavbarProps = {
 };
 
 type NavbarState = {
-  isAdmin: boolean;
+  canAccessReport: boolean;
   isLoadingAccess: boolean;
   currentPath: string;
 };
@@ -28,7 +28,7 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
     super(props);
 
     this.state = {
-      isAdmin: false,
+      canAccessReport: false,
       isLoadingAccess: true,
       currentPath: "",
     };
@@ -61,7 +61,7 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
     try {
       const access = await reportAccessClient.getAccess(currentUserId);
       if (this.cancelled) return;
-      this.setState({ isAdmin: access.isAdmin, isLoadingAccess: false });
+      this.setState({ canAccessReport: access.canAccessReport, isLoadingAccess: false });
     } catch {
       if (this.cancelled) return;
       this.setState({ isLoadingAccess: false });
@@ -70,9 +70,9 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
 
   render() {
     const { currentUserId } = this.props;
-    const { currentPath, isAdmin } = this.state;
+    const { currentPath, canAccessReport } = this.state;
     const { t } = this.context;
-    const showReport = isAdmin || currentPath === "/report";
+    const showReport = canAccessReport || currentPath === "/report";
     const getNavItemClassName = (active: boolean, tone: "default" | "report" = "default") => {
       if (active) {
         return tone === "report"

@@ -23,7 +23,7 @@ import { getInitialLanguage, LanguageContext, persistLanguage } from "../context
 type ReportPageState = {
   lang: Language;
   currentUserId: string;
-  isAdmin: boolean;
+  canAccessReport: boolean;
   isLoadingAccess: boolean;
   isLoadingData: boolean;
   error: string;
@@ -48,7 +48,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
     this.state = {
       lang: 'th',
       currentUserId: "",
-      isAdmin: false,
+      canAccessReport: false,
       isLoadingAccess: true,
       isLoadingData: false,
       error: "",
@@ -154,13 +154,13 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
       if (this.cancelled) return;
       const access = await reportAccessClient.getAccess(currentUserId);
       if (this.cancelled) return;
-      const isAdmin = access.isAdmin;
+      const canAccessReport = access.canAccessReport;
       this.setState({
-        isAdmin,
+        canAccessReport,
         isLoadingAccess: false,
-        error: isAdmin ? "" : this.t.reportOnlyAdmin,
+        error: canAccessReport ? "" : this.t.reportOnlyAdmin,
       });
-      if (isAdmin) {
+      if (canAccessReport) {
         await this.loadReportData(currentUserId);
       }
     } catch (err) {
@@ -251,7 +251,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
       currentUserId,
       data,
       error,
-      isAdmin,
+      canAccessReport,
       isLoadingAccess,
       isLoadingData,
       query,
@@ -338,7 +338,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
         </main>
       );
     }
-    if (!isAdmin) {
+    if (!canAccessReport) {
       return (
         <main className="flex min-h-screen items-center justify-center px-6">
           <Card padding="xl" shadow="xl" className="app-surface max-w-md text-center">
