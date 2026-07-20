@@ -94,8 +94,8 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
       "กด Home ที่เมนูด้านบน หรือกดปุ่มไปหน้าหลักที่ด้านล่างของคู่มือนี้",
       "ขั้นตอนที่ 1 เลือกสาขาหรือค้นหาชื่อ แล้วกดการ์ดเพื่อนร่วมทีมที่ต้องการชื่นชม",
       "กด Continue แล้วเลือกค่านิยมอย่างน้อย 1 ข้อในขั้นตอนที่ 2",
-      "ขั้นตอนที่ 3 กรอก Situation, Task, Action และ Result โดย Preview ด้านขวาจะรวมข้อความให้แบบเรียลไทม์",
-      "ใช้ปุ่ม เขียน STAR / แก้ Preview ที่ลอยอยู่ด้านบนเพื่อสลับโหมด เมื่อเข้าโหมด Preview ระบบจะนำ STAR ล่าสุดมาสร้างข้อความใหม่ และสามารถปรับสำนวนได้โดยไม่แก้ข้อมูล STAR",
+      "ขั้นตอนที่ 3 กรอก Situation, Task, Action และ Result โดย ตัวอย่าง ด้านขวาจะรวมข้อความให้แบบเรียลไทม์",
+      "ใช้ปุ่ม เขียน STAR / แก้ ตัวอย่าง ที่ลอยอยู่ด้านบนเพื่อสลับโหมด เมื่อเข้าโหมด ตัวอย่าง ระบบจะนำ STAR ล่าสุดมาสร้างข้อความใหม่ และสามารถปรับสำนวนได้โดยไม่แก้ข้อมูล STAR",
       "ตรวจความยาวและข้อมูลให้ครบ จากนั้นกด Continue",
       "ขั้นตอนที่ 4 เลือกภาษาไทยหรืออังกฤษสำหรับรูปการ์ด แล้วกดส่งคำชื่นชม",
     ] : [
@@ -133,7 +133,7 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
         icon: <MessageSquare className="h-8 w-8" />,
         title: t.guideStep3Title,
         desc: lang === "th"
-          ? "กรอก STAR ทั้ง 4 ส่วนที่เรียงลงมา Preview จะอัปเดตแบบเรียลไทม์ จากนั้นสลับไปโหมดแก้ Preview เพื่อปรับสำนวนโดยไม่กระทบข้อมูล STAR"
+          ? "กรอก STAR ทั้ง 4 ส่วนที่เรียงลงมา ตัวอย่าง จะอัปเดตแบบเรียลไทม์ จากนั้นสลับไปโหมดแก้ ตัวอย่าง เพื่อปรับสำนวนโดยไม่กระทบข้อมูล STAR"
           : "Complete the four vertically arranged STAR sections. Preview updates in real time; switch to Edit Preview to refine the final message without changing STAR.",
         color: "from-amber-400 to-orange-500",
         bgColor: "bg-amber-50",
@@ -248,7 +248,7 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
             {demoButton(t.submitRecognition, "bg-teal-800 text-white shadow-sm shadow-teal-900/25 hover:bg-teal-900", <Send className="h-4 w-4" />)}
             <span className="inline-grid grid-cols-2 rounded-xl bg-slate-100 p-1">
               <span className="rounded-lg bg-white px-3 py-2 text-sm font-bold text-teal-900 shadow-sm">★ {lang === "th" ? "เขียน STAR" : "Write STAR"}</span>
-              <span className="rounded-lg px-3 py-2 text-sm font-bold text-slate-500">✎ {lang === "th" ? "แก้ Preview" : "Edit Preview"}</span>
+              <span className="rounded-lg px-3 py-2 text-sm font-bold text-slate-500">✎ {lang === "th" ? "แก้ไขตัวอย่าง" : "Edit Preview"}</span>
             </span>
             <span className="inline-flex overflow-hidden rounded-full border-[1.5px] border-amber-300 bg-teal-50 p-1">
               <button
@@ -309,10 +309,10 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
               <div className="mt-3 overflow-hidden rounded-xl border border-teal-200 bg-white/90">
                 <div className="flex items-center gap-2 border-b border-teal-100 bg-teal-50 px-4 py-2.5">
                   <span className="grid h-7 w-7 place-items-center rounded-lg bg-teal-800 text-sm text-white">★</span>
-                  <span className="font-bold text-teal-950">{lang === "th" ? "ข้อความ Preview" : "Recognition message"}</span>
+                  <span className="font-bold text-teal-950">{lang === "th" ? "ข้อความตัวอย่าง" : "Recognition message"}</span>
                 </div>
                 <p className="border-l-4 border-amber-300 px-4 py-3 text-base leading-7 text-slate-700">
-                  {lang === "th" ? "รายการรอส่งและรูปการ์ดจะแสดงข้อความ Preview ที่ปรับสำนวนแล้วเป็นกล่องเดียว" : "The waiting list and card image show the refined Preview as one message panel."}
+                  {lang === "th" ? "รายการรอส่งและรูปการ์ดจะแสดงข้อความตัวอย่าง ที่ปรับสำนวนแล้วเป็นกล่องเดียว" : "The waiting list and card image show the refined Preview as one message panel."}
                 </p>
               </div>
             </div>
@@ -526,8 +526,8 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
                     ))}
                   </div>
                   <div className="mt-5 rounded-2xl border border-teal-200 bg-teal-50/60 p-5">
-                    <h3 className="font-bold text-teal-950">{lang === "th" ? "STAR และ Preview ทำงานร่วมกันอย่างไร" : "How STAR and Preview work together"}</h3>
-                    <p className="mt-2 text-lg leading-8 text-slate-700">{lang === "th" ? "ขณะเขียน STAR กล่อง Preview จะแสดงข้อความรวมแบบเรียลไทม์แต่ยังแก้ไม่ได้ เมื่อกด แก้ Preview ระบบจะสร้างข้อความจาก STAR ล่าสุดอีกครั้งและปลดล็อกให้ปรับสำนวน หากกลับไปแก้ STAR แล้วเข้า Preview ใหม่ ข้อความ Preview จะถูกสร้างใหม่จาก STAR" : "While you write STAR, Preview shows the combined message in real time but remains read-only. Selecting Edit Preview rebuilds it from the latest STAR text and unlocks wording changes. Returning to STAR and opening Preview again rebuilds the Preview."}</p>
+                    <h3 className="font-bold text-teal-950">{lang === "th" ? "STAR และ ตัวอย่าง ทำงานร่วมกันอย่างไร" : "How STAR and Preview work together"}</h3>
+                    <p className="mt-2 text-lg leading-8 text-slate-700">{lang === "th" ? "ขณะเขียน STAR กล่องตัวอย่าง จะแสดงข้อความรวมแบบเรียลไทม์แต่ยังแก้ไม่ได้ เมื่อกด แก้ตัวอย่าง ระบบจะสร้างข้อความจาก STAR ล่าสุดอีกครั้งและปลดล็อกให้ปรับสำนวน หากกลับไปแก้ STAR แล้วเข้าตัวอย่างใหม่ ข้อความตัวอย่าง จะถูกสร้างใหม่จาก STAR" : "While you write STAR, Preview shows the combined message in real time but remains read-only. Selecting Edit Preview rebuilds it from the latest STAR text and unlocks wording changes. Returning to STAR and opening Preview again rebuilds the Preview."}</p>
                   </div>
                 </div>
 
