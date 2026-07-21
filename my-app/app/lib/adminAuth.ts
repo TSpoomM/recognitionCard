@@ -1,5 +1,6 @@
 import { pool } from "@/app/lib/db";
 import { currentUserService } from "@/app/lib/currentUser";
+import { getRequestCurrentUserId } from "@/app/lib/requestCurrentUser";
 import { RowDataPacket } from "mysql2";
 
 type EmployeeRoleRow = RowDataPacket & {
@@ -59,8 +60,8 @@ export class AdminAuthService {
     }
   }
 
-  async getAccess(request: Request, body?: Record<string, unknown>): Promise<AdminAccess> {
-    const userId = await currentUserService.getRequestCurrentUserId(request, body);
+  async getAccess(request: Request): Promise<AdminAccess> {
+    const userId = await getRequestCurrentUserId(request);
     const isAdmin = await this.isUserAdmin(userId);
 
     let isBranchManager = false;
@@ -95,13 +96,12 @@ export class AdminAuthService {
     };
   }
 
-  async requireAdmin(request: Request, body?: Record<string, unknown>): Promise<AdminAccess> {
-    return this.getAccess(request, body);
+  async requireAdmin(request: Request): Promise<AdminAccess> {
+    return this.getAccess(request);
   }
 }
 
 export const adminAuthService = new AdminAuthService();
 
 export const isUserAdmin = (userId: string) => adminAuthService.isUserAdmin(userId);
-export const requireAdmin = (request: Request, body?: Record<string, unknown>) =>
-  adminAuthService.requireAdmin(request, body);
+export const requireAdmin = (request: Request) => adminAuthService.requireAdmin(request);

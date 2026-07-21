@@ -22,6 +22,7 @@ import { RecognitionEngine } from "./lib/RecognitionEngine";
 import { getClientCurrentUserId, isSameUserId } from "./lib/currentUser";
 import { STAR_COMMENT_MAX_LENGTH, STAR_COMMENT_MIN_LENGTH, STAR_SECTION_MIN_LENGTH } from "./constants/recognitionFlow";
 import { logRecognitionAction } from "./lib/recognitionLog";
+import { withBasePath } from "./lib/basePath";
 
 type PageState = HomeState & { lang: Language };
 type StarSectionKey = "s" | "t" | "a" | "r";
@@ -140,10 +141,12 @@ export default class Home extends Component<Record<string, never>, PageState> {
 
   componentDidMount() {
     const initialLang = getInitialLanguage();
-    const currentUserId = getClientCurrentUserId();
-    this.setState({ lang: initialLang, selectedCardLanguage: initialLang, currentUserId });
-    logRecognitionAction("step1", currentUserId);
-    this.loadUsers();
+    this.setState({ lang: initialLang, selectedCardLanguage: initialLang });
+    getClientCurrentUserId().then((currentUserId) => {
+      this.setState({ currentUserId });
+      logRecognitionAction("step1", currentUserId);
+      this.loadUsers();
+    });
     this.setState({
       pendingSubmissions: RecognitionEngine.loadSubmissions(),
     });
@@ -166,7 +169,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
 
   private async loadUsers() {
     try {
-      const response = await fetch("/api/employees");
+      const response = await fetch(withBasePath("/api/employees"));
       const result = await response.json();
 
       if (!response.ok || !result.success || !Array.isArray(result.data)) {
@@ -209,7 +212,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
     this.sendingSubmissionIds.add(submission.id);
 
     try {
-      const response = await fetch("/api/diary", {
+      const response = await fetch(withBasePath("/api/diary"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

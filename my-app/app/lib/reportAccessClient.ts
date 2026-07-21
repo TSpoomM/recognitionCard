@@ -1,5 +1,7 @@
 'use client';
 
+import { withBasePath } from "./basePath";
+
 export type ReportAccessResult = {
   userId: string;
   isAdmin: boolean;
@@ -10,7 +12,7 @@ export type ReportAccessResult = {
 
 export class ReportAccessClient {
   async getAccess(currentUserId: string): Promise<ReportAccessResult> {
-    const response = await fetch(`/api/report/access`, {
+    const response = await fetch(withBasePath("/api/report/access"), {
       headers: {
         "x-current-user-id": currentUserId,
       },

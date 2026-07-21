@@ -13,6 +13,7 @@ import { getInitialLanguage, LanguageContext, persistLanguage } from "../context
 import Button from "../components/ui/Button";
 import { FileText, Search } from "lucide-react";
 import { downloadHistoryCsv, downloadHistoryPdf } from "../lib/historyExport";
+import { withBasePath } from "../lib/basePath";
 import { logRecognitionAction } from "../lib/recognitionLog";
 
 type HistoryPageState = {
@@ -50,7 +51,6 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
 
   componentDidMount() {
     this.setState({ lang: getInitialLanguage() });
-    this.setState({ currentUserId: getClientCurrentUserId() });
     this.loadHistory();
   }
 
@@ -71,7 +71,7 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
   }
 
   private async loadHistory() {
-    const currentUserId = getClientCurrentUserId();
+    const currentUserId = await getClientCurrentUserId();
 
     if (!currentUserId) {
       this.setState({
@@ -85,7 +85,7 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
     this.setState({ currentUserId });
 
     try {
-      const response = await fetch(`/api/diary/history`, {
+      const response = await fetch(withBasePath("/api/diary/history"), {
         headers: {
           "x-current-user-id": currentUserId,
         },
@@ -181,7 +181,7 @@ export default class HistoryPage extends Component<Record<string, never>, Histor
               <HistoryList error={error} isLoading={isLoading} items={items} onForward={(item) => {
                 logRecognitionAction("HistoryPage_Forward", currentUserId);
                 window.sessionStorage.setItem("recognition-forward-draft", JSON.stringify({ comment: item.comment, coreValues: item.coreValues, cardLanguage: "th", starComment: item.starComment }));
-                window.location.href = "/";
+                window.location.href = withBasePath("/");
               }} />
             </Card>
           </div>

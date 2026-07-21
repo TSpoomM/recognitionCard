@@ -10,6 +10,7 @@ import { getClientCurrentUserId } from "../lib/currentUser";
 import { reportAccessClient } from "../lib/reportAccessClient";
 import { downloadReportCsv, downloadReportPdf } from "../lib/reportExport";
 import { logRecognitionAction } from "../lib/recognitionLog";
+import { withBasePath } from "../lib/basePath";
 import {
   getCoreValueDisplayLabel,
   normalizeCoreValueCode,
@@ -67,10 +68,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
     return TRANSLATIONS[this.state.lang];
   }
   componentDidMount() {
-    this.setState({
-      lang: getInitialLanguage(),
-      currentUserId: getClientCurrentUserId(),
-    });
+    this.setState({ lang: getInitialLanguage() });
     this.loadAccess();
   }
   componentWillUnmount() {
@@ -140,7 +138,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
     );
   }
   private async loadAccess() {
-    const currentUserId = getClientCurrentUserId();
+    const currentUserId = await getClientCurrentUserId();
     if (!currentUserId) {
       this.setState({
         currentUserId,
@@ -174,7 +172,7 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
   private async loadReportData(currentUserId: string) {
     this.setState({ isLoadingData: true, error: "" });
     try {
-      const response = await fetch(`/api/report`, {
+      const response = await fetch(withBasePath("/api/report"), {
         headers: {
           "x-current-user-id": currentUserId,
         },

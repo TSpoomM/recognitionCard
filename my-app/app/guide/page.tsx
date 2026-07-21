@@ -34,13 +34,12 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
   }
 
   componentDidMount() {
-    const currentUserId = getClientCurrentUserId();
-    this.setState({
-      lang: getInitialLanguage(),
-      currentUserId,
+    this.setState({ lang: getInitialLanguage() });
+    getClientCurrentUserId().then((currentUserId) => {
+      this.setState({ currentUserId });
+      logRecognitionAction("GuidePage", currentUserId);
+      this.loadAdminAccess(currentUserId);
     });
-    logRecognitionAction("GuidePage", currentUserId);
-    this.loadAdminAccess(currentUserId);
     this.updateActiveGuideSection();
     window.addEventListener("scroll", this.updateActiveGuideSection, { passive: true });
     window.addEventListener("resize", this.updateActiveGuideSection);
