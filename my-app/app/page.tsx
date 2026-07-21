@@ -116,6 +116,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
       if (selectedBranch && user.location !== selectedBranch) return false;
 
       return (
+        user.thaiName?.toLowerCase().includes(query) ||
         user.firstName.toLowerCase().includes(query) ||
         user.lastName.toLowerCase().includes(query) ||
         user.team?.toLowerCase().includes(query) ||

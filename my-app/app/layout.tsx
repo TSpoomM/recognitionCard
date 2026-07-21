@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import "./globals.css";
+import { isDevAuthBypassEnabled } from "./lib/devAuth";
 import { getHrkpisSessionCookieName, readHrkpisSession } from "./lib/hrkpisSession";
 
 export const metadata: Metadata = {
@@ -20,7 +21,7 @@ export default async function RootLayout({
   const sessionId = cookieStore.get(getHrkpisSessionCookieName())?.value;
   const session = await readHrkpisSession(sessionId);
 
-  if (!session) {
+  if (!session && !isDevAuthBypassEnabled) {
     // Must be an absolute URL: redirect() auto-prefixes relative paths with
     // basePath, which would wrongly turn /hrkpis/login.php into /recognitionCard/hrkpis/login.php.
     if (/^https?:\/\//.test(HRKPIS_LOGIN_PATH)) {

@@ -10,8 +10,17 @@ type RecognitionUserSelectProps = {
   onToggleUser: (userId: string) => void;
 };
 
-function getInitials(user: User) {
-  return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.trim().toUpperCase() || "?";
+function getDisplayName(user: User, lang: string) {
+  return (lang === "th" ? user.thaiName : "") || `${user.firstName} ${user.lastName}`.trim();
+}
+
+function getInitials(displayName: string) {
+  return displayName
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0))
+    .join("")
+    .toUpperCase() || "?";
 }
 
 export default class RecognitionUserSelect extends Component<RecognitionUserSelectProps> {
@@ -26,6 +35,7 @@ export default class RecognitionUserSelect extends Component<RecognitionUserSele
         <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
           {users.map((user) => {
             const selected = selectedUserIds.includes(user.user_id);
+            const displayName = getDisplayName(user, this.context.lang);
             return (
               <button
                 key={user.user_id}
@@ -37,10 +47,10 @@ export default class RecognitionUserSelect extends Component<RecognitionUserSele
                   }`}
               >
                 <div className="relative grid h-14 w-14 flex-shrink-0 place-items-center overflow-hidden rounded-2xl bg-teal-50 text-base font-bold text-teal-700">
-                  {getInitials(user)}
+                  {getInitials(displayName)}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p title={`${user.firstName} ${user.lastName}`} className="truncate text-lg font-semibold text-slate-900">{user.firstName} {user.lastName}</p>
+                  <p title={displayName} className="truncate text-lg font-semibold text-slate-900">{displayName}</p>
                   <p title={(this.context.lang === "th" ? user.branchDesc : user.branchNameEn) || user.branchDesc || user.branchNameEn || user.location || ""} className="mt-1 line-clamp-2 text-sm leading-5 text-slate-500">
                     {(this.context.lang === "th" ? user.branchDesc : user.branchNameEn) || user.branchDesc || user.branchNameEn || user.location || "-"}
                   </p>

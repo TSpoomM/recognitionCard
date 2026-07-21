@@ -20,7 +20,7 @@ export const TRANSLATIONS = {
     step1Title: 'Choose Recipients',
     step1Description: 'Pick one or more teammates to recognize.',
     step1Loading: 'Loading employee data...',
-    step1SearchPlaceholder: 'Search by name, team, role...',
+    step1SearchPlaceholder: 'Search by name ...',
 
     // Step 2 – Core Values
     step2Title: 'Choose types',
@@ -205,7 +205,7 @@ export const TRANSLATIONS = {
     step1Title: 'เลือกผู้รับ',
     step1Description: 'เลือกเพื่อนร่วมทีมอย่างน้อยหนึ่งคนที่ต้องการชื่นชม',
     step1Loading: 'กำลังโหลดข้อมูลพนักงาน...',
-    step1SearchPlaceholder: 'ค้นหาด้วยชื่อ, ทีม, ตำแหน่ง...',
+    step1SearchPlaceholder: 'ค้นหาด้วยชื่อ ...',
 
     // Step 2 – Core Values
     step2Title: 'เลือกค่านิยม',

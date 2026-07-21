@@ -34,6 +34,8 @@ export default class RecognitionUserStep extends Component<RecognitionUserStepPr
   render() {
     const { filteredUsers, selectedUsers, selectedUserIds, searchQuery, selectedBranch, availableBranches, onToggleUser } = this.props;
     const { t, lang } = this.context;
+    const getDisplayName = (user: User) =>
+      (lang === "th" ? user.thaiName : "") || `${user.firstName} ${user.lastName}`.trim();
 
     return (
       <>
@@ -73,7 +75,7 @@ export default class RecognitionUserStep extends Component<RecognitionUserStepPr
                 onClick={() => onToggleUser(user.user_id)}
                 className="inline-flex items-center gap-2 rounded-full border-[1.5px] border-amber-400 bg-teal-800 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:border-amber-400 hover:bg-teal-900"
               >
-                {user.firstName} {user.lastName}
+                {getDisplayName(user)}
                 <span className="text-teal-100">x</span>
               </button>
             ))}

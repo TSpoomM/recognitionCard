@@ -5,6 +5,7 @@ import { RowDataPacket } from "mysql2";
 
 type EmployeeRow = RowDataPacket & {
   fs_id: string | number;
+  emp_name: string | null;
   emp_name_en: string | null;
   location_emp: string | null;
   position: string | null;
@@ -51,10 +52,11 @@ export async function GET() {
         user_id: String(row.fs_id),
         firstName,
         lastName,
+        thaiName: row.emp_name?.trim() || undefined,
         email: row.email || "",
         role: row.position || undefined,
         team: undefined,
-        location: row.location_emp || undefined,        
+        location: row.location_emp || undefined,
         branchDesc: row.branch_desc?.trim() || undefined,
         branchNameEn: row.branch_name_en?.trim() || undefined,
       };
@@ -63,6 +65,7 @@ export async function GET() {
     if (!data.some((user) => user.user_id === TEST_CURRENT_USER.user_id)) {
       data.unshift({
         ...TEST_CURRENT_USER,
+        thaiName: undefined,
         team: undefined,
         branchDesc: undefined,
         branchNameEn: undefined,
