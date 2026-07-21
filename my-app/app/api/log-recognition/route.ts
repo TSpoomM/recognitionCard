@@ -1,11 +1,11 @@
 import { pool } from "@/app/lib/db";
-import { getRequestCurrentUserId } from "@/app/lib/currentUser";
+import { getRequestCurrentUserId } from "@/app/lib/requestCurrentUser";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json() as Record<string, unknown>;
-    const employeeId = await getRequestCurrentUserId(request, body);
+    const employeeId = await getRequestCurrentUserId(request);
     const action = typeof body.action === "string" ? body.action.trim() : "";
 
     if (!employeeId || !action) {

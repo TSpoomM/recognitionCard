@@ -2,7 +2,8 @@ import { pool } from "@/app/lib/db";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { NextResponse } from "next/server";
 import { EmailService } from "@/app/services/email/EmailService";
-import { getRequestCurrentUserId, isSameUserId } from "@/app/lib/currentUser";
+import { isSameUserId } from "@/app/lib/currentUser";
+import { getRequestCurrentUserId } from "@/app/lib/requestCurrentUser";
 import { CardLanguage } from "@/app/types/cardLanguage";
 
 type EmployeeEmailRow = RowDataPacket & {
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
     const previewComment = typeof diary_preview === "string" && diary_preview.trim()
       ? diary_preview.trim()
       : diary_comment;
-    const createdBy = await getRequestCurrentUserId(request, body);
+    const createdBy = await getRequestCurrentUserId(request);
     const cardLanguage: CardLanguage = body.cardLanguage === "th" ? "th" : "en";
     const recipientIds = Array.from(
       new Set(

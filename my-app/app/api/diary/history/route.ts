@@ -1,5 +1,5 @@
 import { pool } from "@/app/lib/db";
-import { getRequestCurrentUserId } from "@/app/lib/currentUser";
+import { getRequestCurrentUserId } from "@/app/lib/requestCurrentUser";
 import { parseCoreValues, splitName } from "@/app/lib/reportUtils";
 import { NextResponse } from "next/server";
 import { RowDataPacket } from "mysql2";
