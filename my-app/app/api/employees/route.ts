@@ -27,6 +27,7 @@ export async function GET() {
       `
       SELECT
         e.fs_id,
+        e.emp_name,
         e.emp_name_en,
         e.location_emp,
         em.position,
