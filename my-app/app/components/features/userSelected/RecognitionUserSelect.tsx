@@ -21,6 +21,7 @@ function getInitials(displayName: string) {
     .map((part) => part.charAt(0))
     .join("")
     .toUpperCase() || "?";
+  // return "EIEI";
 }
 
 export default class RecognitionUserSelect extends Component<RecognitionUserSelectProps> {
@@ -35,7 +36,10 @@ export default class RecognitionUserSelect extends Component<RecognitionUserSele
         <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
           {users.map((user) => {
             const selected = selectedUserIds.includes(user.user_id);
-            const displayName = getDisplayName(user, this.context.lang);
+            // const displayName = getDisplayName(user, this.context.lang);
+            const displayName = getDisplayName(user, "en");
+            // console.log("context", this.context);
+
             return (
               <button
                 key={user.user_id}
