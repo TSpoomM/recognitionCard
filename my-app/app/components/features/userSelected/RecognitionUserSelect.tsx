@@ -36,9 +36,8 @@ export default class RecognitionUserSelect extends Component<RecognitionUserSele
         <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
           {users.map((user) => {
             const selected = selectedUserIds.includes(user.user_id);
-            // const displayName = getDisplayName(user, this.context.lang);
-            const displayName = getDisplayName(user, "en");
-            // console.log("context", this.context);
+            const displayName = getDisplayName(user, this.context.lang);
+            const inName = getDisplayName(user, "en");
 
             return (
               <button
@@ -51,7 +50,7 @@ export default class RecognitionUserSelect extends Component<RecognitionUserSele
                   }`}
               >
                 <div className="relative grid h-14 w-14 flex-shrink-0 place-items-center overflow-hidden rounded-2xl bg-teal-50 text-base font-bold text-teal-700">
-                  {getInitials(displayName)}
+                  {getInitials(inName)}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p title={displayName} className="truncate text-lg font-semibold text-slate-900">{displayName}</p>
