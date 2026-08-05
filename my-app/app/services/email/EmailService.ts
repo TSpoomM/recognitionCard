@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 import { EMAIL_CONFIG } from "./emailConfig";
 import { RecognitionCardImageRenderer } from "./RecognitionCardImage";
 import { CardLanguage } from "../../types/cardLanguage";
+import { TRANSLATIONS } from "../../constants/translations";
 
 type SendComplimentEmailParams = {
   toEmail: string | string[];
@@ -50,6 +51,8 @@ export class EmailService {
     }).format(new Date());
 
     console.log(`Generating card image for ${recipientName}...`);
+    const attachmentFileName = TRANSLATIONS[cardLanguage].fileName;
+    const subject = TRANSLATIONS[cardLanguage].subject;
     const imageBuffer = await RecognitionCardImageRenderer.renderToBuffer({
       recipientName,
       recognizedByName,
@@ -64,7 +67,7 @@ export class EmailService {
       console.log(`From: ${EMAIL_CONFIG.emailFrom}`);
       console.log(`To: ${targetRecipients.join(", ")} (Original Recipient: ${originalRecipients.join(", ")})`);
       console.log(`Cc: ${ccRecipients.join(", ")}`);
-      console.log("Subject: Compliment");
+      console.log(`Subject: ${subject}`);
       console.log("Details:");
       console.log(`- Recipient Name: ${recipientName}`);
       console.log(`- Recognized By: ${recognizedByName}`);
@@ -72,6 +75,7 @@ export class EmailService {
       console.log(`- Card Language: ${cardLanguage}`);
       console.log(`- Core Values: ${coreValues.join(", ")}`);
       console.log(`- Comment: ${comment}`);
+      console.log(`- Attachment Filename: ${attachmentFileName}`);
       console.log(`[Card image generated successfully: ${imageBuffer.length} bytes]`);
       console.log("=========================================================");
       return { success: true, info: "SMTP credentials not configured; mocked email successfully." };
@@ -91,16 +95,16 @@ export class EmailService {
       from: `"TeckBeeHang Recognition" <${EMAIL_CONFIG.emailFrom}>`,
       to: targetRecipients,
       cc: ccRecipients,
-      subject: "Compliment",
+      subject: subject,
       html: EmailService.buildHtml(recipientDisplayName || recipientName, cardLanguage, recipientDisplayNames),
       attachments: [
         {
-          filename: "compliment-card.png",
+          filename: attachmentFileName,
           content: imageBuffer,
           cid: "recognitionCard",
         },
         {
-          filename: "compliment-card.png",
+          filename: attachmentFileName,
           content: imageBuffer,
           contentDisposition: "attachment",
         },
@@ -127,8 +131,9 @@ export class EmailService {
 
   private static buildHtml(recipientDisplayName: string, cardLanguage: CardLanguage, recipientDisplayNames?: string[]) {
     const isThai = cardLanguage === "th";
-    const heading = isThai ? "คุณได้รับบัตรส่งต่อคุณค่า !" : "You've received a recognition card!";
-    const intro = isThai ? "เราขอชื่นชม" : "We would like to recognize";
+    // const heading = isThai ? "คุณได้รับบัตรส่งต่อคุณค่า !" : "You've received a recognition card!";
+    const heading = isThai ? "เราขอชื่นชม" : "We would like to recognize";
+    // const intro = isThai ? "เราขอชื่นชม" : "We would like to recognize";
     const note = isThai ? "ขอบคุณที่ร่วมสร้างสิ่งดี ๆ ให้เกิดขึ้นในทีม" : "Thank you for making a positive difference to the team.";
 
     let namesHtml: string;
@@ -155,7 +160,6 @@ export class EmailService {
           <div style="padding:30px 24px 10px;text-align:center;">
             <div style="display:inline-block;margin-bottom:14px;border-radius:999px;background:#ccfbf1;padding:7px 14px;color:#115e59;font-size:12px;font-weight:700;letter-spacing:1.5px;">TECKBEEHANG RECOGNITION</div>
             <h1 style="margin:0;color:#134e4a;font-size:28px;line-height:1.35;">${heading}</h1>
-            <p style="margin:14px 0 8px;color:#64748b;font-size:18px;">${intro}</p>
             ${namesHtml}
           </div>
           <div style="padding:18px 24px;text-align:center;">

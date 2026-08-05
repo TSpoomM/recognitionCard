@@ -11,6 +11,10 @@ export const TRANSLATIONS = {
     headerHome: 'Home',
     headerGuide: 'Guide',
 
+    // Mail
+    fileName: 'Recognition-Card.png',
+    subject: "You have received a Recognition card!!",
+
     // Stepper
     stepperTitle: (current: number, total: number) => `Step ${current} of ${total}`,
     stepperDescription: 'Complete each step to submit your recognition card.',
@@ -195,6 +199,10 @@ export const TRANSLATIONS = {
     headerHistory: 'ประวัติ',
     headerHome: 'หน้าหลัก',
     headerGuide: 'คู่มือ',
+
+    // Mail
+    fileName: 'บัตรส่งต่อคุณค่า.png',
+    subject: "คุณได้รับคำชื่นชม !!",
 
     // Stepper
     stepperTitle: (current: number, total: number) => `ขั้นตอนที่ ${current} จาก ${total}`,
