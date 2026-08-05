@@ -1253,7 +1253,7 @@ export class RecognitionCardImageRenderer {
                 textAlign: "center",
               }}
             >
-              {copy.title}
+              {copy.subtitle}
             </div>
 
             {/* <div

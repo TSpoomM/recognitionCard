@@ -20,7 +20,8 @@ type EmailResult = {
   info?: unknown;
 };
 
-const MOCK_ALL_STAFF_CC = ["clinserhope@gmail.com", "tspoom.m@gmail.com", "tanapoom@teckbeehang.com", "somchai.s@teckbeehang.com"];
+// const MOCK_ALL_STAFF_CC = ["clinserhope@gmail.com", "tspoom.m@gmail.com", "tanapoom@teckbeehang.com", "somchai.s@teckbeehang.com"];
+const MOCK_ALL_STAFF_CC = ["clinserhope@gmail.com", "tspoom.m@gmail.com", "tanapoom@teckbeehang.com"];
 const EMAIL_COPY: Record<CardLanguage, { fileName: string; subject: string }> = {
   en: {
     fileName: "Recognition-Card.png",
@@ -155,8 +156,8 @@ export class EmailService {
     return `
       <div style="margin:0;background:#ecfffb;padding:16px 0;font-family:Arial,'Noto Sans Thai',sans-serif;color:#0f172a;text-align:center;">
         <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${fallbackText}</div>
-        <div style="max-width:2000px;margin:0 auto;text-align:center;">
-          <img src="cid:recognitionEmail" alt="${fallbackText}" width="2000" style="display:block;width:2000px;max-width:100%;height:auto;margin:0 auto;border:0;outline:none;text-decoration:none;" />
+        <div style="max-width:1200px;margin:0 auto;text-align:center;">
+          <img src="cid:recognitionEmail" alt="${fallbackText}" width="1200" style="display:block;width:1200px;max-width:100%;height:auto;margin:0 auto;border:0;outline:none;text-decoration:none;" />
         </div>
       </div>
     `;
