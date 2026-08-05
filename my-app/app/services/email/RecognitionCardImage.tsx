@@ -435,6 +435,16 @@ export class RecognitionCardImageRenderer {
     return `${normalized.slice(0, Math.max(0, maxChars - 3)).trim()}...`;
   }
 
+  private static normalizeDisplayText(text: string) {
+    return (text || "")
+      .replace(/\r\n/g, "\n")
+      .replace(/\r/g, "\n")
+      .split("\n")
+      .map((line) => line.replace(/[ \t]+/g, " ").trim())
+      .join("\n")
+      .trim();
+  }
+
   /**
    * Estimates how many wrapped lines a run of text will need inside a box
    * of a given pixel width/font-size, WITHOUT cutting any text off. This is
@@ -448,34 +458,38 @@ export class RecognitionCardImageRenderer {
     fontSizePx: number,
     avgCharWidthFactor = 0.6
   ): number {
-    const normalized = (text || "").replace(/\s+/g, " ").trim();
+    const normalized = this.normalizeDisplayText(text);
     if (!normalized) return 1;
 
     const charsPerLine = Math.max(4, Math.floor(boxWidthPx / (fontSizePx * avgCharWidthFactor)));
-    const words = normalized.split(" ");
     let lines = 1;
-    let currentLen = 0;
 
-    words.forEach((word) => {
-      let remaining = word;
-      while (remaining.length > 0) {
-        const space = currentLen > 0 ? 1 : 0;
-        const capacity = charsPerLine - currentLen - space;
-        if (capacity <= 0) {
-          lines += 1;
-          currentLen = 0;
-          continue;
+    normalized.split("\n").forEach((paragraph, paragraphIndex) => {
+      if (paragraphIndex > 0) lines += 1;
+      const words = paragraph.split(" ");
+      let currentLen = 0;
+
+      words.forEach((word) => {
+        let remaining = word;
+        while (remaining.length > 0) {
+          const space = currentLen > 0 ? 1 : 0;
+          const capacity = charsPerLine - currentLen - space;
+          if (capacity <= 0) {
+            lines += 1;
+            currentLen = 0;
+            continue;
+          }
+          if (remaining.length <= capacity) {
+            currentLen += space + remaining.length;
+            remaining = "";
+          } else {
+            currentLen += space + capacity;
+            remaining = remaining.slice(capacity);
+            lines += 1;
+            currentLen = 0;
+          }
         }
-        if (remaining.length <= capacity) {
-          currentLen += space + remaining.length;
-          remaining = "";
-        } else {
-          currentLen += space + capacity;
-          remaining = remaining.slice(capacity);
-          lines += 1;
-          currentLen = 0;
-        }
-      }
+      });
     });
 
     return lines;
@@ -659,7 +673,7 @@ export class RecognitionCardImageRenderer {
 
   private static renderStarRow(letter: StarKey, text: string, cardLanguage: CardLanguage) {
     const meta = STAR_META[letter];
-    const displayText = (text || "").replace(/\s+/g, " ").trim();
+    const displayText = this.normalizeDisplayText(text);
     const questionFont = this.getTextFont();
 
     return (
@@ -741,6 +755,7 @@ export class RecognitionCardImageRenderer {
               color: PALETTE.textDark,
               lineHeight: 1.4,
               wordBreak: "break-word",
+              whiteSpace: "pre-wrap",
             }}
           >
             {displayText || " "}
@@ -751,7 +766,7 @@ export class RecognitionCardImageRenderer {
   }
 
   private static renderFreeformPanel(comment: string, cardLanguage: CardLanguage) {
-    const displayText = (comment || "").replace(/\s+/g, " ").trim();
+    const displayText = this.normalizeDisplayText(comment);
     const commentFont = this.getTextFont();
     const formalMascotGang = getImageDataUri("formalMascotGang.png", "image/png");
 
@@ -841,7 +856,7 @@ export class RecognitionCardImageRenderer {
               borderBottomRightRadius: "18px",
             }}
           />
-          <span style={{ fontFamily: commentFont, fontSize: "19px", fontWeight: 500, color: PALETTE.textDark, lineHeight: 1.7, textAlign: "center", wordBreak: "break-word", width: "100%" }}>{displayText || " "}</span>
+          <span style={{ fontFamily: commentFont, fontSize: "19px", fontWeight: 500, color: PALETTE.textDark, lineHeight: 1.7, textAlign: "center", wordBreak: "break-word", whiteSpace: "pre-wrap", width: "100%" }}>{displayText || " "}</span>
         </div>
       </div>
     );
