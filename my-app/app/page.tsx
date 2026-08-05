@@ -90,10 +90,10 @@ export default class Home extends Component<Record<string, never>, PageState> {
   }
 
   private get selectedUsers() {
-    return this.state.users.filter((user) =>
-      this.state.selectedUserIds.includes(user.user_id) &&
-      !isSameUserId(user.user_id, this.state.currentUserId)
-    );
+    const userById = new Map(this.state.users.map((user) => [user.user_id, user]));
+    return this.state.selectedUserIds
+      .map((userId) => userById.get(userId))
+      .filter((user): user is User => !!user && !isSameUserId(user.user_id, this.state.currentUserId));
   }
 
   private get availableBranches() {
@@ -270,7 +270,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
       const selectedUserIds = currentState.selectedUserIds.includes(userId)
         ? currentState.selectedUserIds.filter((id) => id !== userId)
         : [...currentState.selectedUserIds, userId];
-      return { selectedUserIds, formError: "", formSuccess: "" };
+      return { selectedUserIds, searchQuery: "", formError: "", formSuccess: "" };
     });
   };
 

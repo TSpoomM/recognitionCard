@@ -64,6 +64,8 @@ const FOOTER_BACKGROUND = `url("data:image/svg+xml,${encodeURIComponent(`
 
 type RecognitionCardImageProps = {
   recipientName: string;
+  recipientDisplayName?: string;
+  recipientDisplayNames?: string[];
   recognizedByName: string;
   comment: string;
   coreValues: string[];
@@ -405,8 +407,26 @@ const CARD_COPY: Record<CardLanguage, {
 };
 
 export class RecognitionCardImageRenderer {
-  private static getTextFont(cardLanguage: CardLanguage) {
+  private static getTextFont() {
     return "IBMPlexSansThai, Roboto";
+  }
+
+  private static getEmailCopy(cardLanguage: CardLanguage) {
+    if (cardLanguage === "th") {
+      return {
+        eyebrow: "TECKBEEHANG RECOGNITION",
+        title: "คุณได้รับบัตรส่งต่อคุณค่า !",
+        subtitle: "เราขอชื่นชม",
+        footer: "This is an automated email from TeckBeeHang Recognition System.",
+      };
+    }
+
+    return {
+      eyebrow: "TECKBEEHANG RECOGNITION",
+      title: "You've received a recognition card!",
+      subtitle: "We would like to recognize",
+      footer: "This is an automated email from TeckBeeHang Recognition System.",
+    };
   }
 
   private static truncateText(text: string, maxChars: number) {
@@ -519,7 +539,7 @@ export class RecognitionCardImageRenderer {
   private static renderHeader(recognizedByName: string, cardLanguage: CardLanguage) {
     const logoUri = getImageDataUri("logo.png", "image/png");
     const copy = CARD_COPY[cardLanguage];
-    const textFont = this.getTextFont(cardLanguage);
+    const textFont = this.getTextFont();
     const compact = cardLanguage === "th";
     return (
       <div
@@ -640,7 +660,7 @@ export class RecognitionCardImageRenderer {
   private static renderStarRow(letter: StarKey, text: string, cardLanguage: CardLanguage) {
     const meta = STAR_META[letter];
     const displayText = (text || "").replace(/\s+/g, " ").trim();
-    const questionFont = this.getTextFont(cardLanguage);
+    const questionFont = this.getTextFont();
 
     return (
       <div key={letter} style={{ display: "flex", alignItems: "stretch", minHeight: "60px", width: "100%" }}>
@@ -732,7 +752,7 @@ export class RecognitionCardImageRenderer {
 
   private static renderFreeformPanel(comment: string, cardLanguage: CardLanguage) {
     const displayText = (comment || "").replace(/\s+/g, " ").trim();
-    const commentFont = this.getTextFont(cardLanguage);
+    const commentFont = this.getTextFont();
     const formalMascotGang = getImageDataUri("formalMascotGang.png", "image/png");
 
     return (
@@ -837,7 +857,7 @@ export class RecognitionCardImageRenderer {
 
   private static renderBottomStrip(dateString: string, cardLanguage: CardLanguage) {
     const copy = CARD_COPY[cardLanguage];
-    const textFont = this.getTextFont(cardLanguage);
+    const textFont = this.getTextFont();
 
     return (
       <div
@@ -916,7 +936,7 @@ export class RecognitionCardImageRenderer {
   private static renderCoreValues(coreValues: string[], cardLanguage: CardLanguage) {
     const selected = new Set(coreValues.map((v) => v.trim().toUpperCase()));
     const copy = CARD_COPY[cardLanguage];
-    const textFont = this.getTextFont(cardLanguage);
+    const textFont = this.getTextFont();
 
     return (
       <div style={{ display: "flex", width: "100%", gap: "12px", alignItems: "center" }}>
@@ -1028,7 +1048,7 @@ export class RecognitionCardImageRenderer {
 
   private static renderFooter(cardLanguage: CardLanguage) {
     const copy = CARD_COPY[cardLanguage];
-    const textFont = this.getTextFont(cardLanguage);
+    const textFont = this.getTextFont();
 
     return (
       <div
@@ -1079,7 +1099,7 @@ export class RecognitionCardImageRenderer {
           display: "flex",
           flexDirection: "column",
           width: "100%",
-          height: "100%",
+          height: "auto",
           backgroundColor: PALETTE.cream,
           // borderRadius: "18px",
           overflow: "hidden",
@@ -1102,12 +1122,198 @@ export class RecognitionCardImageRenderer {
     );
   }
 
+  private static renderRecipientNames(props: RecognitionCardImageProps) {
+    const textFont = this.getTextFont();
+    const names =
+      props.recipientDisplayNames && props.recipientDisplayNames.length > 0
+        ? props.recipientDisplayNames
+        : [props.recipientDisplayName || props.recipientName];
+
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          width: "100%",
+          maxWidth: "960px",
+          marginTop: "20px",
+          marginBottom: "8px",
+          gap: "10px 22px",
+          alignItems: "center",
+        }}
+      >
+        {names.map((name, index) => (
+          <div
+            key={`${name}-${index}`}
+            style={{
+              display: "flex",
+              maxWidth: "100%",
+              justifyContent: "center",
+              padding: "2px 0",
+              color: "#0f766e",
+              fontFamily: textFont,
+              fontSize: props.cardLanguage === "th" ? "24px" : "23px",
+              fontWeight: 700,
+              lineHeight: 1.35,
+              textAlign: "center",
+              overflowWrap: "break-word",
+            }}
+          >
+            {name}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  private static renderEmailImage(props: RecognitionCardImageProps) {
+    const copy = this.getEmailCopy(props.cardLanguage);
+    const textFont = this.getTextFont();
+
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          width: "100%",
+          minHeight: "100%",
+          padding: "34px 18px",
+          backgroundColor: "#ecfffb",
+          color: "#134e4a",
+          fontFamily: textFont,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            overflow: "hidden",
+            border: "2px solid #f3d37a",
+            borderTopWidth: "0px",
+            borderRadius: "28px",
+            backgroundColor: "#ffffff",
+            boxShadow: "0 18px 45px rgba(15,118,110,.13)",
+          }}
+        >
+          <div style={{ display: "flex", width: "100%", height: "10px", background: "linear-gradient(90deg,#0f766e,#14b8a6,#f6c453)" }} />
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              width: "100%",
+              padding: "38px 38px 18px",
+              textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                marginBottom: "18px",
+                borderRadius: "999px",
+                backgroundColor: "#ccfbf1",
+                padding: "8px 24px",
+                color: "#115e59",
+                fontFamily: "Roboto, IBMPlexSansThai",
+                fontSize: "16px",
+                fontWeight: 700,
+                letterSpacing: "2px",
+              }}
+            >
+              {copy.eyebrow}
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                color: "#134e4a",
+                fontFamily: textFont,
+                fontSize: props.cardLanguage === "th" ? "40px" : "38px",
+                fontWeight: 700,
+                lineHeight: 1.28,
+                textAlign: "center",
+              }}
+            >
+              {copy.title}
+            </div>
+
+            {/* <div
+              style={{
+                display: "flex",
+                marginTop: "12px",
+                color: "#64748b",
+                fontFamily: textFont,
+                fontSize: props.cardLanguage === "th" ? "24px" : "22px",
+                fontWeight: 600,
+                lineHeight: 1.35,
+                textAlign: "center",
+              }}
+            >
+              {copy.subtitle}
+            </div> */}
+
+            {this.renderRecipientNames(props)}
+          </div>
+
+          <div style={{ display: "flex", width: "100%", padding: "0 10px 24px" }}>
+            <div
+              style={{
+                display: "flex",
+                width: "100%",
+                overflow: "hidden",
+                borderRadius: "20px",
+                boxShadow: "0 14px 34px rgba(15,23,42,.16)",
+              }}
+            >
+              {this.renderImage(props)}
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              width: "100%",
+              justifyContent: "center",
+              borderTop: "1px solid #e2e8f0",
+              backgroundColor: "#f8fafc",
+              padding: "18px 24px",
+              color: "#94a3b8",
+              fontFamily: "Roboto, IBMPlexSansThai",
+              fontSize: "14px",
+              lineHeight: 1.5,
+              textAlign: "center",
+            }}
+          >
+            {copy.footer}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   static async renderToBuffer(props: RecognitionCardImageProps): Promise<Buffer> {
+    return this.renderEmailToBuffer(props);
+  }
+
+  static async renderEmailToBuffer(props: RecognitionCardImageProps): Promise<Buffer> {
     // Start with a generously sized viewport, then let Chromium measure the
     // actual rendered content. The old estimate was designed for Satori and
     // leaves a large empty area when Chromium wraps Thai text more accurately.
+    const initialHeight = CARD_HEIGHT + this.computeExtraHeight(props.comment) + 360;
+    return this.renderElementToBuffer(props, this.renderEmailImage(props), initialHeight);
+  }
+
+  static async renderCardToBuffer(props: RecognitionCardImageProps): Promise<Buffer> {
     const initialHeight = CARD_HEIGHT + this.computeExtraHeight(props.comment);
-    const markupStream = await renderToReadableStream(this.renderImage(props));
+    return this.renderElementToBuffer(props, this.renderImage(props), initialHeight);
+  }
+
+  private static async renderElementToBuffer(props: RecognitionCardImageProps, element: React.ReactElement, initialHeight: number): Promise<Buffer> {
+    const markupStream = await renderToReadableStream(element);
     const markup = await new Response(markupStream).text();
     const fontCss = `
       @font-face { font-family: Roboto; src: url('${getFontDataUri("Roboto-Regular.ttf")}') format('truetype'); font-weight: 400; }
