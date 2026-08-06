@@ -23,6 +23,7 @@ import { getClientCurrentUserId, isSameUserId } from "./lib/currentUser";
 import { STAR_COMMENT_MAX_LENGTH, STAR_COMMENT_MIN_LENGTH, STAR_SECTION_MIN_LENGTH } from "./constants/recognitionFlow";
 import { logRecognitionAction } from "./lib/recognitionLog";
 import { withBasePath } from "./lib/basePath";
+import { peopleSearchScore } from "./lib/peopleSearch";
 
 type PageState = HomeState & { lang: Language };
 type StarSectionKey = "s" | "t" | "a" | "r";
@@ -107,23 +108,42 @@ export default class Home extends Component<Record<string, never>, PageState> {
   }
 
   private get filteredUsers() {
-    const query = this.state.searchQuery.toLowerCase();
-    const { selectedBranch } = this.state;
+    const query = this.state.searchQuery;
+    const { lang, selectedBranch } = this.state;
+    const getSortName = (user: User) =>
+      lang === "th"
+        ? user.thaiName || `${user.firstName} ${user.lastName}`.trim()
+        : `${user.firstName} ${user.lastName}`.trim() || user.thaiName || "";
 
-    return this.state.users.filter((user) => {
-      if (isSameUserId(user.user_id, this.state.currentUserId)) return false;
+    return this.state.users
+      .map((user, index) => ({
+        user,
+        index,
+        score: peopleSearchScore({
+          primary: [
+            user.thaiName?.trim().split(/\s+/)[0] || "",
+            user.firstName,
+          ],
+          secondary: [
+            user.team || "",
+            user.role || "",
+            user.email,
+          ],
+        }, query),
+      }))
+      .filter(({ user, score }) => {
+        if (isSameUserId(user.user_id, this.state.currentUserId)) return false;
 
-      if (selectedBranch && user.location !== selectedBranch) return false;
+        if (selectedBranch && user.location !== selectedBranch) return false;
 
-      return (
-        user.thaiName?.toLowerCase().includes(query) ||
-        user.firstName.toLowerCase().includes(query) ||
-        user.lastName.toLowerCase().includes(query) ||
-        user.team?.toLowerCase().includes(query) ||
-        user.role?.toLowerCase().includes(query) ||
-        user.email.toLowerCase().includes(query)
-      );
-    });
+        return score !== null;
+      })
+      .sort((left, right) =>
+        (left.score ?? Number.MAX_SAFE_INTEGER) - (right.score ?? Number.MAX_SAFE_INTEGER) ||
+        getSortName(left.user).localeCompare(getSortName(right.user), lang === "th" ? "th" : "en", { sensitivity: "base" }) ||
+        left.index - right.index
+      )
+      .map(({ user }) => user);
   }
 
   private get commentLength() {
