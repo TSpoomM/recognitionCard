@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# puppeteer (downloaded Chrome binary, ~700MB - never commit this)
+.puppeteer-cache/
+
+# scheduled-task runtime log, regenerated on every deploy
+service.log

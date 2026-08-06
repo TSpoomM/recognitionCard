@@ -4,13 +4,14 @@ import { redirect } from "next/navigation";
 import "./globals.css";
 import { isDevAuthBypassEnabled } from "./lib/devAuth";
 import { getHrkpisSessionCookieName, readHrkpisSession } from "./lib/hrkpisSession";
+import SessionWatcher from "./components/SessionWatcher";
 
 export const metadata: Metadata = {
   title: "Recognition Cards",
   description: "Created for complimenting and recognizing.",
 };
 
-const HRKPIS_LOGIN_PATH = process.env.HRKPIS_LOGIN_URL || "/hrkpis/login.php";
+const HRKPIS_LOGIN_PATH = process.env.HRKPIS_LOGIN_URL || "/hrkpis/index.php";
 
 export default async function RootLayout({
   children,
@@ -23,7 +24,7 @@ export default async function RootLayout({
 
   if (!session && !isDevAuthBypassEnabled) {
     // Must be an absolute URL: redirect() auto-prefixes relative paths with
-    // basePath, which would wrongly turn /hrkpis/login.php into /recognitionCard/hrkpis/login.php.
+    // basePath, which would wrongly turn /hrkpis/index.php into /recognitioncard/hrkpis/index.php.
     if (/^https?:\/\//.test(HRKPIS_LOGIN_PATH)) {
       redirect(HRKPIS_LOGIN_PATH);
     }
@@ -35,7 +36,10 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className="min-h-full flex flex-col font-sans">
+        <SessionWatcher />
+        {children}
+      </body>
     </html>
   );
 }

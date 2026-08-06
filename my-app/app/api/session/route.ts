@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDevAuthSession, isDevAuthBypassEnabled } from "@/app/lib/devAuth";
 import { getHrkpisSessionCookieName, readHrkpisSession } from "@/app/lib/hrkpisSession";
 
+const HRKPIS_LOGIN_PATH = process.env.HRKPIS_LOGIN_URL || "/hrkpis/index.php";
+
 export async function GET(request: NextRequest) {
   if (isDevAuthBypassEnabled) {
     return NextResponse.json({
@@ -14,7 +16,7 @@ export async function GET(request: NextRequest) {
   const session = await readHrkpisSession(sessionId);
 
   if (!session) {
-    return NextResponse.json({ authenticated: false }, { status: 401 });
+    return NextResponse.json({ authenticated: false, loginUrl: HRKPIS_LOGIN_PATH }, { status: 401 });
   }
 
   return NextResponse.json({

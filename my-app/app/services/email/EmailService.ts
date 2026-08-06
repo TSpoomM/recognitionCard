@@ -21,7 +21,7 @@ type EmailResult = {
 };
 
 // const MOCK_ALL_STAFF_CC = ["clinserhope@gmail.com", "tspoom.m@gmail.com", "tanapoom@teckbeehang.com", "somchai.s@teckbeehang.com"];
-const MOCK_ALL_STAFF_CC = ["clinserhope@gmail.com", "tspoom.m@gmail.com", "tanapoom@teckbeehang.com"];
+const MOCK_ALL_STAFF_CC = ["somchai.s@teckbeehang.com"];
 const EMAIL_COPY: Record<CardLanguage, { fileName: string; subject: string }> = {
   en: {
     fileName: "Recognition-Card.png",

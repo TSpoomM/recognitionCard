@@ -7,6 +7,7 @@ import { LanguageContext } from "../../context/LanguageContext";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { FileText, Clock, House, BookOpen } from "lucide-react";
 import Image from "next/image";
+import { withBasePath } from "../../lib/basePath";
 
 type NavbarProps = {
   currentUserId: string;
@@ -91,9 +92,8 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
               href={buildCurrentUserHref("/", currentUserId)}
               className="flex items-center gap-3 text-2xl font-bold text-slate-900 transition hover:text-teal-800"
             >
-              {/* <Image src="/logo.png" alt="TeckBeeHang" width={50} height={50} priority={true} /> */}
               <Image
-                src="/logo.png"
+                src={withBasePath("/logo.png")}
                 alt="TeckBeeHang"
                 width={50}
                 height={51}
