@@ -109,7 +109,11 @@ export default class Home extends Component<Record<string, never>, PageState> {
 
   private get filteredUsers() {
     const query = this.state.searchQuery;
-    const { selectedBranch } = this.state;
+    const { lang, selectedBranch } = this.state;
+    const getSortName = (user: User) =>
+      lang === "th"
+        ? user.thaiName || `${user.firstName} ${user.lastName}`.trim()
+        : `${user.firstName} ${user.lastName}`.trim() || user.thaiName || "";
 
     return this.state.users
       .map((user, index) => ({
@@ -136,6 +140,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
       })
       .sort((left, right) =>
         (left.score ?? Number.MAX_SAFE_INTEGER) - (right.score ?? Number.MAX_SAFE_INTEGER) ||
+        getSortName(left.user).localeCompare(getSortName(right.user), lang === "th" ? "th" : "en", { sensitivity: "base" }) ||
         left.index - right.index
       )
       .map(({ user }) => user);
