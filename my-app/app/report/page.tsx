@@ -21,6 +21,7 @@ import { ReportData, ReportEmployee, ReportRow } from "../types/report";
 import { COMMENT_TYPE_META, COMMENT_TYPES, CommentType } from "../types/commentType";
 import { Language, TRANSLATIONS } from "../constants/translations";
 import { getInitialLanguage, LanguageContext, persistLanguage } from "../context/LanguageContext";
+import { peopleSearchScore } from "../lib/peopleSearch";
 type ReportPageState = {
   lang: Language;
   currentUserId: string;
@@ -77,17 +78,26 @@ export default class ReportPage extends Component<Record<string, never>, ReportP
   private get filteredEmployees(): ReportEmployee[] {
     const { data, query, selectedBranches } = this.state;
     if (!data) return [];
-    const normalizedQuery = query.trim().toLowerCase();
-    return data.employees.filter((employee) => {
-      if (selectedBranches.length > 0 && !selectedBranches.includes(employee.branch)) {
-        return false;
-      }
-      if (!normalizedQuery) return true;
-      return (
-        employee.name.toLowerCase().includes(normalizedQuery) ||
-        employee.branch.toLowerCase().includes(normalizedQuery)
-      );
-    });
+    return data.employees
+      .map((employee, index) => ({
+        employee,
+        index,
+        score: peopleSearchScore({
+          primary: [employee.name],
+          secondary: [employee.branch],
+        }, query),
+      }))
+      .filter(({ employee, score }) => {
+        if (selectedBranches.length > 0 && !selectedBranches.includes(employee.branch)) {
+          return false;
+        }
+        return score !== null;
+      })
+      .sort((left, right) =>
+        (left.score ?? Number.MAX_SAFE_INTEGER) - (right.score ?? Number.MAX_SAFE_INTEGER) ||
+        left.index - right.index
+      )
+      .map(({ employee }) => employee);
   }
   private get filteredRows(): ReportRow[] {
     const { data, selectedBranches, selectedPeople, selectedYears } = this.state;
