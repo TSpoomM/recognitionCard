@@ -1,44 +1,9 @@
 @import "tailwindcss";
 
-@font-face {
-  font-family: "IBMPlexSansThai";
-  src: url("/fonts/IBMPlexSansThai-Regular.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "IBMPlexSansThai";
-  src: url("/fonts/IBMPlexSansThai-Medium.ttf") format("truetype");
-  font-weight: 500 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "IBMPlexSansThai";
-  src: url("/fonts/IBMPlexSansThai-Bold.ttf") format("truetype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Roboto";
-  src: url("/fonts/Roboto-Regular.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Roboto";
-  src: url("/fonts/Roboto-Medium.ttf") format("truetype");
-  font-weight: 500 700;
-  font-style: normal;
-  font-display: swap;
-}
+/* Font files loaded via next/font/local in app/fonts.ts (see comment there
+   for why: raw @font-face + url("/fonts/...") 404s under this app's
+   basePath). --font-ibm-plex-sans-thai and --font-roboto come from the
+   .variable classes applied to <html> in layout.tsx. */
 
 /* ===========================
    Theme Mapping
@@ -46,7 +11,7 @@
 
 @theme inline {
   /* Fonts */
-  --font-sans: "IBMPlexSansThai", Roboto, Arial, Helvetica, sans-serif;
+  --font-sans: var(--font-ibm-plex-sans-thai), var(--font-roboto), Arial, Helvetica, sans-serif;
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 
   /* Radius */

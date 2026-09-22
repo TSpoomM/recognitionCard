@@ -10,6 +10,7 @@ export const TRANSLATIONS = {
     headerHistory: 'History',
     headerHome: 'Home',
     headerGuide: 'Guide',
+    headerBackToHrkpis: 'Back to HRKPIS',
 
     // Mail
     fileName: 'Recognition-Card.png',
@@ -199,6 +200,7 @@ export const TRANSLATIONS = {
     headerHistory: 'ประวัติ',
     headerHome: 'หน้าหลัก',
     headerGuide: 'คู่มือ',
+    headerBackToHrkpis: 'กลับหน้าหลัก HRKPIS',
 
     // Mail
     fileName: 'บัตรส่งต่อคุณค่า.png',

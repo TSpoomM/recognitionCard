@@ -5,6 +5,7 @@ import "./globals.css";
 import { isDevAuthBypassEnabled } from "./lib/devAuth";
 import { getHrkpisSessionCookieName, readHrkpisSession } from "./lib/hrkpisSession";
 import SessionWatcher from "./components/SessionWatcher";
+import { ibmPlexSansThai, roboto } from "./fonts";
 
 export const metadata: Metadata = {
   title: "Recognition Cards",
@@ -35,7 +36,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className={`h-full antialiased ${ibmPlexSansThai.variable} ${roboto.variable}`}>
       <body className="min-h-full flex flex-col font-sans">
         <SessionWatcher />
         {children}

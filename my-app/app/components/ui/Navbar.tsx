@@ -5,7 +5,7 @@ import { buildCurrentUserHref } from "../../lib/currentUser";
 import { reportAccessClient } from "../../lib/reportAccessClient";
 import { LanguageContext } from "../../context/LanguageContext";
 import LanguageSwitcher from "./LanguageSwitcher";
-import { FileText, Clock, House, BookOpen } from "lucide-react";
+import { FileText, Clock, House, BookOpen, ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import { withBasePath } from "../../lib/basePath";
 
@@ -104,6 +104,14 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
             </a>
 
             <div className="flex items-center gap-2 sm:gap-3">
+              <a
+                href="/hrkpis/main-menu.php"
+                className={getNavItemClassName(false)}
+              >
+                <ArrowLeft className="h-5 w-5" />
+                <span className="hidden sm:inline">{t.headerBackToHrkpis}</span>
+              </a>
+
               <a
                 href={buildCurrentUserHref("/", currentUserId)}
                 className={getNavItemClassName(currentPath === "/")}

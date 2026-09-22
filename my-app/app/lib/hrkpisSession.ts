@@ -86,21 +86,46 @@ function toStringOrUndefined(value: PhpValue | undefined): string | undefined {
   return String(value);
 }
 
+// PHP's file session handler holds an exclusive lock on the session file for
+// the entire lifetime of whichever hrkpis script called session_start() -
+// on Windows that's an OS-enforced lock, not just advisory. hrkpis pages
+// like main-menu.php are large (many DB queries) and can hold that lock for
+// a noticeable moment. A user who clicks straight from hrkpis into this app
+// right after logging in can land here while that lock is still held, which
+// makes this read fail with a transient sharing-violation error - not
+// because there's no session, but because hrkpis is still using it. Retry
+// briefly before giving up. A genuinely missing file (logged out, expired)
+// is ENOENT and returns immediately without retrying.
+const READ_RETRY_ATTEMPTS = 5;
+const READ_RETRY_DELAY_MS = 100;
+
+async function readSessionFileWithRetry(filePath: string): Promise<{ mtimeMs: number; raw: string } | null> {
+  for (let attempt = 1; attempt <= READ_RETRY_ATTEMPTS; attempt++) {
+    try {
+      const stats = await stat(filePath);
+      const raw = await readFile(filePath, "utf8");
+      return { mtimeMs: stats.mtimeMs, raw };
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException)?.code === "ENOENT") return null;
+      if (attempt === READ_RETRY_ATTEMPTS) return null;
+      await new Promise((resolve) => setTimeout(resolve, READ_RETRY_DELAY_MS));
+    }
+  }
+  return null;
+}
+
 export async function readHrkpisSession(sessionId: string | undefined): Promise<HrkpisSession | null> {
   if (!sessionId || !VALID_SESSION_ID.test(sessionId)) return null;
 
   const filePath = path.join(SESSION_SAVE_PATH, `sess_${sessionId}`);
 
-  let raw: string;
-  try {
-    const stats = await stat(filePath);
-    const ageSeconds = (Date.now() - stats.mtimeMs) / 1000;
-    if (ageSeconds > SESSION_MAX_AGE_SECONDS) return null;
+  const file = await readSessionFileWithRetry(filePath);
+  if (!file) return null;
 
-    raw = await readFile(filePath, "utf8");
-  } catch {
-    return null;
-  }
+  const ageSeconds = (Date.now() - file.mtimeMs) / 1000;
+  if (ageSeconds > SESSION_MAX_AGE_SECONDS) return null;
+
+  const raw = file.raw;
 
   let data: Record<string, PhpValue>;
   try {
