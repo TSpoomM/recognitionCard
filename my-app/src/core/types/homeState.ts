@@ -2,7 +2,7 @@ import { CommentType } from "./commentType";
 import { PendingSubmission } from "./pendingSubmission";
 import { User } from "./user";
 import { CardLanguage } from "./cardLanguage";
-import type { StarSections } from "../../components/features/starComment/RecognitionCommentStep";
+import type { StarSections } from "./starSections";
 
 export type HomeState = {
   currentStep: number;

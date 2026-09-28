@@ -2,7 +2,7 @@ import { CommentType } from "../types/commentType";
 import { PendingSubmission } from "../types/pendingSubmission";
 import { User } from "../types/user";
 import { CardLanguage } from "../types/cardLanguage";
-import type { StarSections } from "../../components/features/starComment/RecognitionCommentStep";
+import type { StarSections } from "../types/starSections";
 
 export class RecognitionEngine {
   static STORAGE_KEY = "recognition-card-submissions";

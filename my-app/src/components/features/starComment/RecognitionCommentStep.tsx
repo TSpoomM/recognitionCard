@@ -4,8 +4,8 @@ import { ChangeEvent, Component } from "react";
 import { LanguageContext } from "../../../context/LanguageContext";
 import { COMMENT_TYPE_META, CommentType } from "../../../core/types/commentType";
 import { User } from "../../../core/types/user";
+import { StarSections } from "../../../core/types/starSections";
 
-export type StarSections = { s: string; t: string; a: string; r: string };
 type Props = {
   users: User[]; selectedTypes: CommentType[]; comment: string; sections: StarSections;
   commentLength: number; minLength: number; sectionMinLength: number; maxLength: number;

@@ -1,4 +1,4 @@
-import type { StarSections } from "../../components/features/starComment/RecognitionCommentStep";
+import type { StarSections } from "../types/starSections";
 
 export type StarSectionKey = "s" | "t" | "a" | "r";
 
