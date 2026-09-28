@@ -4,6 +4,10 @@ import { getCoreValueLabel, parseCoreValues, splitName } from "@/app/lib/export/
 import { ReportData, ReportEmployee, ReportRow } from "@/app/types/report";
 import { NextResponse } from "next/server";
 import { RowDataPacket } from "mysql2";
+import { getOrSetCache } from "@/app/lib/serverCache";
+
+const REPORT_CACHE_PREFIX = "report:";
+const REPORT_CACHE_TTL_MS = 60_000;
 
 type DiaryReportRow = RowDataPacket & {
   diary_list: number;
@@ -36,91 +40,98 @@ export async function GET(request: Request) {
     }
 
     const branchFilter = isBranchManager && !isAdmin ? branch : null;
-    const diaryWhere = branchFilter ? "WHERE e.location_emp = ?" : "";
-    const employeeWhere = branchFilter
-      ? "WHERE emp_name_en IS NOT NULL AND location_emp = ?"
-      : "WHERE emp_name_en IS NOT NULL";
 
-    const [diaryRows] = await pool.query<DiaryReportRow[]>(
-      `
-      SELECT
-        d.diary_list,
-        d.diary_emp_id,
-        d.diary_comment,
-        d.diary_preview,
-        d.diary_corevalue,
-        d.createdDate,
-        d.createdBy,
-        e.emp_name_en AS recipient_name,
-        e.location_emp,
-        sender.emp_name_en AS sender_name
-      FROM tb_diary_list d
-      LEFT JOIN tb_employee_list e
-        ON d.diary_emp_id = e.fs_id
-      LEFT JOIN tb_employee_list sender
-        ON d.createdBy = sender.fs_id
-      ${diaryWhere}
-      ORDER BY d.createdDate DESC, d.diary_list DESC
-      `,
-      branchFilter ? [branchFilter] : []
-    );
+    const data = await getOrSetCache(
+      `${REPORT_CACHE_PREFIX}${branchFilter ?? "all"}`,
+      REPORT_CACHE_TTL_MS,
+      async (): Promise<ReportData> => {
+        const diaryWhere = branchFilter ? "WHERE e.location_emp = ?" : "";
+        const employeeWhere = branchFilter
+          ? "WHERE emp_name_en IS NOT NULL AND location_emp = ?"
+          : "WHERE emp_name_en IS NOT NULL";
 
-    const [employeeRows] = await pool.query<EmployeeBranchRow[]>(
-      `
-      SELECT fs_id, emp_name_en, location_emp
-      FROM tb_employee_list
-      ${employeeWhere}
-      ORDER BY emp_name_en ASC
-      `,
-      branchFilter ? [branchFilter] : []
-    );
+        const [diaryRows] = await pool.query<DiaryReportRow[]>(
+          `
+          SELECT
+            d.diary_list,
+            d.diary_emp_id,
+            d.diary_comment,
+            d.diary_preview,
+            d.diary_corevalue,
+            d.createdDate,
+            d.createdBy,
+            e.emp_name_en AS recipient_name,
+            e.location_emp,
+            sender.emp_name_en AS sender_name
+          FROM tb_diary_list d
+          LEFT JOIN tb_employee_list e
+            ON d.diary_emp_id = e.fs_id
+          LEFT JOIN tb_employee_list sender
+            ON d.createdBy = sender.fs_id
+          ${diaryWhere}
+          ORDER BY d.createdDate DESC, d.diary_list DESC
+          `,
+          branchFilter ? [branchFilter] : []
+        );
 
-    const rows: ReportRow[] = [];
+        const [employeeRows] = await pool.query<EmployeeBranchRow[]>(
+          `
+          SELECT fs_id, emp_name_en, location_emp
+          FROM tb_employee_list
+          ${employeeWhere}
+          ORDER BY emp_name_en ASC
+          `,
+          branchFilter ? [branchFilter] : []
+        );
 
-    for (const row of diaryRows) {
-      const personId = String(row.diary_emp_id);
-      const personName = row.recipient_name?.trim() || `Employee #${personId}`;
-      const branch = row.location_emp?.trim() || "Unknown";
-      const senderName = row.sender_name?.trim() || String(row.createdBy);
-      const createdAt = row.createdDate ? new Date(row.createdDate) : null;
-      const coreValues = parseCoreValues(row.diary_corevalue);
-      const values = coreValues.length > 0 ? coreValues : [""];
+        const rows: ReportRow[] = [];
 
-      for (const coreValue of values) {
-        rows.push({
-          id: `${row.diary_list}-${personId}-${coreValue || "none"}`,
-          personId,
-          personName,
-          branch,
-          comment: row.diary_preview || row.diary_comment || "",
-          coreValue,
-          coreValueLabel: coreValue ? getCoreValueLabel(coreValue) : "",
-          createdAt: createdAt ? createdAt.toISOString() : null,
-          year: createdAt ? createdAt.getFullYear() : null,
-          createdBy: String(row.createdBy),
-          senderName,
+        for (const row of diaryRows) {
+          const personId = String(row.diary_emp_id);
+          const personName = row.recipient_name?.trim() || `Employee #${personId}`;
+          const branch = row.location_emp?.trim() || "Unknown";
+          const senderName = row.sender_name?.trim() || String(row.createdBy);
+          const createdAt = row.createdDate ? new Date(row.createdDate) : null;
+          const coreValues = parseCoreValues(row.diary_corevalue);
+          const values = coreValues.length > 0 ? coreValues : [""];
+
+          for (const coreValue of values) {
+            rows.push({
+              id: `${row.diary_list}-${personId}-${coreValue || "none"}`,
+              personId,
+              personName,
+              branch,
+              comment: row.diary_preview || row.diary_comment || "",
+              coreValue,
+              coreValueLabel: coreValue ? getCoreValueLabel(coreValue) : "",
+              createdAt: createdAt ? createdAt.toISOString() : null,
+              year: createdAt ? createdAt.getFullYear() : null,
+              createdBy: String(row.createdBy),
+              senderName,
+            });
+          }
+        }
+
+        const branches = [...new Set(rows.map((row) => row.branch).filter(Boolean))].sort((a, b) =>
+          a.localeCompare(b)
+        );
+        const years = [...new Set(rows.map((row) => row.year).filter((year): year is number => year !== null))]
+          .sort((a, b) => b - a);
+
+        const employees: ReportEmployee[] = employeeRows.map((row) => {
+          const fullName = row.emp_name_en?.trim() || String(row.fs_id);
+          const { firstName, lastName } = splitName(fullName);
+
+          return {
+            user_id: String(row.fs_id),
+            name: `${firstName} ${lastName}`.trim(),
+            branch: row.location_emp?.trim() || "Unknown",
+          };
         });
+
+        return { rows, branches, employees, years };
       }
-    }
-
-    const branches = [...new Set(rows.map((row) => row.branch).filter(Boolean))].sort((a, b) =>
-      a.localeCompare(b)
     );
-    const years = [...new Set(rows.map((row) => row.year).filter((year): year is number => year !== null))]
-      .sort((a, b) => b - a);
-
-    const employees: ReportEmployee[] = employeeRows.map((row) => {
-      const fullName = row.emp_name_en?.trim() || String(row.fs_id);
-      const { firstName, lastName } = splitName(fullName);
-
-      return {
-        user_id: String(row.fs_id),
-        name: `${firstName} ${lastName}`.trim(),
-        branch: row.location_emp?.trim() || "Unknown",
-      };
-    });
-
-    const data: ReportData = { rows, branches, employees, years };
 
     return NextResponse.json({ success: true, data });
   } catch (error) {

@@ -9,15 +9,31 @@ export function getFontData(fileName: string): Buffer {
   return fs.readFileSync(filePath);
 }
 
+// Font files never change at runtime, so cache their base64 data URIs instead
+// of re-reading and re-encoding them from disk on every card/email render.
+const fontDataUriCache = new Map<string, string>();
+
 export function getFontDataUri(fileName: string): string {
-  return `data:font/ttf;base64,${getFontData(fileName).toString("base64")}`;
+  const cached = fontDataUriCache.get(fileName);
+  if (cached) return cached;
+
+  const dataUri = `data:font/ttf;base64,${getFontData(fileName).toString("base64")}`;
+  fontDataUriCache.set(fileName, dataUri);
+  return dataUri;
 }
 
+// Static local assets never change at runtime either, so cache these too.
+const imageDataUriCache = new Map<string, string>();
+
 export function getImageDataUri(fileName: string, mimeType: string): string {
+  const cacheKey = `${fileName}|${mimeType}`;
+  const cached = imageDataUriCache.get(cacheKey);
+  if (cached !== undefined) return cached;
+
   const filePath = path.join(process.cwd(), "public", fileName);
-  if (!fs.existsSync(filePath)) {
-    return "";
-  }
-  const buffer = fs.readFileSync(filePath);
-  return `data:${mimeType};base64,${buffer.toString("base64")}`;
+  const dataUri = fs.existsSync(filePath)
+    ? `data:${mimeType};base64,${fs.readFileSync(filePath).toString("base64")}`
+    : "";
+  imageDataUriCache.set(cacheKey, dataUri);
+  return dataUri;
 }

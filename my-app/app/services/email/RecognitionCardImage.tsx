@@ -1,6 +1,6 @@
 import React from "react";
 import { renderToReadableStream } from "react-dom/server.edge";
-import puppeteer from "puppeteer";
+import puppeteer, { Browser } from "puppeteer";
 import { StarSection } from "./starComment";
 import { CardLanguage } from "../../types/cardLanguage";
 import { PALETTE } from "./palette";
@@ -967,19 +967,54 @@ export class RecognitionCardImageRenderer {
   }
 
   static async renderEmailToBuffer(props: RecognitionCardImageProps): Promise<Buffer> {
+    return this.withBrowser((browser) => this.renderEmailOnBrowser(browser, props));
+  }
+
+  static async renderCardToBuffer(props: RecognitionCardImageProps): Promise<Buffer> {
+    return this.withBrowser((browser) => this.renderCardOnBrowser(browser, props));
+  }
+
+  /**
+   * Renders both the email inline image and the attached card image inside a
+   * single Chromium instance (two pages, in parallel) instead of launching
+   * Chromium twice — launching Chromium is the dominant cost of a card send.
+   */
+  static async renderEmailAndCardToBuffers(props: RecognitionCardImageProps): Promise<{ emailBuffer: Buffer; cardBuffer: Buffer }> {
+    return this.withBrowser(async (browser) => {
+      const [emailBuffer, cardBuffer] = await Promise.all([
+        this.renderEmailOnBrowser(browser, props),
+        this.renderCardOnBrowser(browser, props),
+      ]);
+      return { emailBuffer, cardBuffer };
+    });
+  }
+
+  private static async withBrowser<T>(fn: (browser: Browser) => Promise<T>): Promise<T> {
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+    try {
+      return await fn(browser);
+    } finally {
+      await browser.close();
+    }
+  }
+
+  private static renderEmailOnBrowser(browser: Browser, props: RecognitionCardImageProps): Promise<Buffer> {
     // Start with a generously sized viewport, then let Chromium measure the
     // actual rendered content. The old estimate was designed for Satori and
     // leaves a large empty area when Chromium wraps Thai text more accurately.
     const initialHeight = CARD_HEIGHT + this.computeExtraHeight(props.comment) + 360;
-    return this.renderElementToBuffer(props, this.renderEmailImage(props), initialHeight);
+    return this.renderElementOnBrowser(browser, props, this.renderEmailImage(props), initialHeight);
   }
 
-  static async renderCardToBuffer(props: RecognitionCardImageProps): Promise<Buffer> {
+  private static renderCardOnBrowser(browser: Browser, props: RecognitionCardImageProps): Promise<Buffer> {
     const initialHeight = CARD_HEIGHT + this.computeExtraHeight(props.comment);
-    return this.renderElementToBuffer(props, this.renderImage(props), initialHeight);
+    return this.renderElementOnBrowser(browser, props, this.renderImage(props), initialHeight);
   }
 
-  private static async renderElementToBuffer(props: RecognitionCardImageProps, element: React.ReactElement, initialHeight: number): Promise<Buffer> {
+  private static async renderElementOnBrowser(browser: Browser, props: RecognitionCardImageProps, element: React.ReactElement, initialHeight: number): Promise<Buffer> {
     const markupStream = await renderToReadableStream(element);
     const markup = await new Response(markupStream).text();
     const fontCss = `
@@ -992,13 +1027,9 @@ export class RecognitionCardImageRenderer {
       html, body { margin: 0; width: ${CARD_WIDTH}px; height: ${initialHeight}px; overflow: hidden; }
       * { box-sizing: border-box; }
     `;
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
 
+    const page = await browser.newPage();
     try {
-      const page = await browser.newPage();
       await page.setViewport({ width: CARD_WIDTH, height: initialHeight, deviceScaleFactor: 2 });
       await page.setContent(
         `<!doctype html><html lang="${props.cardLanguage === "th" ? "th" : "en"}"><head><meta charset="utf-8"><style>${fontCss}</style></head><body>${markup}</body></html>`,
@@ -1032,7 +1063,7 @@ export class RecognitionCardImageRenderer {
       });
       return Buffer.from(png);
     } finally {
-      await browser.close();
+      await page.close();
     }
   }
 }

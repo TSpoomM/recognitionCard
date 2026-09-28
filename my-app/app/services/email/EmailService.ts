@@ -20,8 +20,6 @@ type EmailResult = {
   info?: unknown;
 };
 
-// const MOCK_ALL_STAFF_CC = ["clinserhope@gmail.com", "tspoom.m@gmail.com", "tanapoom@teckbeehang.com", "somchai.s@teckbeehang.com"];
-const MOCK_ALL_STAFF_CC = ["staff@teckbeehang.com"];
 const EMAIL_COPY: Record<CardLanguage, { fileName: string; subject: string }> = {
   en: {
     fileName: "Recognition-Card.png",
@@ -47,7 +45,7 @@ export class EmailService {
     const originalRecipients = EmailService.normalizeEmails(toEmail);
     const testRecipients = EmailService.normalizeEmails(EMAIL_CONFIG.testEmailTo);
     const targetRecipients = testRecipients.length > 0 ? testRecipients : originalRecipients;
-    const ccRecipients = MOCK_ALL_STAFF_CC;
+    const ccRecipients = EMAIL_CONFIG.ccTo;
     const safeCardLanguage: CardLanguage = cardLanguage === "th" ? "th" : "en";
 
     if (targetRecipients.length === 0) {
@@ -74,8 +72,8 @@ export class EmailService {
       cardLanguage: safeCardLanguage,
       dateString,
     };
-    const emailImageBuffer = await RecognitionCardImageRenderer.renderEmailToBuffer(imageProps);
-    const cardImageBuffer = await RecognitionCardImageRenderer.renderCardToBuffer(imageProps);
+    const { emailBuffer: emailImageBuffer, cardBuffer: cardImageBuffer } =
+      await RecognitionCardImageRenderer.renderEmailAndCardToBuffers(imageProps);
 
     if (!EMAIL_CONFIG.smtpUser || !EMAIL_CONFIG.smtpPass) {
       console.log("================ MOCK EMAIL NOTIFICATION ================");
@@ -127,11 +125,6 @@ export class EmailService {
         },
       ],
     });
-
-    console.log("recipientName: ", recipientName);
-    console.log("targetRecipients: ", targetRecipients);
-    console.log("ccRecipients: ", ccRecipients);
-
 
     console.log(`Email sent successfully: ${info.messageId}`);
     return { success: true, messageId: info.messageId, info };

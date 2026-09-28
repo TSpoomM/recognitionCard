@@ -83,15 +83,39 @@ export default class Home extends Component<Record<string, never>, PageState> {
     return Array.from(branches).sort();
   }
 
+  private filteredUsersCache: {
+    users: User[];
+    currentUserId: string;
+    searchQuery: string;
+    selectedBranch: string;
+    lang: Language;
+    result: User[];
+  } | null = null;
+
+  // Memoized: this getter is re-read on every render, but the underlying
+  // filter+sort only needs to redo work when one of these inputs changes
+  // (e.g. not when an unrelated state field like formError changes).
   private get filteredUsers() {
-    const query = this.state.searchQuery;
-    const { lang, selectedBranch } = this.state;
+    const { users, currentUserId, searchQuery, selectedBranch, lang } = this.state;
+    const cache = this.filteredUsersCache;
+    if (
+      cache &&
+      cache.users === users &&
+      cache.currentUserId === currentUserId &&
+      cache.searchQuery === searchQuery &&
+      cache.selectedBranch === selectedBranch &&
+      cache.lang === lang
+    ) {
+      return cache.result;
+    }
+
+    const query = searchQuery;
     const getSortName = (user: User) =>
       lang === "th"
         ? user.thaiName || `${user.firstName} ${user.lastName}`.trim()
         : `${user.firstName} ${user.lastName}`.trim() || user.thaiName || "";
 
-    return this.state.users
+    const result = users
       .map((user, index) => ({
         user,
         index,
@@ -108,7 +132,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
         }, query),
       }))
       .filter(({ user, score }) => {
-        if (isSameUserId(user.user_id, this.state.currentUserId)) return false;
+        if (isSameUserId(user.user_id, currentUserId)) return false;
 
         if (selectedBranch && user.location !== selectedBranch) return false;
 
@@ -120,6 +144,9 @@ export default class Home extends Component<Record<string, never>, PageState> {
         left.index - right.index
       )
       .map(({ user }) => user);
+
+    this.filteredUsersCache = { users, currentUserId, searchQuery, selectedBranch, lang, result };
+    return result;
   }
 
   private get commentLength() {
@@ -141,6 +168,12 @@ export default class Home extends Component<Record<string, never>, PageState> {
     this.setState({ lang: initialLang, selectedCardLanguage: initialLang });
     getClientCurrentUserId().then((currentUserId) => {
       this.setState({ currentUserId });
+
+      if (!currentUserId) {
+        this.setState({ isLoadingUsers: false, formError: this.t.errorNoUserId });
+        return;
+      }
+
       logRecognitionAction("step1", currentUserId);
       this.loadUsers();
     });

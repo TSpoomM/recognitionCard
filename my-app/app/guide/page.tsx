@@ -403,7 +403,7 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
           <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             {/* Back Button */}
             {/* <a
-              href={buildCurrentUserHref("/", currentUserId)}
+              href={buildCurrentUserHref("/")}
               className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-teal-700 hover:text-teal-900 transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -634,7 +634,7 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
                       {t.guideGetStarted}
                     </h2>
                     <a
-                      href={buildCurrentUserHref("/", currentUserId)}
+                      href={buildCurrentUserHref("/")}
                       className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-bold text-lg shadow-lg hover:from-teal-600 hover:to-emerald-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5"
                     >
                       {t.guideGetStartedBtn}
