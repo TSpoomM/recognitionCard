@@ -1,0 +1,30 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getDevAuthSession, isDevAuthBypassEnabled } from "@/src/lib/auth/devAuth";
+import { getHrkpisSessionCookieName, readHrkpisSession } from "@/src/lib/auth/hrkpisSession";
+
+const HRKPIS_LOGIN_PATH = process.env.HRKPIS_LOGIN_URL || "/hrkpis/index.php";
+
+export async function GET(request: NextRequest) {
+  if (isDevAuthBypassEnabled) {
+    return NextResponse.json({
+      authenticated: true,
+      ...getDevAuthSession(),
+    });
+  }
+
+  const sessionId = request.cookies.get(getHrkpisSessionCookieName())?.value;
+  const session = await readHrkpisSession(sessionId);
+
+  if (!session) {
+    return NextResponse.json({ authenticated: false, loginUrl: HRKPIS_LOGIN_PATH }, { status: 401 });
+  }
+
+  return NextResponse.json({
+    authenticated: true,
+    userId: session.userId,
+    empId: session.empId,
+    userInv: session.userInv,
+    imgProfile: session.imgProfile,
+    yearAssessment: session.yearAssessment,
+  });
+}
