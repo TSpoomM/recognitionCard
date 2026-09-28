@@ -7,9 +7,9 @@ import localFont from "next/font/local";
 // raw CSS @font-face.
 export const ibmPlexSansThai = localFont({
   src: [
-    { path: "../public/fonts/IBMPlexSansThai-Regular.ttf", weight: "400", style: "normal" },
-    { path: "../public/fonts/IBMPlexSansThai-Medium.ttf", weight: "500 600", style: "normal" },
-    { path: "../public/fonts/IBMPlexSansThai-Bold.ttf", weight: "700", style: "normal" },
+    { path: "../../public/fonts/IBMPlexSansThai-Regular.ttf", weight: "400", style: "normal" },
+    { path: "../../public/fonts/IBMPlexSansThai-Medium.ttf", weight: "500 600", style: "normal" },
+    { path: "../../public/fonts/IBMPlexSansThai-Bold.ttf", weight: "700", style: "normal" },
   ],
   variable: "--font-ibm-plex-sans-thai",
   display: "swap",
@@ -17,8 +17,8 @@ export const ibmPlexSansThai = localFont({
 
 export const roboto = localFont({
   src: [
-    { path: "../public/fonts/Roboto-Regular.ttf", weight: "400", style: "normal" },
-    { path: "../public/fonts/Roboto-Medium.ttf", weight: "500 700", style: "normal" },
+    { path: "../../public/fonts/Roboto-Regular.ttf", weight: "400", style: "normal" },
+    { path: "../../public/fonts/Roboto-Medium.ttf", weight: "500 700", style: "normal" },
   ],
   variable: "--font-roboto",
   display: "swap",
