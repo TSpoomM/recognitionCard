@@ -1,10 +1,14 @@
-import fs from "fs";
-import path from "path";
 import React from "react";
 import { renderToReadableStream } from "react-dom/server.edge";
-import puppeteer from "puppeteer";
+import puppeteer, { Browser } from "puppeteer";
 import { StarSection } from "./starComment";
 import { CardLanguage } from "../../types/cardLanguage";
+import { PALETTE } from "./palette";
+import { getFontDataUri, getImageDataUri } from "./emailAssets";
+import { SparkleIcon, StarBadgeIcon, CheckIcon } from "./emailIcons";
+import { StarKey, STAR_ORDER, STAR_META, StarIcon } from "./starMeta";
+import { CORE_VALUES_META } from "./coreValuesMeta";
+import { CARD_COPY } from "./cardCopy";
 
 /**
  * This renderer reproduces the "TBH Recognition Card" HTML template
@@ -24,25 +28,6 @@ import { CardLanguage } from "../../types/cardLanguage";
 
 const CARD_WIDTH = 1100;
 const CARD_HEIGHT = 790;
-
-const PALETTE = {
-  cream: "#f5f6f1",
-  black: "#000000",
-  darkGreen: "#0c3a22",
-  green1: "#165c30",
-  green2: "#1f7040",
-  green3: "#2f8a4a",
-  green4: "#4aab5a",
-  green5: "#82be40",
-  accent: "#a8d840",
-  textDark: "#2c3c28",
-  textMuted: "#556650",
-  textFaint: "#7a8875",
-  lineGray: "#9baa8e",
-  dashGray: "#c8d3be",
-  panelBg: "#edf0e8",
-  white: "#ffffff",
-};
 
 const HEADER_BACKGROUND = `url("data:image/svg+xml,${encodeURIComponent(`
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 170" preserveAspectRatio="none">
@@ -71,339 +56,6 @@ type RecognitionCardImageProps = {
   coreValues: string[];
   cardLanguage: CardLanguage;
   dateString: string;
-};
-
-function getFontData(fileName: string): Buffer {
-  const filePath = path.join(process.cwd(), "public", "fonts", fileName);
-  if (!fs.existsSync(filePath)) {
-    throw new Error(`Font file not found: ${filePath}`);
-  }
-  return fs.readFileSync(filePath);
-}
-
-function getFontDataUri(fileName: string): string {
-  return `data:font/ttf;base64,${getFontData(fileName).toString("base64")}`;
-}
-
-function getImageDataUri(fileName: string, mimeType: string): string {
-  const filePath = path.join(process.cwd(), "public", fileName);
-  if (!fs.existsSync(filePath)) {
-    return "";
-  }
-  const buffer = fs.readFileSync(filePath);
-  return `data:${mimeType};base64,${buffer.toString("base64")}`;
-}
-
-type StarKey = "S" | "T" | "A" | "R";
-
-const STAR_ORDER: StarKey[] = ["S", "T", "A", "R"];
-
-const STAR_META: Record<StarKey, { word: string; questions: Record<CardLanguage, string>; bg: string }> = {
-  S: {
-    word: "SITUATION",
-    questions: {
-      en: "What was the situation or context?",
-      th: "คุณต้องการชื่นชมเรื่องอะไร",
-    },
-    bg: PALETTE.darkGreen,
-  },
-  T: {
-    word: "TASK",
-    questions: {
-      en: "What was the task or challenge?",
-      th: "บทบาทหน้าที่ของบุคคลนั้น คืออะไร",
-    },
-    bg: PALETTE.green1,
-  },
-  A: {
-    word: "ACTION",
-    questions: {
-      en: "What action did you take?",
-      th: "บุคคลนั้นได้ลงมือทำอะไร",
-    },
-    bg: PALETTE.green3,
-  },
-  R: {
-    word: "RESULT",
-    questions: {
-      en: "What was the result or impact?",
-      th: "ผลลัพธ์ที่ได้ คืออะไร?",
-    },
-    bg: PALETTE.green5,
-  },
-};
-
-function StarIcon({ letter }: { letter: StarKey }) {
-  const common = { width: 16, height: 16 } as const;
-  switch (letter) {
-    case "S":
-      return (
-        <svg viewBox="0 0 24 24" style={common}>
-          <path
-            fill="#ffffff"
-            d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zM8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
-          />
-        </svg>
-      );
-    case "T":
-      return (
-        <svg viewBox="0 0 24 24" style={common}>
-          <circle cx="12" cy="12" r="10" fill="none" stroke="#ffffff" strokeWidth={2} />
-          <path d="M9 12l2 2 4-4" stroke="#ffffff" strokeWidth={2} fill="none" strokeLinecap="round" />
-        </svg>
-      );
-    case "A":
-      return (
-        <svg viewBox="0 0 24 24" style={common}>
-          <path
-            fill="#ffffff"
-            d="M13.13 22.19L11.5 18.36c1.74-.84 3.31-1.99 4.7-3.46-1.34 2.83-2.84 5.66-3.07 7.29zM5.64 12.5c.93-1.39 2.08-2.96 3.46-4.7l3.63 1.63-7.09 3.07zm12.96-9.7a.996.996 0 00-.82-.3 22.05 22.05 0 00-9.52 4.11L4.63 6.43a1 1 0 00-1.25.15l-1.82 1.82a1 1 0 00.15 1.53l2.38 1.59-1.75 1.75a1 1 0 000 1.41l5.02 5.02a1 1 0 001.41 0l1.75-1.75 1.59 2.38a1 1 0 001.53.15l1.82-1.82a1 1 0 00.15-1.25l-.19-3.65a22 22 0 004.11-9.52 1 1 0 00-.28-.74z"
-          />
-        </svg>
-      );
-    case "R":
-      return (
-        <svg viewBox="0 0 24 24" style={common}>
-          <path fill="#ffffff" d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" />
-        </svg>
-      );
-  }
-}
-
-function SparkleIcon({ size = 16, color = "#ffffff" }: { size?: number; color?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" style={{ width: size, height: size, display: "flex" }}>
-      <path
-        fill={color}
-        d="M12 2c.6 3.7 1.9 5.9 5 7-3.1 1.1-4.4 3.3-5 7-.6-3.7-1.9-5.9-5-7 3.1-1.1 4.4-3.3 5-7z"
-      />
-    </svg>
-  );
-}
-
-function StarBadgeIcon({ size = 15, color = "#ffffff" }: { size?: number; color?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" style={{ width: size, height: size, display: "flex" }}>
-      <path
-        fill={color}
-        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-      />
-    </svg>
-  );
-}
-
-function CheckIcon({ size = 15, color = "#ffffff", strokeWidth = 2.6 }: { size?: number; color?: string; strokeWidth?: number }) {
-  return (
-    <svg viewBox="0 0 24 24" style={{ width: size, height: size, display: "flex" }}>
-      <path
-        d="M4 12.5l5 5L20 6"
-        fill="none"
-        stroke={color}
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-type CoreValueMeta = {
-  key: string;
-  labels: Record<CardLanguage, { name: string; description: string }>;
-  circleColor: string;
-  icon: React.ReactNode;
-};
-
-const cvCommonStyle = { width: 36, height: 36, overflow: "visible" };
-
-const CORE_VALUES_META: CoreValueMeta[] = [
-  {
-    key: "RESPECT",
-    labels: {
-      en: {
-        name: "RESPECT",
-        description: "Respects others and treats everyone equally.",
-      },
-      th: {
-        description: "เคารพผู้อื่นและปฏิบัติต่อทุกคนอย่างเท่าเทียม",
-        name: "การเครพให้เกียรติซึ่งกันและกัน",
-      },
-    },
-    circleColor: PALETTE.green4,
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke={PALETTE.darkGreen}
-        strokeWidth={1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        style={cvCommonStyle}
-      >
-        <path d="M5 9V5l4-2v4M19 9V5l-4-2v4" />
-        <path d="M3 10.5 6.5 9l3 1.5 2-1.2a2.6 2.6 0 0 1 3.1.3l1.1.9 2.3-1 3 1.5-2 6-3.1 1.2" />
-        <path d="m8.5 14 4 3.5a1.15 1.15 0 0 0 1.7-1.55M6.5 15.5l3.8 3.4a1.15 1.15 0 0 0 1.7-1.55" />
-        <path d="m10.2 11.8 1.2-1a2 2 0 0 1 2.6.05l3.2 2.8" />
-        <path d="M3 10.5 5 17l2.2-.7M21 11l-2 6-2-.7" />
-      </svg>
-    ),
-  },
-  {
-    key: "LEADERSHIP",
-    labels: {
-      en: {
-        name: "LEADERSHIP",
-        description: "Shows initiative, confidence, and fair leadership.",
-      },
-      th: {
-        description: "กล้าคิด กล้าทำ กล้าแสดงออก และมีความเป็นธรรม",
-        name: "ความเป็นผู้นำที่่ดี",
-      },
-    },
-    circleColor: PALETTE.darkGreen,
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke={PALETTE.darkGreen}
-        strokeWidth={1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        style={cvCommonStyle}
-      >
-        <path d="M16.051 12.616a1 1 0 0 1 1.909.024l.737 1.452a1 1 0 0 0 .737.535l1.634.256a1 1 0 0 1 .588 1.806l-1.172 1.168a1 1 0 0 0-.282.866l.259 1.613a1 1 0 0 1-1.541 1.134l-1.465-.75a1 1 0 0 0-.912 0l-1.465.75a1 1 0 0 1-1.539-1.133l.258-1.613a1 1 0 0 0-.282-.866l-1.156-1.153a1 1 0 0 1 .572-1.822l1.633-.256a1 1 0 0 0 .737-.535z" />
-        <path d="M8 15H7a4 4 0 0 0-4 4v2" />
-        <circle cx="10" cy="7" r="4" />
-      </svg>
-    ),
-  },
-  {
-    key: "COMMUNICATION",
-    labels: {
-      en: {
-        name: "COMMUNICATION",
-        description: "Communicates clearly and listens well.",
-      },
-      th: {
-        description: "สื่อสารชัดเจน รับฟังอย่างตั้งใจ และพูดอย่างเป็นมิตร",
-        name: "การสื่อสารอย่างมีประสิทธิภาพ",
-      },
-    },
-    circleColor: PALETTE.green5,
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke={PALETTE.darkGreen}
-        strokeWidth={1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        style={cvCommonStyle}
-      >
-        <circle cx="10.5" cy="13.5" r="8" />
-        <circle cx="10.5" cy="13.5" r="4" />
-        <circle cx="10.5" cy="13.5" r="1" />
-        <path d="m10.5 13.5 10-10" />
-        <path d="M16.5 3.5h4v4" />
-      </svg>
-    ),
-  },
-  {
-    key: "PROFESSIONALISM",
-    labels: {
-      en: {
-        name: "PROFESSIONALISM",
-        description: "Has strong expertise and solves problems effectively.",
-      },
-      th: {
-        name: "ความเป็นมืออาชีพ",
-        description: "รอบรู้ เชี่ยวชาญในงานของตน แก้ปัญหาได้รวดเร็ว แม่นยำ",
-      },
-    },
-    circleColor: PALETTE.green3,
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke={PALETTE.darkGreen}
-        strokeWidth={1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        style={cvCommonStyle}
-      >
-        <circle cx="6.5" cy="6.5" r="2.8" />
-        <path d="M2.5 17.5v-4a3 3 0 0 1 3-3h2a3 3 0 0 1 3 3v4M4.5 20v-5M8.5 20v-5" />
-        <path d="M12.5 20v-3h2.5v3M16.5 20v-6h2.5v6M20.5 20v-9H23v9" />
-        <path d="m12.5 14.5 3.2-3.2 2.2 1.5 4-4" />
-        <path d="M19 8.8h3v3" />
-      </svg>
-    ),
-  },
-  {
-    key: "INTEGRITY",
-    labels: {
-      en: {
-        name: "INTEGRITY",
-        description: "Acts with integrity, responsibility, and punctuality.",
-      },
-      th: {
-        name: "ความซื่อสัตย์",
-        description: "ซื่อสัตย์ สุจริต สำนึกรับผิดชอบ และตรงต่อเวลา",
-      },
-    },
-    circleColor: PALETTE.green1,
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke={PALETTE.darkGreen}
-        strokeWidth={1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        style={cvCommonStyle}
-      >
-        <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.8 17 5 19 5a1 1 0 0 1 1 1z" />
-        <path d="m9 12 2 2 4-4" />
-      </svg>
-    ),
-  },
-];
-
-const CARD_COPY: Record<CardLanguage, {
-  tagline: string;
-  tagline2: string;
-  appreciation: string;
-  givenBy: string;
-  coreValuesTitle: string;
-  thankYou: string;
-  date: string;
-  footer: [string, string, string];
-  footerValues: [string, string, string];
-}> = {
-  en: {
-    tagline: "Thank you for making a difference",
-    tagline2: "Thank you for embodying our core values and inspiring your colleagues every day.",
-    appreciation: "Your contribution creates a great impact. We and your colleagues appreciate you.",
-    givenBy: "Given By",
-    // coreValuesTitle: "OUR 5 CORE VALUES",
-    coreValuesTitle: "Which core value does your good deed align with?",
-    thankYou: "Thank you so much",
-    date: "DATE",
-    footer: ["Future", "and", "Beyond"],
-    footerValues: ["Growing together", "Care for the environment", "Towards sustainability"],
-  },
-  th: {
-    tagline: "ขอบคุณที่คุณ สร้างความแตกต่าง",
-    tagline2: "ขอบคุณที่ยึดมั่นในค่านิยมของเรา และเป็นแรงบรรดาลใจให้กับเพื่อนร่วมงานทุกวัน",
-    appreciation: "การมีส่วนร่วมของคุณ สร้างผลลัพธ์ที่ยิ่งใหญ่ เราและเพื่อนร่วมงาน ขอชื่นชมคุณ",
-    givenBy: "มอบโดย",
-    // coreValuesTitle: "ค่านิยมหลัก 5 ข้อของเรา",
-    coreValuesTitle: "ความดีของคุณตรงกับค่านิยมข้อไหน",
-    thankYou: "ขอบคุณมาก",
-    date: "วันที่",
-    footer: ["เพื่ออนาคต", "และ", "สิ่งที่ไกลกว่านั้น"],
-    footerValues: ["เติบโตด้วยกัน", "ใส่ใจสิ่งแวดล้อม", "มุ่งสู่ความยั่งยืน"],
-  },
 };
 
 export class RecognitionCardImageRenderer {
@@ -1315,19 +967,54 @@ export class RecognitionCardImageRenderer {
   }
 
   static async renderEmailToBuffer(props: RecognitionCardImageProps): Promise<Buffer> {
+    return this.withBrowser((browser) => this.renderEmailOnBrowser(browser, props));
+  }
+
+  static async renderCardToBuffer(props: RecognitionCardImageProps): Promise<Buffer> {
+    return this.withBrowser((browser) => this.renderCardOnBrowser(browser, props));
+  }
+
+  /**
+   * Renders both the email inline image and the attached card image inside a
+   * single Chromium instance (two pages, in parallel) instead of launching
+   * Chromium twice — launching Chromium is the dominant cost of a card send.
+   */
+  static async renderEmailAndCardToBuffers(props: RecognitionCardImageProps): Promise<{ emailBuffer: Buffer; cardBuffer: Buffer }> {
+    return this.withBrowser(async (browser) => {
+      const [emailBuffer, cardBuffer] = await Promise.all([
+        this.renderEmailOnBrowser(browser, props),
+        this.renderCardOnBrowser(browser, props),
+      ]);
+      return { emailBuffer, cardBuffer };
+    });
+  }
+
+  private static async withBrowser<T>(fn: (browser: Browser) => Promise<T>): Promise<T> {
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+    try {
+      return await fn(browser);
+    } finally {
+      await browser.close();
+    }
+  }
+
+  private static renderEmailOnBrowser(browser: Browser, props: RecognitionCardImageProps): Promise<Buffer> {
     // Start with a generously sized viewport, then let Chromium measure the
     // actual rendered content. The old estimate was designed for Satori and
     // leaves a large empty area when Chromium wraps Thai text more accurately.
     const initialHeight = CARD_HEIGHT + this.computeExtraHeight(props.comment) + 360;
-    return this.renderElementToBuffer(props, this.renderEmailImage(props), initialHeight);
+    return this.renderElementOnBrowser(browser, props, this.renderEmailImage(props), initialHeight);
   }
 
-  static async renderCardToBuffer(props: RecognitionCardImageProps): Promise<Buffer> {
+  private static renderCardOnBrowser(browser: Browser, props: RecognitionCardImageProps): Promise<Buffer> {
     const initialHeight = CARD_HEIGHT + this.computeExtraHeight(props.comment);
-    return this.renderElementToBuffer(props, this.renderImage(props), initialHeight);
+    return this.renderElementOnBrowser(browser, props, this.renderImage(props), initialHeight);
   }
 
-  private static async renderElementToBuffer(props: RecognitionCardImageProps, element: React.ReactElement, initialHeight: number): Promise<Buffer> {
+  private static async renderElementOnBrowser(browser: Browser, props: RecognitionCardImageProps, element: React.ReactElement, initialHeight: number): Promise<Buffer> {
     const markupStream = await renderToReadableStream(element);
     const markup = await new Response(markupStream).text();
     const fontCss = `
@@ -1340,13 +1027,9 @@ export class RecognitionCardImageRenderer {
       html, body { margin: 0; width: ${CARD_WIDTH}px; height: ${initialHeight}px; overflow: hidden; }
       * { box-sizing: border-box; }
     `;
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
 
+    const page = await browser.newPage();
     try {
-      const page = await browser.newPage();
       await page.setViewport({ width: CARD_WIDTH, height: initialHeight, deviceScaleFactor: 2 });
       await page.setContent(
         `<!doctype html><html lang="${props.cardLanguage === "th" ? "th" : "en"}"><head><meta charset="utf-8"><style>${fontCss}</style></head><body>${markup}</body></html>`,
@@ -1380,7 +1063,7 @@ export class RecognitionCardImageRenderer {
       });
       return Buffer.from(png);
     } finally {
-      await browser.close();
+      await page.close();
     }
   }
 }

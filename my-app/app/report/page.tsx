@@ -6,9 +6,9 @@ import Card from "../components/ui/Card";
 import Navbar from "../components/ui/Navbar";
 import Select from "../components/ui/Select";
 import Modal from "../components/ui/Modal";
-import { getClientCurrentUserId } from "../lib/currentUser";
-import { reportAccessClient } from "../lib/reportAccessClient";
-import { downloadReportCsv, downloadReportPdf } from "../lib/reportExport";
+import { getClientCurrentUserId } from "../lib/auth/currentUser";
+import { reportAccessClient } from "../lib/auth/reportAccessClient";
+import { downloadReportCsv, downloadReportPdf } from "../lib/export/reportExport";
 import { logRecognitionAction } from "../lib/recognitionLog";
 import { withBasePath } from "../lib/basePath";
 import {
@@ -16,7 +16,7 @@ import {
   normalizeCoreValueCode,
   sortCoreValues,
   toggleArrayItem,
-} from "../lib/reportUtils";
+} from "../lib/export/reportUtils";
 import { ReportData, ReportEmployee, ReportRow } from "../types/report";
 import { COMMENT_TYPE_META, COMMENT_TYPES, CommentType } from "../types/commentType";
 import { Language, TRANSLATIONS } from "../constants/translations";

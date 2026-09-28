@@ -2,9 +2,10 @@ import { pool } from "@/app/lib/db";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { NextResponse } from "next/server";
 import { EmailService } from "@/app/services/email/EmailService";
-import { isSameUserId } from "@/app/lib/currentUser";
-import { getRequestCurrentUserId } from "@/app/lib/requestCurrentUser";
+import { isSameUserId } from "@/app/lib/auth/currentUser";
+import { getRequestCurrentUserId } from "@/app/lib/auth/requestCurrentUser";
 import { CardLanguage } from "@/app/types/cardLanguage";
+import { invalidateCache } from "@/app/lib/serverCache";
 
 type EmployeeEmailRow = RowDataPacket & {
   fs_id: string | number;
@@ -56,6 +57,8 @@ export async function POST(request: Request) {
         return result;
       })
     );
+
+    invalidateCache("report:");
 
     // Look up employee info for the email
     let recipientName = recipientIds.map((recipientId) => `Employee #${recipientId}`).join(", ");

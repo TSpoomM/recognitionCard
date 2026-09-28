@@ -1,5 +1,5 @@
 import { pool } from "@/app/lib/db";
-import { getRequestCurrentUserId } from "@/app/lib/requestCurrentUser";
+import { getRequestCurrentUserId } from "@/app/lib/auth/requestCurrentUser";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {

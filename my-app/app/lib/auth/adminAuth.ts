@@ -1,6 +1,6 @@
 import { pool } from "@/app/lib/db";
-import { currentUserService } from "@/app/lib/currentUser";
-import { getRequestCurrentUserId } from "@/app/lib/requestCurrentUser";
+import { currentUserService } from "@/app/lib/auth/currentUser";
+import { getRequestCurrentUserId } from "@/app/lib/auth/requestCurrentUser";
 import { RowDataPacket } from "mysql2";
 
 type EmployeeRoleRow = RowDataPacket & {

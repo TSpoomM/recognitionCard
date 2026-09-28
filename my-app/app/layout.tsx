@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import "./globals.css";
-import { isDevAuthBypassEnabled } from "./lib/devAuth";
-import { getHrkpisSessionCookieName, readHrkpisSession } from "./lib/hrkpisSession";
+import { isDevAuthBypassEnabled } from "./lib/auth/devAuth";
+import { getHrkpisSessionCookieName, readHrkpisSession } from "./lib/auth/hrkpisSession";
 import SessionWatcher from "./components/SessionWatcher";
 import { ibmPlexSansThai, roboto } from "./fonts";
 

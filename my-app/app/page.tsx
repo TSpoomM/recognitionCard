@@ -19,44 +19,20 @@ import RecognitionQueueButton from "./components/features/recognition/QueueButto
 import Card from "./components/ui/Card";
 import Navbar from "./components/ui/Navbar";
 import { RecognitionEngine } from "./lib/RecognitionEngine";
-import { getClientCurrentUserId, isSameUserId } from "./lib/currentUser";
+import { getClientCurrentUserId, isSameUserId } from "./lib/auth/currentUser";
 import { STAR_COMMENT_MAX_LENGTH, STAR_COMMENT_MIN_LENGTH, STAR_SECTION_MIN_LENGTH } from "./constants/recognitionFlow";
 import { logRecognitionAction } from "./lib/recognitionLog";
 import { withBasePath } from "./lib/basePath";
 import { peopleSearchScore } from "./lib/peopleSearch";
+import {
+  EMPTY_STAR_SECTIONS,
+  STAR_SECTION_LABELS,
+  StarSectionKey,
+  parseStarCommentToSections,
+  serializeStarSections,
+} from "./lib/starSections";
 
 type PageState = HomeState & { lang: Language };
-type StarSectionKey = "s" | "t" | "a" | "r";
-
-const STAR_SECTION_LABELS: Record<StarSectionKey, string> = {
-  s: "Situation",
-  t: "Task",
-  a: "Action",
-  r: "Result",
-};
-const EMPTY_STAR_SECTIONS: StarSections = { s: "", t: "", a: "", r: "" };
-
-function serializeStarSections(sections?: StarSections, fallback = "") {
-  if (!sections || Object.values(sections).every((value) => !value.trim())) return fallback;
-  return (["s", "t", "a", "r"] as (keyof StarSections)[])
-    .map((key) => `${key.toUpperCase()}: ${sections[key].trim()}`)
-    .join("\n\n");
-}
-
-function parseStarCommentToSections(comment: string): StarSections {
-  const sections: StarSections = { s: "", t: "", a: "", r: "" };
-  const matches = Array.from(comment.matchAll(/(^|\n)\s*(S|T|A|R)\s*[:\-]\s*/gi));
-  if (matches.length === 0) return sections;
-  matches.forEach((match, index) => {
-    const label = match[2].toLowerCase() as keyof StarSections;
-    if (!(label in sections)) return;
-    const textStart = (match.index ?? 0) + match[0].length;
-    const nextMatchIndex = matches[index + 1]?.index ?? comment.length;
-    const text = comment.slice(textStart, nextMatchIndex).trim();
-    sections[label] = text;
-  });
-  return sections;
-}
 
 export default class Home extends Component<Record<string, never>, PageState> {
   private intervalId: number | null = null;
@@ -107,15 +83,39 @@ export default class Home extends Component<Record<string, never>, PageState> {
     return Array.from(branches).sort();
   }
 
+  private filteredUsersCache: {
+    users: User[];
+    currentUserId: string;
+    searchQuery: string;
+    selectedBranch: string;
+    lang: Language;
+    result: User[];
+  } | null = null;
+
+  // Memoized: this getter is re-read on every render, but the underlying
+  // filter+sort only needs to redo work when one of these inputs changes
+  // (e.g. not when an unrelated state field like formError changes).
   private get filteredUsers() {
-    const query = this.state.searchQuery;
-    const { lang, selectedBranch } = this.state;
+    const { users, currentUserId, searchQuery, selectedBranch, lang } = this.state;
+    const cache = this.filteredUsersCache;
+    if (
+      cache &&
+      cache.users === users &&
+      cache.currentUserId === currentUserId &&
+      cache.searchQuery === searchQuery &&
+      cache.selectedBranch === selectedBranch &&
+      cache.lang === lang
+    ) {
+      return cache.result;
+    }
+
+    const query = searchQuery;
     const getSortName = (user: User) =>
       lang === "th"
         ? user.thaiName || `${user.firstName} ${user.lastName}`.trim()
         : `${user.firstName} ${user.lastName}`.trim() || user.thaiName || "";
 
-    return this.state.users
+    const result = users
       .map((user, index) => ({
         user,
         index,
@@ -132,7 +132,7 @@ export default class Home extends Component<Record<string, never>, PageState> {
         }, query),
       }))
       .filter(({ user, score }) => {
-        if (isSameUserId(user.user_id, this.state.currentUserId)) return false;
+        if (isSameUserId(user.user_id, currentUserId)) return false;
 
         if (selectedBranch && user.location !== selectedBranch) return false;
 
@@ -144,6 +144,9 @@ export default class Home extends Component<Record<string, never>, PageState> {
         left.index - right.index
       )
       .map(({ user }) => user);
+
+    this.filteredUsersCache = { users, currentUserId, searchQuery, selectedBranch, lang, result };
+    return result;
   }
 
   private get commentLength() {
@@ -165,6 +168,12 @@ export default class Home extends Component<Record<string, never>, PageState> {
     this.setState({ lang: initialLang, selectedCardLanguage: initialLang });
     getClientCurrentUserId().then((currentUserId) => {
       this.setState({ currentUserId });
+
+      if (!currentUserId) {
+        this.setState({ isLoadingUsers: false, formError: this.t.errorNoUserId });
+        return;
+      }
+
       logRecognitionAction("step1", currentUserId);
       this.loadUsers();
     });

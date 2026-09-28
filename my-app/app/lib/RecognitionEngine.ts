@@ -90,7 +90,7 @@ export class RecognitionEngine {
 
   static createPendingSubmission(users: User[], types: CommentType[], comment: string, cardLanguage: CardLanguage, starSections?: StarSections): PendingSubmission {
     return {
-      id: `${Date.now()}`,
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       users,
       types,
       cardLanguage,

@@ -1,8 +1,8 @@
 'use client';
 
 import { Component } from "react";
-import { buildCurrentUserHref } from "../../lib/currentUser";
-import { reportAccessClient } from "../../lib/reportAccessClient";
+import { buildCurrentUserHref } from "../../lib/auth/currentUser";
+import { reportAccessClient } from "../../lib/auth/reportAccessClient";
 import { LanguageContext } from "../../context/LanguageContext";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { FileText, Clock, House, BookOpen, ArrowLeft } from "lucide-react";
@@ -70,7 +70,6 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
   }
 
   render() {
-    const { currentUserId } = this.props;
     const { currentPath, canAccessReport } = this.state;
     const { t } = this.context;
     const showReport = canAccessReport || currentPath === "/report";
@@ -89,7 +88,7 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-20 items-center justify-between gap-4">
             <a
-              href={buildCurrentUserHref("/", currentUserId)}
+              href={buildCurrentUserHref("/")}
               className="flex items-center gap-3 text-2xl font-bold text-slate-900 transition hover:text-teal-800"
             >
               <Image
@@ -113,7 +112,7 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
               </a>
 
               <a
-                href={buildCurrentUserHref("/", currentUserId)}
+                href={buildCurrentUserHref("/")}
                 className={getNavItemClassName(currentPath === "/")}
               >
                 <House className="h-5 w-5" />
@@ -121,7 +120,7 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
               </a>
 
               <a
-                href={buildCurrentUserHref("/history", currentUserId)}
+                href={buildCurrentUserHref("/history")}
                 className={getNavItemClassName(currentPath === "/history")}
               >
                 <Clock className="h-5 w-5" />
@@ -129,7 +128,7 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
               </a>
 
               <a
-                href={buildCurrentUserHref("/guide", currentUserId)}
+                href={buildCurrentUserHref("/guide")}
                 className={getNavItemClassName(currentPath === "/guide")}
               >
                 <BookOpen className="h-5 w-5" />
@@ -138,7 +137,7 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
 
               {showReport && (
                 <a
-                  href={buildCurrentUserHref("/report", currentUserId)}
+                  href={buildCurrentUserHref("/report")}
                   className={getNavItemClassName(currentPath === "/report", "report")}
                 >
                   <FileText className="h-5 w-5" />

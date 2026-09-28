@@ -1,6 +1,6 @@
 'use client';
 
-import { withBasePath } from "./basePath";
+import { withBasePath } from "../basePath";
 
 export type ReportAccessResult = {
   userId: string;

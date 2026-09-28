@@ -1,4 +1,4 @@
-import { adminAuthService } from "@/app/lib/adminAuth";
+import { adminAuthService } from "@/app/lib/auth/adminAuth";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {

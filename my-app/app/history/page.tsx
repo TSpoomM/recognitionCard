@@ -6,13 +6,13 @@ import Navbar from "../components/ui/Navbar";
 import Select from "../components/ui/Select";
 import HistoryHeader from "../components/features/history/HistoryHeader";
 import HistoryList from "../components/features/history/HistoryList";
-import { getClientCurrentUserId } from "../lib/currentUser";
+import { getClientCurrentUserId } from "../lib/auth/currentUser";
 import { HistoryItem } from "../types/history";
 import { Language, TRANSLATIONS } from "../constants/translations";
 import { getInitialLanguage, LanguageContext, persistLanguage } from "../context/LanguageContext";
 import Button from "../components/ui/Button";
 import { FileText, Search } from "lucide-react";
-import { downloadHistoryCsv, downloadHistoryPdf } from "../lib/historyExport";
+import { downloadHistoryCsv, downloadHistoryPdf } from "../lib/export/historyExport";
 import { withBasePath } from "../lib/basePath";
 import { logRecognitionAction } from "../lib/recognitionLog";
 
