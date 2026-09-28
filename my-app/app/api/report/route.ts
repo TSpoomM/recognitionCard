@@ -1,6 +1,6 @@
-import { requireAdmin } from "@/app/lib/adminAuth";
+import { requireAdmin } from "@/app/lib/auth/adminAuth";
 import { pool } from "@/app/lib/db";
-import { getCoreValueLabel, parseCoreValues, splitName } from "@/app/lib/reportUtils";
+import { getCoreValueLabel, parseCoreValues, splitName } from "@/app/lib/export/reportUtils";
 import { ReportData, ReportEmployee, ReportRow } from "@/app/types/report";
 import { NextResponse } from "next/server";
 import { RowDataPacket } from "mysql2";

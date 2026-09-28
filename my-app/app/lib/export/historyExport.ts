@@ -1,7 +1,7 @@
-import { HistoryItem } from "../types/history";
-import { ReportRow } from "../types/report";
+import { HistoryItem } from "../../types/history";
+import { ReportRow } from "../../types/report";
 import { downloadReportCsv, downloadReportPdf } from "./reportExport";
-import { COMMENT_TYPES, COMMENT_TYPE_META, CommentType } from "../types/commentType";
+import { COMMENT_TYPES, COMMENT_TYPE_META, CommentType } from "../../types/commentType";
 
 function normalizeCoreValueCode(value: string) {
   const raw = value.trim().toUpperCase();

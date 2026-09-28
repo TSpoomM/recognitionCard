@@ -1,8 +1,8 @@
 'use client';
 
 import { Component } from "react";
-import { buildCurrentUserHref } from "../../lib/currentUser";
-import { reportAccessClient } from "../../lib/reportAccessClient";
+import { buildCurrentUserHref } from "../../lib/auth/currentUser";
+import { reportAccessClient } from "../../lib/auth/reportAccessClient";
 import { LanguageContext } from "../../context/LanguageContext";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { FileText, Clock, House, BookOpen, ArrowLeft } from "lucide-react";

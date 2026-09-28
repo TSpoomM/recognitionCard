@@ -1,5 +1,5 @@
 import { pool } from "@/app/lib/db";
-import { TEST_CURRENT_USER } from "@/app/lib/currentUser";
+import { TEST_CURRENT_USER } from "@/app/lib/auth/currentUser";
 import { NextResponse } from "next/server";
 import { RowDataPacket } from "mysql2";
 

@@ -1,4 +1,4 @@
-import { getClientCurrentUserId } from "./currentUser";
+import { getClientCurrentUserId } from "./auth/currentUser";
 import { withBasePath } from "./basePath";
 
 function send(employeeId: string, action: string) {

@@ -3,8 +3,8 @@
 import { Component, ReactNode } from "react";
 import { LanguageContext, getInitialLanguage } from "../context/LanguageContext";
 import { TRANSLATIONS, Language } from "../constants/translations";
-import { buildCurrentUserHref, getClientCurrentUserId } from "../lib/currentUser";
-import { reportAccessClient } from "../lib/reportAccessClient";
+import { buildCurrentUserHref, getClientCurrentUserId } from "../lib/auth/currentUser";
+import { reportAccessClient } from "../lib/auth/reportAccessClient";
 import { logRecognitionAction } from "../lib/recognitionLog";
 import { COMMENT_TYPE_META, COMMENT_TYPES } from "../types/commentType";
 import Navbar from "../components/ui/Navbar";

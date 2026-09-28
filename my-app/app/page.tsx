@@ -19,44 +19,20 @@ import RecognitionQueueButton from "./components/features/recognition/QueueButto
 import Card from "./components/ui/Card";
 import Navbar from "./components/ui/Navbar";
 import { RecognitionEngine } from "./lib/RecognitionEngine";
-import { getClientCurrentUserId, isSameUserId } from "./lib/currentUser";
+import { getClientCurrentUserId, isSameUserId } from "./lib/auth/currentUser";
 import { STAR_COMMENT_MAX_LENGTH, STAR_COMMENT_MIN_LENGTH, STAR_SECTION_MIN_LENGTH } from "./constants/recognitionFlow";
 import { logRecognitionAction } from "./lib/recognitionLog";
 import { withBasePath } from "./lib/basePath";
 import { peopleSearchScore } from "./lib/peopleSearch";
+import {
+  EMPTY_STAR_SECTIONS,
+  STAR_SECTION_LABELS,
+  StarSectionKey,
+  parseStarCommentToSections,
+  serializeStarSections,
+} from "./lib/starSections";
 
 type PageState = HomeState & { lang: Language };
-type StarSectionKey = "s" | "t" | "a" | "r";
-
-const STAR_SECTION_LABELS: Record<StarSectionKey, string> = {
-  s: "Situation",
-  t: "Task",
-  a: "Action",
-  r: "Result",
-};
-const EMPTY_STAR_SECTIONS: StarSections = { s: "", t: "", a: "", r: "" };
-
-function serializeStarSections(sections?: StarSections, fallback = "") {
-  if (!sections || Object.values(sections).every((value) => !value.trim())) return fallback;
-  return (["s", "t", "a", "r"] as (keyof StarSections)[])
-    .map((key) => `${key.toUpperCase()}: ${sections[key].trim()}`)
-    .join("\n\n");
-}
-
-function parseStarCommentToSections(comment: string): StarSections {
-  const sections: StarSections = { s: "", t: "", a: "", r: "" };
-  const matches = Array.from(comment.matchAll(/(^|\n)\s*(S|T|A|R)\s*[:\-]\s*/gi));
-  if (matches.length === 0) return sections;
-  matches.forEach((match, index) => {
-    const label = match[2].toLowerCase() as keyof StarSections;
-    if (!(label in sections)) return;
-    const textStart = (match.index ?? 0) + match[0].length;
-    const nextMatchIndex = matches[index + 1]?.index ?? comment.length;
-    const text = comment.slice(textStart, nextMatchIndex).trim();
-    sections[label] = text;
-  });
-  return sections;
-}
 
 export default class Home extends Component<Record<string, never>, PageState> {
   private intervalId: number | null = null;

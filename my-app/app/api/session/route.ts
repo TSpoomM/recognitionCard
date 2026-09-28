@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDevAuthSession, isDevAuthBypassEnabled } from "@/app/lib/devAuth";
-import { getHrkpisSessionCookieName, readHrkpisSession } from "@/app/lib/hrkpisSession";
+import { getDevAuthSession, isDevAuthBypassEnabled } from "@/app/lib/auth/devAuth";
+import { getHrkpisSessionCookieName, readHrkpisSession } from "@/app/lib/auth/hrkpisSession";
 
 const HRKPIS_LOGIN_PATH = process.env.HRKPIS_LOGIN_URL || "/hrkpis/index.php";
 

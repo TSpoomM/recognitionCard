@@ -1,0 +1,18 @@
+export const PALETTE = {
+  cream: "#f5f6f1",
+  black: "#000000",
+  darkGreen: "#0c3a22",
+  green1: "#165c30",
+  green2: "#1f7040",
+  green3: "#2f8a4a",
+  green4: "#4aab5a",
+  green5: "#82be40",
+  accent: "#a8d840",
+  textDark: "#2c3c28",
+  textMuted: "#556650",
+  textFaint: "#7a8875",
+  lineGray: "#9baa8e",
+  dashGray: "#c8d3be",
+  panelBg: "#edf0e8",
+  white: "#ffffff",
+};
