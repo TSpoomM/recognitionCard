@@ -1,9 +1,10 @@
 'use client';
 
 import { Component, ReactNode } from "react";
+import Link from "next/link";
 import { LanguageContext, getInitialLanguage } from "../../context/LanguageContext";
 import { TRANSLATIONS, Language } from "../../core/constants/translations";
-import { buildCurrentUserHref, getClientCurrentUserId } from "../../lib/auth/currentUser";
+import { buildCurrentUserPath, getClientCurrentUserId } from "../../lib/auth/currentUser";
 import { reportAccessClient } from "../../lib/auth/reportAccessClient";
 import { logRecognitionAction } from "../../lib/recognitionLog";
 import { COMMENT_TYPE_META, COMMENT_TYPES } from "../../core/types/commentType";
@@ -633,13 +634,13 @@ export default class GuidePage extends Component<Record<string, never>, GuideSta
                     <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
                       {t.guideGetStarted}
                     </h2>
-                    <a
-                      href={buildCurrentUserHref("/")}
+                    <Link
+                      href={buildCurrentUserPath("/")}
                       className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-bold text-lg shadow-lg hover:from-teal-600 hover:to-emerald-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5"
                     >
                       {t.guideGetStartedBtn}
                       <ArrowRight className="h-5 w-5" />
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </main>

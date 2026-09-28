@@ -1,12 +1,13 @@
 'use client';
 
 import { Component } from "react";
-import { buildCurrentUserHref } from "../../lib/auth/currentUser";
+import { buildCurrentUserPath } from "../../lib/auth/currentUser";
 import { reportAccessClient } from "../../lib/auth/reportAccessClient";
 import { LanguageContext } from "../../context/LanguageContext";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { FileText, Clock, House, BookOpen, ArrowLeft } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { withBasePath } from "../../utils/basePath";
 
 type NavbarProps = {
@@ -87,8 +88,8 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
       <nav className="sticky top-0 z-40 border-b-[1.5px] border-amber-300 bg-white/85 shadow-sm shadow-teal-900/5 backdrop-blur">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-20 items-center justify-between gap-4">
-            <a
-              href={buildCurrentUserHref("/")}
+            <Link
+              href={buildCurrentUserPath("/")}
               className="flex items-center gap-3 text-2xl font-bold text-slate-900 transition hover:text-teal-800"
             >
               <Image
@@ -100,7 +101,7 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
                 style={{ width: "50px", height: "auto" }}
               />
               <span className="hidden sm:inline">{t.headerLabel}</span>
-            </a>
+            </Link>
 
             <div className="flex items-center gap-2 sm:gap-3">
               <a
@@ -111,38 +112,38 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
                 <span className="hidden sm:inline">{t.headerBackToHrkpis}</span>
               </a>
 
-              <a
-                href={buildCurrentUserHref("/")}
+              <Link
+                href={buildCurrentUserPath("/")}
                 className={getNavItemClassName(currentPath === "/")}
               >
                 <House className="h-5 w-5" />
                 <span className="hidden sm:inline">{t.headerHome ?? "Home"}</span>
-              </a>
+              </Link>
 
-              <a
-                href={buildCurrentUserHref("/history")}
+              <Link
+                href={buildCurrentUserPath("/history")}
                 className={getNavItemClassName(currentPath === "/history")}
               >
                 <Clock className="h-5 w-5" />
                 <span className="hidden sm:inline">{t.headerHistory}</span>
-              </a>
+              </Link>
 
-              <a
-                href={buildCurrentUserHref("/guide")}
+              <Link
+                href={buildCurrentUserPath("/guide")}
                 className={getNavItemClassName(currentPath === "/guide")}
               >
                 <BookOpen className="h-5 w-5" />
                 <span className="hidden sm:inline">{t.headerGuide}</span>
-              </a>
+              </Link>
 
               {showReport && (
-                <a
-                  href={buildCurrentUserHref("/report")}
+                <Link
+                  href={buildCurrentUserPath("/report")}
                   className={getNavItemClassName(currentPath === "/report", "report")}
                 >
                   <FileText className="h-5 w-5" />
                   <span className="hidden sm:inline">{t.headerReport}</span>
-                </a>
+                </Link>
               )}
 
               <LanguageSwitcher />

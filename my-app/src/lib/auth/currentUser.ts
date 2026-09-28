@@ -42,13 +42,21 @@ export class CurrentUserService {
 
   buildCurrentUserHref(pathname: string) {
     if (!pathname) return pathname;
+    return `${withBasePath(this.buildCurrentUserPath(pathname))}`;
+  }
+
+  // Same as buildCurrentUserHref but WITHOUT the basePath prefix — for
+  // next/link, which already prepends basePath itself. Prefixing it here
+  // too would double it up (e.g. /recognitioncard/recognitioncard/history).
+  buildCurrentUserPath(pathname: string) {
+    if (!pathname) return pathname;
 
     const [path, search = ""] = pathname.split("?");
     const params = new URLSearchParams(search);
     params.delete("currentUserId");
 
     const suffix = params.toString() ? `?${params.toString()}` : "";
-    return `${withBasePath(path)}${suffix}`;
+    return `${path}${suffix}`;
   }
 }
 
@@ -59,3 +67,5 @@ export const isSameUserId = (a: unknown, b: unknown) => currentUserService.isSam
 export const getClientCurrentUserId = () => currentUserService.getClientCurrentUserId();
 export const buildCurrentUserHref = (pathname: string) =>
   currentUserService.buildCurrentUserHref(pathname);
+export const buildCurrentUserPath = (pathname: string) =>
+  currentUserService.buildCurrentUserPath(pathname);
